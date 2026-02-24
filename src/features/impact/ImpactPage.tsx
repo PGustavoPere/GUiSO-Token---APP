@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { api, Project } from '../../services/api';
-import { Heart, CheckCircle2, Clock, MapPin, Share2 } from 'lucide-react';
+import { Heart, CheckCircle2, Clock, MapPin, Share2, Sparkles } from 'lucide-react';
+import { useGuiso } from '../../context/GuisoContext';
+import SupportModal from './SupportModal';
 
 export default function ImpactPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const { isWalletConnected, impactScore } = useGuiso();
 
   useEffect(() => {
     api.getProjects().then(data => {
@@ -32,9 +36,10 @@ export default function ImpactPage() {
           <p className="text-gray-500">Proyectos financiados y apoyados por la comunidad GUISO.</p>
         </div>
         <div className="flex gap-2">
-          <span className="px-4 py-2 bg-white rounded-full text-sm font-bold border border-gray-100 shadow-sm">
-            Total Ayudado: <span className="text-guiso-orange">200k+ GSO</span>
-          </span>
+          <div className="px-4 py-2 bg-white rounded-full text-sm font-bold border border-gray-100 shadow-sm flex items-center gap-2">
+            <Sparkles size={16} className="text-guiso-orange" />
+            Tu Impacto: <span className="text-guiso-orange">{impactScore} IP</span>
+          </div>
         </div>
       </header>
 
@@ -55,11 +60,6 @@ export default function ImpactPage() {
                 )}>
                   {project.status === 'active' ? 'En Curso' : 'Completado'}
                 </span>
-              </div>
-              <div className="absolute top-4 right-4">
-                <button className="p-2 bg-white/20 backdrop-blur-md rounded-full text-white hover:bg-white/40 transition-colors">
-                  <Share2 size={18} />
-                </button>
               </div>
             </div>
 
@@ -87,11 +87,17 @@ export default function ImpactPage() {
                     {project.status === 'active' ? <Clock size={16} /> : <CheckCircle2 size={16} className="text-green-500" />}
                     <span>{project.status === 'active' ? 'Quedan 12 días' : 'Finalizado con éxito'}</span>
                   </div>
-                  <button className={cn(
-                    "px-6 py-2 rounded-full text-sm font-bold transition-all",
-                    project.status === 'active' ? "bg-guiso-orange text-white hover:shadow-lg" : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  )}>
-                    {project.status === 'active' ? 'Votar Apoyo' : 'Ver Evidencia'}
+                  <button 
+                    onClick={() => setSelectedProject(project)}
+                    disabled={project.status !== 'active' || !isWalletConnected}
+                    className={cn(
+                      "px-6 py-2 rounded-full text-sm font-bold transition-all",
+                      project.status === 'active' && isWalletConnected 
+                        ? "bg-guiso-orange text-white hover:shadow-lg active:scale-95" 
+                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    )}
+                  >
+                    {!isWalletConnected ? 'Conecta Wallet' : project.status === 'active' ? 'Apoyar Causa' : 'Ver Evidencia'}
                   </button>
                 </div>
               </div>
@@ -99,6 +105,13 @@ export default function ImpactPage() {
           </div>
         ))}
       </div>
+
+      {selectedProject && (
+        <SupportModal 
+          project={selectedProject} 
+          onClose={() => setSelectedProject(null)} 
+        />
+      )}
 
       {/* Transparency Section */}
       <div className="glass-card p-10 bg-guiso-terracotta text-white relative overflow-hidden">

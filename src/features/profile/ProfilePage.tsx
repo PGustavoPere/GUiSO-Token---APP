@@ -1,35 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { api, UserProfile } from '../../services/api';
-import { Wallet, Award, History, ExternalLink, ShieldCheck, LogOut, Heart } from 'lucide-react';
+import React, { useState } from 'react';
+import { Wallet, Award, History, ExternalLink, ShieldCheck, LogOut, Heart, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useGuiso } from '../../context/GuisoContext';
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const { 
+    balance, 
+    impactScore, 
+    communityLevel, 
+    history, 
+    isWalletConnected, 
+    connectWallet,
+    totalSupportedCauses 
+  } = useGuiso();
   const [isConnecting, setIsConnecting] = useState(false);
-  const [address, setAddress] = useState<string | null>(null);
 
-  const connectWallet = () => {
+  const handleConnect = () => {
     setIsConnecting(true);
-    // Simulate wallet connection delay
     setTimeout(() => {
-      const mockAddress = '0x71C7...f6D2';
-      setAddress(mockAddress);
+      connectWallet();
       setIsConnecting(false);
     }, 1500);
   };
 
-  const disconnectWallet = () => {
-    setAddress(null);
-    setProfile(null);
-  };
+  const address = isWalletConnected ? '0x71C7...f6D2' : null;
 
-  useEffect(() => {
-    if (address) {
-      api.getUserProfile(address).then(setProfile);
-    }
-  }, [address]);
-
-  if (!address) {
+  if (!isWalletConnected) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center text-center space-y-6">
         <div className="w-24 h-24 bg-guiso-orange/10 rounded-3xl flex items-center justify-center text-guiso-orange mb-4">
@@ -38,7 +34,7 @@ export default function ProfilePage() {
         <h1 className="text-4xl font-display font-bold">Conecta tu Wallet</h1>
         <p className="text-gray-500 max-w-md">Para ver tu balance de GSO y participar en las decisiones de la comunidad, necesitas conectar tu cartera Web3.</p>
         <button 
-          onClick={connectWallet}
+          onClick={handleConnect}
           disabled={isConnecting}
           className="btn-primary flex items-center gap-2 px-10 py-4 text-lg"
         >
@@ -64,108 +60,102 @@ export default function ProfilePage() {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 bg-gradient-to-br from-guiso-orange to-guiso-terracotta rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
-            {address.substring(2, 4).toUpperCase()}
+            {address?.substring(2, 4).toUpperCase()}
           </div>
           <div>
             <h1 className="text-3xl font-display font-bold flex items-center gap-2">
               {address}
               <ShieldCheck size={20} className="text-blue-500" />
             </h1>
-            <p className="text-gray-500 text-sm">Usuario Verificado de GUISO</p>
+            <p className="text-gray-500 text-sm">{communityLevel}</p>
           </div>
         </div>
-        <button 
-          onClick={disconnectWallet}
-          className="flex items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-50 rounded-xl transition-colors text-sm font-bold"
-        >
-          <LogOut size={18} />
-          Desconectar
-        </button>
       </header>
 
-      {profile && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Stats */}
-          <div className="lg:col-span-2 space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="glass-card p-8 bg-guiso-dark text-white relative overflow-hidden">
-                <p className="text-white/60 text-sm mb-1 uppercase tracking-widest font-bold">Balance GSO</p>
-                <h3 className="text-4xl font-display font-bold mb-4">{profile.balance.toLocaleString()} GSO</h3>
-                <div className="flex gap-3">
-                  <button className="flex-1 py-2 bg-guiso-orange rounded-lg text-sm font-bold hover:bg-guiso-terracotta transition-colors">Enviar</button>
-                  <button className="flex-1 py-2 bg-white/10 rounded-lg text-sm font-bold hover:bg-white/20 transition-colors">Recibir</button>
-                </div>
-                <Coins size={120} className="absolute -right-10 -bottom-10 text-white/5" />
-              </div>
-
-              <div className="glass-card p-8 flex flex-col justify-between">
-                <div>
-                  <p className="text-gray-500 text-sm mb-1 uppercase tracking-widest font-bold">Puntos de Impacto</p>
-                  <h3 className="text-4xl font-display font-bold text-guiso-orange">{profile.impactPoints} IP</h3>
-                </div>
-                <div className="mt-6 flex items-center gap-2 text-xs text-gray-400">
-                  <Award size={14} className="text-guiso-orange" />
-                  Nivel: Colaborador Activo
-                </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Stats */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="glass-card p-8 bg-guiso-dark text-white relative overflow-hidden">
+              <p className="text-white/60 text-sm mb-1 uppercase tracking-widest font-bold">Balance GSO</p>
+              <h3 className="text-4xl font-display font-bold mb-4">{balance.toLocaleString()} GSO</h3>
+              <div className="flex gap-3">
+                <button className="flex-1 py-2 bg-guiso-orange rounded-lg text-sm font-bold hover:bg-guiso-terracotta transition-colors">Enviar</button>
+                <button className="flex-1 py-2 bg-white/10 rounded-lg text-sm font-bold hover:bg-white/20 transition-colors">Recibir</button>
               </div>
             </div>
 
-            {/* History */}
-            <div className="glass-card p-8">
-              <h3 className="text-xl font-display font-bold mb-6 flex items-center gap-2">
-                <History size={20} className="text-guiso-orange" />
-                Historial de Participación
-              </h3>
-              <div className="space-y-4">
-                {profile.history.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
-                    <div className="flex items-center gap-4">
-                      <div className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center",
-                        item.type === 'vote' ? "bg-blue-100 text-blue-600" : "bg-green-100 text-green-600"
-                      )}>
-                        {item.type === 'vote' ? <Award size={18} /> : <Heart size={18} />}
-                      </div>
-                      <div>
-                        <p className="font-bold text-sm">
-                          {item.type === 'vote' ? `Votó en: ${item.project}` : `Donación: ${item.amount} GSO`}
-                        </p>
-                        <p className="text-xs text-gray-400">{item.date}</p>
-                      </div>
-                    </div>
-                    <ExternalLink size={16} className="text-gray-300" />
-                  </div>
-                ))}
+            <div className="glass-card p-8 flex flex-col justify-between">
+              <div>
+                <p className="text-gray-500 text-sm mb-1 uppercase tracking-widest font-bold">Puntos de Impacto</p>
+                <h3 className="text-4xl font-display font-bold text-guiso-orange">{impactScore} IP</h3>
+              </div>
+              <div className="mt-6 flex items-center gap-2 text-xs text-gray-400">
+                <Sparkles size={14} className="text-guiso-orange" />
+                Causas Apoyadas: {totalSupportedCauses}
               </div>
             </div>
           </div>
 
-          {/* Sidebar Info */}
-          <div className="space-y-8">
-            <div className="glass-card p-6 border-guiso-orange/20">
-              <h4 className="font-display font-bold mb-4">Próximas Recompensas</h4>
-              <div className="space-y-4">
-                <div className="p-4 bg-guiso-cream rounded-xl border border-guiso-orange/10 opacity-50">
-                  <p className="text-xs font-bold text-guiso-orange uppercase mb-1">Bloqueado</p>
-                  <p className="text-sm font-bold">NFT Fundador GUISO</p>
-                  <p className="text-xs text-gray-400">Necesitas 500 IP</p>
+          {/* History */}
+          <div className="glass-card p-8">
+            <h3 className="text-xl font-display font-bold mb-6 flex items-center gap-2">
+              <History size={20} className="text-guiso-orange" />
+              Historial de Acciones Sociales
+            </h3>
+            <div className="space-y-4">
+              {history.length > 0 ? (
+                history.map((item) => (
+                  <motion.div 
+                    initial={{ x: -10, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    key={item.id} 
+                    className="flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-guiso-orange/10 text-guiso-orange flex items-center justify-center">
+                        <Heart size={18} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm">Apoyo a {item.projectTitle}</p>
+                        <p className="text-xs text-gray-400">{item.date} • {item.amount} GSO aportados</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs font-bold text-green-500">+{item.impactGenerated} IP</p>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="text-center py-12 text-gray-400">
+                  <p>Aún no has realizado ninguna acción social.</p>
+                  <p className="text-xs">¡Visita la sección de Impacto para comenzar!</p>
                 </div>
-                <div className="p-4 bg-guiso-cream rounded-xl border border-guiso-orange/10">
-                  <p className="text-xs font-bold text-green-500 uppercase mb-1">Disponible</p>
-                  <p className="text-sm font-bold">Acceso a Votación VIP</p>
-                  <p className="text-xs text-gray-400">¡Ya puedes participar!</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="glass-card p-6 bg-gray-50 border-none">
-              <h4 className="font-display font-bold mb-2">Seguridad</h4>
-              <p className="text-xs text-gray-500 mb-4">Tu frase semilla nunca es almacenada en nuestros servidores. GUISO es una plataforma non-custodial.</p>
-              <button className="text-xs font-bold text-guiso-orange hover:underline">Ver auditoría de seguridad</button>
+              )}
             </div>
           </div>
         </div>
-      )}
+
+        {/* Sidebar Info */}
+        <div className="space-y-8">
+          <div className="glass-card p-6 border-guiso-orange/20">
+            <h4 className="font-display font-bold mb-4">Progreso de Nivel</h4>
+            <div className="space-y-4">
+              <div className="flex justify-between text-xs font-bold mb-1">
+                <span>Nivel Actual</span>
+                <span className="text-guiso-orange">{impactScore} / 500 IP</span>
+              </div>
+              <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                <div 
+                  className="bg-guiso-orange h-full transition-all duration-500" 
+                  style={{ width: `${Math.min((impactScore / 500) * 100, 100)}%` }} 
+                />
+              </div>
+              <p className="text-[10px] text-gray-400 text-center italic">Próximo rango: Guerrero de la Comunidad</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

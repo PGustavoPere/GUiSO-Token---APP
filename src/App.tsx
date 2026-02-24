@@ -4,6 +4,7 @@
  */
 
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { GuisoProvider } from './context/GuisoContext';
 import Layout from './components/Layout';
 import DashboardPage from './features/dashboard/DashboardPage';
 import ImpactPage from './features/impact/ImpactPage';
@@ -32,15 +33,17 @@ const CommunityPage = () => (
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<DashboardPage />} />
-          <Route path="impacto" element={<ImpactPage />} />
-          <Route path="comunidad" element={<CommunityPage />} />
-          <Route path="perfil" element={<ProfilePage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <GuisoProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="impacto" element={<ImpactPage />} />
+            <Route path="comunidad" element={<CommunityPage />} />
+            <Route path="perfil" element={<ProfilePage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </GuisoProvider>
   );
 }

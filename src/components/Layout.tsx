@@ -4,6 +4,7 @@ import { LayoutDashboard, Heart, Users, User, Settings, Menu, X } from 'lucide-r
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useGuiso } from '../context/GuisoContext';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -11,6 +12,7 @@ function cn(...inputs: ClassValue[]) {
 
 export default function Layout() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { balance, isWalletConnected } = useGuiso();
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -27,9 +29,14 @@ export default function Layout() {
           <div className="w-8 h-8 bg-guiso-orange rounded-lg flex items-center justify-center text-white font-bold">G</div>
           <span className="font-display font-bold text-lg">GUISO</span>
         </div>
-        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        <div className="flex items-center gap-4">
+          {isWalletConnected && (
+            <span className="text-xs font-bold text-guiso-orange">{balance.toLocaleString()} GSO</span>
+          )}
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </header>
 
       {/* Sidebar (Desktop) */}
@@ -62,10 +69,14 @@ export default function Layout() {
 
         <div className="p-4 mt-auto">
           <div className="bg-guiso-cream rounded-2xl p-4 border border-guiso-orange/10">
-            <p className="text-xs text-gray-500 mb-2">Estado del Token</p>
+            <p className="text-xs text-gray-500 mb-2">Tu Balance</p>
             <div className="flex justify-between items-end">
-              <span className="font-display font-bold text-lg">$0.042</span>
-              <span className="text-xs text-green-500 font-medium">+5.4%</span>
+              <span className="font-display font-bold text-lg">
+                {isWalletConnected ? `${balance.toLocaleString()} GSO` : '---'}
+              </span>
+              {isWalletConnected && (
+                <span className="text-[10px] text-green-500 font-bold uppercase">Activo</span>
+              )}
             </div>
           </div>
         </div>
