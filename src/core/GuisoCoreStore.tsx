@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { impactEngine, LevelThreshold } from '../system/impactEngine';
+import { useWallet } from './WalletProvider';
 
 /**
  * Tipos de datos para el Core Store
@@ -18,7 +19,11 @@ export interface UserState {
   impactScore: number;
   communityLevel: string;
   isWalletConnected: boolean;
+  walletAddress: string | null;
   hasExperiencedImpactMoment: boolean;
+  isDemoModeActive: boolean;
+  demoStep: number;
+  hasSeenWelcome: boolean;
 }
 
 export interface TokenState {
@@ -43,12 +48,17 @@ interface GuisoCoreContextType {
   activeImpactMoment: { points: number; target: string } | null;
 
   // Actions
-  connectWallet: () => void;
   supportCause: (projectId: string, projectTitle: string, amount: number) => void;
   earnImpact: (points: number) => void;
   updateGlobalImpact: (impact: number, meals?: number) => void;
   dismissNotification: () => void;
   dismissImpactMoment: () => void;
+  
+  // Demo Actions
+  startDemo: () => void;
+  skipDemo: () => void;
+  nextDemoStep: () => void;
+  resetDemo: () => void;
 }
 
 const GuisoCoreContext = createContext<GuisoCoreContextType | undefined>(undefined);
@@ -61,7 +71,11 @@ const INITIAL_USER: UserState = {
   impactScore: 0,
   communityLevel: impactEngine.calculateLevel(0).level,
   isWalletConnected: false,
+  walletAddress: null,
   hasExperiencedImpactMoment: false,
+  isDemoModeActive: false,
+  demoStep: 0,
+  hasSeenWelcome: false,
 };
 
 const INITIAL_TOKEN: TokenState = {
@@ -76,11 +90,21 @@ const INITIAL_GLOBAL: GlobalImpactState = {
 };
 
 export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isConnected, address } = useWallet();
   const [user, setUser] = useState<UserState>(INITIAL_USER);
   const [token, setToken] = useState<TokenState>(INITIAL_TOKEN);
   const [global, setGlobal] = useState<GlobalImpactState>(INITIAL_GLOBAL_STATS_ADAPTED);
   const [levelUpNotification, setLevelUpNotification] = useState<LevelThreshold | null>(null);
   const [activeImpactMoment, setActiveImpactMoment] = useState<{ points: number; target: string } | null>(null);
+
+  // Sync with WalletProvider
+  useEffect(() => {
+    setUser(prev => ({
+      ...prev,
+      isWalletConnected: isConnected,
+      walletAddress: address
+    }));
+  }, [isConnected, address]);
 
   // Persistencia: Cargar estado inicial
   useEffect(() => {
@@ -97,13 +121,6 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   useEffect(() => {
     localStorage.setItem('guiso_core_store', JSON.stringify({ user, token, global }));
   }, [user, token, global]);
-
-  /**
-   * Acción: Conectar Wallet
-   */
-  const connectWallet = useCallback(() => {
-    setUser(prev => ({ ...prev, isWalletConnected: true }));
-  }, []);
 
   /**
    * Acción: Apoyar una causa social
@@ -186,6 +203,38 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setActiveImpactMoment(null);
   }, []);
 
+  const startDemo = useCallback(() => {
+    setUser(prev => ({
+      ...prev,
+      isDemoModeActive: true,
+      demoStep: 1,
+      hasSeenWelcome: true
+    }));
+  }, []);
+
+  const skipDemo = useCallback(() => {
+    setUser(prev => ({
+      ...prev,
+      isDemoModeActive: false,
+      hasSeenWelcome: true
+    }));
+  }, []);
+
+  const nextDemoStep = useCallback(() => {
+    setUser(prev => ({
+      ...prev,
+      demoStep: prev.demoStep + 1
+    }));
+  }, []);
+
+  const resetDemo = useCallback(() => {
+    setUser(INITIAL_USER);
+    setToken(INITIAL_TOKEN);
+    setGlobal(INITIAL_GLOBAL_STATS_ADAPTED);
+    localStorage.removeItem('guiso_core_store');
+    window.location.reload();
+  }, []);
+
   return (
     <GuisoCoreContext.Provider value={{
       user,
@@ -193,12 +242,15 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       global,
       levelUpNotification,
       activeImpactMoment,
-      connectWallet,
       supportCause,
       earnImpact,
       updateGlobalImpact,
       dismissNotification,
-      dismissImpactMoment
+      dismissImpactMoment,
+      startDemo,
+      skipDemo,
+      nextDemoStep,
+      resetDemo
     }}>
       {children}
     </GuisoCoreContext.Provider>

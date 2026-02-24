@@ -56,13 +56,33 @@ See [ROADMAP.md](./ROADMAP.md) for details.
 
 ---
 
-## 🏗️ Architecture
-The project follows a feature-based structure for scalability.
-- `/src/context`: Global SocialFi state.
-- `/src/features`: Modular pages (Dashboard, Impact, Profile).
-- `/src/components`: Reusable UI components.
+## 🏗️ Architecture & Core Systems
+The project follows a modular, domain-driven architecture:
+- **GuisoCoreStore:** Centralized state management for user profile, token economy, and global impact metrics.
+- **WalletProvider:** Simulation layer for Web3 wallet connectivity.
+- **ImpactEngine:** Logic layer that converts financial actions into humanitarian metrics (Impact Points).
+- **Proof of Impact (PoI):** Conceptual framework for social validation (see [PROOF-OF-IMPACT.md](./docs/PROOF-OF-IMPACT.md)).
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for a deep dive.
+## 🎯 MVP Features
+- **Wallet Simulation:** Connect/Disconnect mock wallets with persistent addresses.
+- **Impact Transaction Panel:** Direct support for community kitchens, homeless support, and food programs.
+- **Real-time Impact Dashboard:** Visualize personal and collective impact metrics (Meals generated, Impact Score).
+- **Impact History:** Transparent log of all social actions with unique transaction IDs.
+- **Emotional Feedback:** Instant humanitarian feedback after every contribution.
+
+## 🚀 Investor Demo Mode
+The application includes a specialized **Investor Demo Mode** designed for partners and stakeholders:
+- **Guided Experience:** A step-by-step walkthrough of the GUISO ecosystem.
+- **Investor Metrics Panel:** Simulated growth and scalability metrics (Retention, Volume, Reach).
+- **Impact Story Mode:** Narrative cards that explain the real-world connection of digital transactions.
+- **Vision Section:** Deep dive into the philosophy, neutrality, and long-term roadmap.
+- **Demo Reset:** Instantly reset the experience to showcase the first-time user journey.
+
+## 🔮 Future Blockchain Integration
+- **Smart Contracts:** Transition from mock state to EVM-compatible smart contracts for GSO tokens.
+- **On-chain Proof of Impact:** Minting soulbound tokens (SBTs) or NFTs as verifiable credentials of social contribution.
+- **DAO Governance:** Impact-weighted voting power for community decisions.
+- **Oracle Integration:** Connecting off-chain social data (e.g., from NGOs) to on-chain impact verification.
 
 ---
 

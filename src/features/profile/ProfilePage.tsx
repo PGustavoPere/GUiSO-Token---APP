@@ -2,20 +2,20 @@ import React, { useState } from 'react';
 import { Wallet, Award, History, ExternalLink, ShieldCheck, LogOut, Heart, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
+import { useWallet } from '../../core/WalletProvider';
 import { impactEngine } from '../../system/impactEngine';
 
 export default function ProfilePage() {
   const { 
     user,
     token,
-    connectWallet,
     global
   } = useGuisoCore();
-  const [isConnecting, setIsConnecting] = useState(false);
+  const { address, isConnected, connect, isConnecting } = useWallet();
 
   const impactScore = user.impactScore;
   const communityLevel = user.communityLevel;
-  const isWalletConnected = user.isWalletConnected;
+  const isWalletConnected = isConnected;
   const balance = token.gsoBalance;
   const history = token.transactions;
   const totalSupportedCauses = global.supportedCauses;
@@ -28,14 +28,8 @@ export default function ProfilePage() {
     : 100;
 
   const handleConnect = () => {
-    setIsConnecting(true);
-    setTimeout(() => {
-      connectWallet();
-      setIsConnecting(false);
-    }, 1500);
+    connect();
   };
-
-  const address = isWalletConnected ? '0x71C7...f6D2' : null;
 
   if (!isWalletConnected) {
     return (
@@ -72,7 +66,7 @@ export default function ProfilePage() {
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 bg-gradient-to-br from-guiso-orange to-guiso-terracotta rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
-            {address?.substring(2, 4).toUpperCase()}
+            {address?.substring(2, 4).toUpperCase() || 'G'}
           </div>
           <div>
             <h1 className="text-3xl font-display font-bold flex items-center gap-2">
@@ -134,7 +128,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-bold text-green-500">+{item.impactGenerated} IP</p>
+                      <p className="text-xs font-bold text-green-500">+{item.impactPoints} IP</p>
                     </div>
                   </motion.div>
                 ))

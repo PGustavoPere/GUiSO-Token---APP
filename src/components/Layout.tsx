@@ -5,8 +5,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useGuisoCore } from '../core/GuisoCoreStore';
+import { useWallet } from '../core/WalletProvider';
 import LevelUpNotification from './LevelUpNotification';
 import ImpactMoment from './ImpactMoment';
+import DemoWelcome from './DemoWelcome';
+import DemoGuide from './DemoGuide';
+import { Globe, RotateCcw } from 'lucide-react';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -14,12 +18,14 @@ function cn(...inputs: ClassValue[]) {
 
 export default function Layout() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { token, user } = useGuisoCore();
+  const { token, user, resetDemo } = useGuisoCore();
+  const { address, isConnected, connect, isConnecting } = useWallet();
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/impacto', icon: Heart, label: 'Impacto Social' },
     { to: '/comunidad', icon: Users, label: 'Comunidad' },
+    { to: '/vision', icon: Globe, label: 'Visión' },
     { to: '/perfil', icon: User, label: 'Mi Perfil' },
   ];
 
@@ -32,8 +38,19 @@ export default function Layout() {
           <span className="font-display font-bold text-lg">GUISO</span>
         </div>
         <div className="flex items-center gap-4">
-          {user.isWalletConnected && (
-            <span className="text-xs font-bold text-guiso-orange">{token.gsoBalance.toLocaleString()} GSO</span>
+          {isConnected ? (
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-bold text-guiso-orange uppercase tracking-tighter">{token.gsoBalance.toLocaleString()} GSO</span>
+              <span className="text-[8px] text-gray-400 font-mono">{address}</span>
+            </div>
+          ) : (
+            <button 
+              onClick={connect} 
+              disabled={isConnecting}
+              className="text-[10px] font-bold bg-guiso-orange text-white px-3 py-1 rounded-full"
+            >
+              {isConnecting ? '...' : 'Connect'}
+            </button>
           )}
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -69,16 +86,37 @@ export default function Layout() {
           ))}
         </nav>
 
-        <div className="p-4 mt-auto">
+        <div className="p-4 mt-auto space-y-4">
+          <button
+            onClick={resetDemo}
+            className="w-full flex items-center justify-center gap-2 py-2 text-[10px] font-bold text-gray-400 hover:text-guiso-orange transition-colors uppercase tracking-widest"
+          >
+            <RotateCcw size={12} />
+            Reiniciar Demo
+          </button>
+
           <div className="bg-guiso-cream rounded-2xl p-4 border border-guiso-orange/10">
-            <p className="text-xs text-gray-500 mb-2">Tu Balance</p>
-            <div className="flex justify-between items-end">
-              <span className="font-display font-bold text-lg">
-                {user.isWalletConnected ? `${token.gsoBalance.toLocaleString()} GSO` : '---'}
+            <p className="text-xs text-gray-500 mb-2">Tu Wallet</p>
+            <div className="flex flex-col gap-1">
+              <span className="font-mono text-[10px] text-gray-400 truncate">
+                {isConnected ? address : 'No conectada'}
               </span>
-              {user.isWalletConnected && (
-                <span className="text-[10px] text-green-500 font-bold uppercase">Activo</span>
-              )}
+              <div className="flex justify-between items-end mt-1">
+                <span className="font-display font-bold text-lg">
+                  {isConnected ? `${token.gsoBalance.toLocaleString()} GSO` : '---'}
+                </span>
+                {isConnected ? (
+                  <span className="text-[10px] text-green-500 font-bold uppercase">Activo</span>
+                ) : (
+                  <button 
+                    onClick={connect}
+                    disabled={isConnecting}
+                    className="text-[10px] text-guiso-orange font-bold uppercase hover:underline"
+                  >
+                    {isConnecting ? 'Conectando...' : 'Conectar'}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -121,6 +159,8 @@ export default function Layout() {
       {/* Global Notifications */}
       <LevelUpNotification />
       <ImpactMoment />
+      <DemoWelcome />
+      <DemoGuide />
     </div>
   );
 }

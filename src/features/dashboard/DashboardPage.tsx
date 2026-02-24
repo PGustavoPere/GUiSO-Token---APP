@@ -1,149 +1,115 @@
-import React, { useEffect, useState } from 'react';
-import { api, TokenStats } from '../../services/api';
-import { TrendingUp, Users, Coins, BarChart3, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import ImpactCounter from '../../components/ImpactCounter';
-
-const mockChartData = [
-  { name: 'Lun', price: 0.038 },
-  { name: 'Mar', price: 0.040 },
-  { name: 'Mie', price: 0.039 },
-  { name: 'Jue', price: 0.041 },
-  { name: 'Vie', price: 0.043 },
-  { name: 'Sab', price: 0.042 },
-  { name: 'Dom', price: 0.042 },
-];
+import React from 'react';
+import { motion } from 'motion/react';
+import { Sparkles, ArrowRight, Heart, ShieldCheck, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import ImpactDashboard from '../../components/ImpactDashboard';
+import ImpactTransactionPanel from '../../components/ImpactTransactionPanel';
+import ImpactHistory from '../../components/ImpactHistory';
+import InvestorPanel from '../../components/InvestorPanel';
+import { useGuisoCore } from '../../core/GuisoCoreStore';
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<TokenStats | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    api.getTokenStats().then(data => {
-      setStats(data);
-      setLoading(false);
-    });
-  }, []);
-
-  if (loading || !stats) {
-    return (
-      <div className="space-y-8 animate-pulse">
-        <div className="h-64 bg-gray-200 rounded-3xl" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => <div key={i} className="h-32 bg-gray-200 rounded-2xl" />)}
-        </div>
-        <div className="h-64 bg-gray-200 rounded-2xl" />
-      </div>
-    );
-  }
-
-  const statCards = [
-    { label: 'Precio GSO', value: `$${stats.price}`, change: `+${stats.priceChange24h}%`, icon: TrendingUp, color: 'text-green-500' },
-    { label: 'Holders', value: stats.holders.toLocaleString(), change: '+12 hoy', icon: Users, color: 'text-blue-500' },
-    { label: 'Market Cap', value: `$${(stats.marketCap / 1000000).toFixed(2)}M`, change: 'Estable', icon: BarChart3, color: 'text-purple-500' },
-  ];
+  const { user } = useGuisoCore();
 
   return (
-    <div className="space-y-10">
-      <header className="hidden md:block">
-        <h1 className="text-4xl mb-2">Dashboard del Token</h1>
-        <p className="text-gray-500">Métricas de utilidad y salud del ecosistema GUISO.</p>
-      </header>
+    <div className="space-y-12 pb-20">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden rounded-[3rem] bg-guiso-dark p-8 md:p-16 text-white">
+        <div className="absolute top-0 right-0 w-1/2 h-full opacity-20 pointer-events-none">
+          <div className="absolute top-[-20%] right-[-10%] w-[80%] h-[80%] rounded-full bg-guiso-orange blur-[120px]" />
+        </div>
+        
+        <div className="relative z-10 max-w-2xl space-y-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-bold uppercase tracking-widest"
+          >
+            <Zap size={14} className="text-guiso-orange" />
+            Social Impact MVP v1.0
+          </motion.div>
+          
+          <motion.h1 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-5xl md:text-7xl font-display font-bold leading-[0.9] tracking-tight"
+          >
+            Tus Acciones, <br />
+            <span className="text-guiso-orange">Impacto Real.</span>
+          </motion.h1>
+          
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-lg text-white/60 leading-relaxed"
+          >
+            GUISO transforma cada transacción en una oportunidad para ayudar. 
+            Conecta tu wallet y empieza a generar impacto humanitario hoy mismo.
+          </motion.p>
 
-      {/* Global Impact Banner */}
-      <ImpactCounter />
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-wrap gap-4"
+          >
+            <Link to="/impacto" className="btn-primary px-8 py-4 text-lg flex items-center gap-2">
+              Explorar Causas
+              <ArrowRight size={20} />
+            </Link>
+            <div className="flex items-center gap-3 px-6 py-4 rounded-full border border-white/20 text-sm font-bold">
+              <ShieldCheck size={20} className="text-green-400" />
+              Impacto Verificado
+            </div>
+          </motion.div>
+        </div>
+      </section>
 
-      {/* Stat Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {statCards.map((card, i) => (
-          <div key={i} className="glass-card p-6 flex items-start justify-between">
-            <div>
-              <p className="text-sm text-gray-500 font-medium mb-1">{card.label}</p>
-              <h3 className="text-3xl font-display font-bold">{card.value}</h3>
-              <div className="flex items-center gap-1 mt-2">
-                {card.change.startsWith('+') ? <ArrowUpRight size={14} className="text-green-500" /> : <ArrowDownRight size={14} className="text-red-500" />}
-                <span className={cn("text-xs font-bold", card.change.startsWith('+') ? "text-green-500" : "text-red-500")}>{card.change}</span>
+      {/* Investor Metrics (Simulated) */}
+      <InvestorPanel />
+
+      {/* MVP Core Experience */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Main Column */}
+        <div className="lg:col-span-2 space-y-8">
+          <section id="dashboard-stats" className="space-y-4">
+            <h2 className="text-2xl font-display font-bold px-2">Panel de Control</h2>
+            <ImpactDashboard />
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-display font-bold px-2">Historial Reciente</h2>
+            <ImpactHistory />
+          </section>
+        </div>
+
+        {/* Sidebar Column */}
+        <div className="space-y-8">
+          <section id="transaction-panel" className="space-y-4">
+            <h2 className="text-2xl font-display font-bold px-2">Acción Rápida</h2>
+            <ImpactTransactionPanel />
+          </section>
+
+          {/* Education Card */}
+          <div className="glass-card p-6 bg-guiso-cream border-guiso-orange/20">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-guiso-orange rounded-xl flex items-center justify-center text-white">
+                <Heart size={20} />
               </div>
+              <h4 className="font-display font-bold">¿Cómo funciona?</h4>
             </div>
-            <div className={cn("p-3 rounded-xl bg-gray-50", card.color)}>
-              <card.icon size={24} />
-            </div>
+            <p className="text-sm text-gray-500 leading-relaxed mb-4">
+              Cada vez que aportas GSO, el sistema calcula el impacto humanitario generado. 
+              Tus puntos de impacto (IP) determinan tu nivel en la comunidad y tu poder de decisión.
+            </p>
+            <Link to="/comunidad" className="text-guiso-orange text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
+              Saber más sobre niveles <ArrowRight size={14} />
+            </Link>
           </div>
-        ))}
-      </div>
-
-      {/* Chart Section */}
-      <div className="glass-card p-8">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h3 className="text-xl font-display font-bold">Evolución del Precio</h3>
-            <p className="text-sm text-gray-500">Últimos 7 días</p>
-          </div>
-          <div className="flex gap-2">
-            {['1D', '1W', '1M', 'ALL'].map(t => (
-              <button key={t} className={cn("px-3 py-1 rounded-lg text-xs font-bold transition-colors", t === '1W' ? "bg-guiso-orange text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200")}>
-                {t}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="h-[300px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={mockChartData}>
-              <defs>
-                <linearGradient id="colorPrice" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#F27D26" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#F27D26" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#999'}} dy={10} />
-              <YAxis hide domain={['dataMin - 0.005', 'dataMax + 0.005']} />
-              <Tooltip 
-                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                itemStyle={{ color: '#F27D26', fontWeight: 'bold' }}
-              />
-              <Area type="monotone" dataKey="price" stroke="#F27D26" strokeWidth={3} fillOpacity={1} fill="url(#colorPrice)" />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-
-      {/* Additional Info */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="glass-card p-6">
-          <h3 className="text-lg font-display font-bold mb-4 flex items-center gap-2">
-            <Coins size={20} className="text-guiso-orange" />
-            Distribución del Supply
-          </h3>
-          <div className="space-y-4">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-500">Supply Circulante</span>
-              <span className="font-bold">{(stats.circulatingSupply / 1000000).toFixed(1)}M GSO</span>
-            </div>
-            <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-              <div className="bg-guiso-orange h-full" style={{ width: `${(stats.circulatingSupply / stats.totalSupply) * 100}%` }} />
-            </div>
-            <div className="flex justify-between text-xs text-gray-400">
-              <span>0M</span>
-              <span>Total: 100M GSO</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="glass-card p-6 bg-guiso-dark text-white">
-          <h3 className="text-lg font-display font-bold mb-2">¿Por qué GSO?</h3>
-          <p className="text-sm text-gray-400 mb-6">Cada transacción contribuye directamente a la tesorería de impacto social, permitiendo que la comunidad financie proyectos reales sin intermediarios.</p>
-          <button className="w-full py-3 bg-white text-guiso-dark font-bold rounded-xl hover:bg-guiso-orange hover:text-white transition-colors">
-            Ver Whitepaper
-          </button>
         </div>
       </div>
     </div>
   );
-}
-
-// Helper for class names
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
 }
