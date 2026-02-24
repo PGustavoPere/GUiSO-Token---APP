@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, Utensils, Heart, Users, TrendingUp } from 'lucide-react';
 import { useGuisoCore } from '../core/GuisoCoreStore';
+import { Card } from './ui';
 
 export default function ImpactDashboard() {
   const { global, user } = useGuisoCore();
@@ -49,24 +50,25 @@ export default function ImpactDashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1 }}
-            className="glass-card p-5 space-y-3"
           >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.color}`}>
-              <stat.icon size={20} />
-            </div>
-            <div>
-              <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">{stat.label}</p>
-              <p className="text-2xl font-display font-bold">
-                {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
-                <span className="text-sm font-normal opacity-40">{stat.suffix}</span>
-              </p>
-            </div>
+            <Card variant="glass" padding="sm" rounded="2xl" className="space-y-3 h-full">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.color}`}>
+                <stat.icon size={20} />
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">{stat.label}</p>
+                <p className="text-2xl font-display font-bold">
+                  {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
+                  <span className="text-sm font-normal opacity-40">{stat.suffix}</span>
+                </p>
+              </div>
+            </Card>
           </motion.div>
         ))}
       </div>
 
       {/* Visual Progress Section */}
-      <div className="glass-card p-8">
+      <Card variant="glass" padding="lg" rounded="2xl">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-2">
             <h3 className="text-xl font-display font-bold">Impacto Colectivo</h3>
@@ -88,7 +90,7 @@ export default function ImpactDashboard() {
             </div>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

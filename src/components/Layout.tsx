@@ -8,9 +8,9 @@ import { useGuisoCore } from '../core/GuisoCoreStore';
 import { useWallet } from '../core/WalletProvider';
 import LevelUpNotification from './LevelUpNotification';
 import ImpactMoment from './ImpactMoment';
-import DemoWelcome from './DemoWelcome';
-import DemoGuide from './DemoGuide';
-import { Globe, RotateCcw } from 'lucide-react';
+import { Globe, RotateCcw, Cpu } from 'lucide-react';
+import { web3Bridge } from '../web3/web3Provider';
+import { Button } from './ui';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -44,13 +44,14 @@ export default function Layout() {
               <span className="text-[8px] text-gray-400 font-mono">{address}</span>
             </div>
           ) : (
-            <button 
+            <Button 
               onClick={connect} 
               disabled={isConnecting}
-              className="text-[10px] font-bold bg-guiso-orange text-white px-3 py-1 rounded-full"
+              size="sm"
+              className="text-[10px] px-3 py-1"
             >
               {isConnecting ? '...' : 'Connect'}
-            </button>
+            </Button>
           )}
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -87,6 +88,16 @@ export default function Layout() {
         </nav>
 
         <div className="p-4 mt-auto space-y-4">
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-2">
+              <Cpu size={12} className="text-guiso-orange" />
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Bridge Status</span>
+            </div>
+            <span className="text-[8px] font-bold bg-guiso-orange/10 text-guiso-orange px-2 py-0.5 rounded-full uppercase">
+              {web3Bridge.getMode()}
+            </span>
+          </div>
+
           <button
             onClick={resetDemo}
             className="w-full flex items-center justify-center gap-2 py-2 text-[10px] font-bold text-gray-400 hover:text-guiso-orange transition-colors uppercase tracking-widest"
@@ -159,8 +170,6 @@ export default function Layout() {
       {/* Global Notifications */}
       <LevelUpNotification />
       <ImpactMoment />
-      <DemoWelcome />
-      <DemoGuide />
     </div>
   );
 }

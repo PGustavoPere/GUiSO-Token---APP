@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Heart, Users, ArrowRight } from 'lucide-react';
 import { useGuisoCore } from '../core/GuisoCoreStore';
+import { Button } from './ui';
 
 export default function ImpactMoment() {
   const { activeImpactMoment, dismissImpactMoment, global } = useGuisoCore();
@@ -64,7 +65,7 @@ export default function ImpactMoment() {
               </div>
 
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -96,16 +97,21 @@ export default function ImpactMoment() {
                 </motion.div>
               </div>
 
-              <motion.button
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 1 }}
-                onClick={dismissImpactMoment}
-                className="group flex items-center gap-3 mx-auto px-8 py-4 bg-white text-[#0a0502] rounded-full font-bold text-lg hover:bg-guiso-orange hover:text-white transition-all active:scale-95"
+                className="flex justify-center"
               >
-                Continuar el Camino
-                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-              </motion.button>
+                <Button
+                  onClick={dismissImpactMoment}
+                  size="lg"
+                  className="group flex items-center justify-center gap-3 w-full sm:w-auto px-8 py-4 bg-white text-[#0a0502] hover:bg-guiso-orange hover:text-white"
+                >
+                  Continuar el Camino
+                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </motion.div>
             </motion.div>
           </div>
         </motion.div>

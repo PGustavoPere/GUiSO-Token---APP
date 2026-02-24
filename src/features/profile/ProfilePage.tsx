@@ -4,6 +4,7 @@ import { motion } from 'motion/react';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { useWallet } from '../../core/WalletProvider';
 import { impactEngine } from '../../system/impactEngine';
+import { Card, Button, Badge } from '../../components/ui';
 
 export default function ProfilePage() {
   const { 
@@ -39,10 +40,11 @@ export default function ProfilePage() {
         </div>
         <h1 className="text-4xl font-display font-bold">Conecta tu Wallet</h1>
         <p className="text-gray-500 max-w-md">Para ver tu balance de GSO y participar en las decisiones de la comunidad, necesitas conectar tu cartera Web3.</p>
-        <button 
+        <Button 
           onClick={handleConnect}
           disabled={isConnecting}
-          className="btn-primary flex items-center gap-2 px-10 py-4 text-lg"
+          size="lg"
+          className="flex items-center gap-2 px-10"
         >
           {isConnecting ? (
             <>
@@ -55,7 +57,7 @@ export default function ProfilePage() {
               Conectar Wallet
             </>
           )}
-        </button>
+        </Button>
         <p className="text-xs text-gray-400">Soportamos MetaMask, WalletConnect y Coinbase Wallet.</p>
       </div>
     );
@@ -65,15 +67,15 @@ export default function ProfilePage() {
     <div className="space-y-10">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-guiso-orange to-guiso-terracotta rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
+          <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-guiso-orange to-guiso-terracotta rounded-2xl flex items-center justify-center text-white text-xl md:text-2xl font-bold shrink-0">
             {address?.substring(2, 4).toUpperCase() || 'G'}
           </div>
-          <div>
-            <h1 className="text-3xl font-display font-bold flex items-center gap-2">
-              {address}
-              <ShieldCheck size={20} className="text-blue-500" />
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl md:text-3xl font-display font-bold flex items-center gap-2">
+              <span className="truncate">{address}</span>
+              <ShieldCheck size={20} className="text-blue-500 shrink-0" />
             </h1>
-            <p className="text-gray-500 text-sm">{communityLevel}</p>
+            <p className="text-gray-500 text-xs md:text-sm">{communityLevel}</p>
           </div>
         </div>
       </header>
@@ -81,54 +83,54 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Stats */}
         <div className="lg:col-span-2 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="glass-card p-8 bg-guiso-dark text-white relative overflow-hidden">
-              <p className="text-white/60 text-sm mb-1 uppercase tracking-widest font-bold">Balance GSO</p>
-              <h3 className="text-4xl font-display font-bold mb-4">{balance.toLocaleString()} GSO</h3>
-              <div className="flex gap-3">
-                <button className="flex-1 py-2 bg-guiso-orange rounded-lg text-sm font-bold hover:bg-guiso-terracotta transition-colors">Enviar</button>
-                <button className="flex-1 py-2 bg-white/10 rounded-lg text-sm font-bold hover:bg-white/20 transition-colors">Recibir</button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <Card variant="dark" padding="md" rounded="2xl" className="relative overflow-hidden">
+              <p className="text-white/60 text-xs md:text-sm mb-1 uppercase tracking-widest font-bold">Balance GSO</p>
+              <h3 className="text-3xl md:text-4xl font-display font-bold mb-4">{balance.toLocaleString()} GSO</h3>
+              <div className="flex gap-2 md:gap-3">
+                <Button variant="primary" size="sm" className="flex-1">Enviar</Button>
+                <Button variant="secondary" size="sm" className="flex-1">Recibir</Button>
               </div>
-            </div>
+            </Card>
 
-            <div className="glass-card p-8 flex flex-col justify-between">
+            <Card variant="glass" padding="md" rounded="2xl" className="flex flex-col justify-between">
               <div>
-                <p className="text-gray-500 text-sm mb-1 uppercase tracking-widest font-bold">Puntos de Impacto</p>
-                <h3 className="text-4xl font-display font-bold text-guiso-orange">{impactScore} IP</h3>
+                <p className="text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-widest font-bold">Puntos de Impacto</p>
+                <h3 className="text-3xl md:text-4xl font-display font-bold text-guiso-orange">{impactScore} IP</h3>
               </div>
-              <div className="mt-6 flex items-center gap-2 text-xs text-gray-400">
+              <div className="mt-4 md:mt-6 flex items-center gap-2 text-[10px] md:text-xs text-gray-400">
                 <Sparkles size={14} className="text-guiso-orange" />
                 Causas Apoyadas: {totalSupportedCauses}
               </div>
-            </div>
+            </Card>
           </div>
 
           {/* History */}
-          <div className="glass-card p-8">
-            <h3 className="text-xl font-display font-bold mb-6 flex items-center gap-2">
+          <Card variant="glass" padding="md" rounded="2xl">
+            <h3 className="text-lg md:text-xl font-display font-bold mb-4 md:mb-6 flex items-center gap-2">
               <History size={20} className="text-guiso-orange" />
               Historial de Acciones Sociales
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {history.length > 0 ? (
                 history.map((item) => (
                   <motion.div 
                     initial={{ x: -10, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     key={item.id} 
-                    className="flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100"
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 md:p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 gap-2 sm:gap-4"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-full bg-guiso-orange/10 text-guiso-orange flex items-center justify-center">
-                        <Heart size={18} />
+                    <div className="flex items-center gap-3 md:gap-4 w-full sm:w-auto">
+                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-guiso-orange/10 text-guiso-orange flex items-center justify-center shrink-0">
+                        <Heart size={16} className="md:w-[18px] md:h-[18px]" />
                       </div>
-                      <div>
-                        <p className="font-bold text-sm">Apoyo a {item.target}</p>
-                        <p className="text-xs text-gray-400">{item.date} • {item.amount} GSO aportados</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-xs md:text-sm truncate">Apoyo a {item.target}</p>
+                        <p className="text-[10px] md:text-xs text-gray-400 truncate">{item.date} • {item.amount} GSO aportados</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs font-bold text-green-500">+{item.impactPoints} IP</p>
+                    <div className="text-left sm:text-right pl-11 sm:pl-0">
+                      <p className="text-[10px] md:text-xs font-bold text-green-500">+{item.impactPoints} IP</p>
                     </div>
                   </motion.div>
                 ))
@@ -139,12 +141,12 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Sidebar Info */}
         <div className="space-y-8">
-          <div className="glass-card p-6 border-guiso-orange/20">
+          <Card variant="glass" padding="sm" rounded="2xl" className="border-guiso-orange/20">
             <h4 className="font-display font-bold mb-4">Progreso de Nivel</h4>
             <div className="space-y-4">
               <div className="flex justify-between text-xs font-bold mb-1">
@@ -163,7 +165,7 @@ export default function ProfilePage() {
                 {nextThreshold ? `Próximo rango: ${nextThreshold.level}` : '¡Has alcanzado el nivel máximo!'}
               </p>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     </div>

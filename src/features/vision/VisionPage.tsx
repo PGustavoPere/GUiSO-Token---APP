@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Globe, ShieldCheck, Zap, Heart, ArrowRight, Layers, Cpu, Users } from 'lucide-react';
+import { Target, Users, ShieldCheck, ArrowRight, Zap, Globe, Heart, Layers, Cpu } from 'lucide-react';
+import { Card, Button, Badge } from '../../components/ui';
 
 export default function VisionPage() {
   const pillars = [
@@ -43,7 +44,7 @@ export default function VisionPage() {
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-5xl md:text-7xl font-display font-bold tracking-tight max-w-4xl mx-auto"
+          className="text-4xl md:text-7xl font-display font-bold tracking-tight max-w-4xl mx-auto"
         >
           Redefiniendo el <span className="text-guiso-orange">Valor Social</span> en la Era Digital.
         </motion.h1>
@@ -51,7 +52,7 @@ export default function VisionPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed"
+          className="text-lg md:text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed"
         >
           GUISO no es solo un token; es un protocolo de confianza diseñado para escalar la generosidad humana mediante tecnología inmutable.
         </motion.p>
@@ -65,19 +66,20 @@ export default function VisionPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="glass-card p-8 space-y-4 hover:border-guiso-orange/30 transition-all"
           >
-            <div className="w-12 h-12 bg-guiso-orange/10 rounded-2xl flex items-center justify-center text-guiso-orange">
-              <p.icon size={24} />
-            </div>
-            <h3 className="text-xl font-display font-bold">{p.title}</h3>
-            <p className="text-gray-500 text-sm leading-relaxed">{p.desc}</p>
+            <Card variant="glass" padding="lg" className="space-y-4 hover:border-guiso-orange/30 transition-all h-full">
+              <div className="w-12 h-12 bg-guiso-orange/10 rounded-2xl flex items-center justify-center text-guiso-orange">
+                <p.icon size={24} />
+              </div>
+              <h3 className="text-xl font-display font-bold">{p.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{p.desc}</p>
+            </Card>
           </motion.div>
         ))}
       </section>
 
       {/* Impact Loop Explanation */}
-      <section className="glass-card p-8 md:p-16 bg-guiso-dark text-white overflow-hidden relative">
+      <Card variant="dark" padding="xl" rounded="3xl">
         <div className="absolute top-0 right-0 w-1/2 h-full bg-guiso-orange/10 blur-[120px]" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
           <div className="space-y-8">
@@ -111,35 +113,35 @@ export default function VisionPage() {
             </div>
           </div>
         </div>
-      </section>
+      </Card>
 
       {/* Roadmap */}
       <section className="space-y-8">
         <h2 className="text-3xl font-display font-bold text-center">Hoja de Ruta</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {roadmap.map((r, i) => (
-            <div key={r.phase} className="glass-card p-6 space-y-3">
+            <Card key={r.phase} variant="glass" padding="sm" className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-guiso-orange">{r.phase}</span>
-                <span className={`text-[8px] font-bold px-2 py-0.5 rounded-full uppercase ${r.status === 'Completado' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'}`}>
+                <Badge variant={r.status === 'Completado' ? 'success' : 'neutral'} size="sm">
                   {r.status}
-                </span>
+                </Badge>
               </div>
               <h4 className="font-bold text-sm">{r.desc}</h4>
-            </div>
+            </Card>
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="text-center p-12 bg-guiso-cream rounded-[3rem] space-y-6">
-        <h3 className="text-3xl font-display font-bold">¿Listo para ser parte del cambio?</h3>
-        <p className="text-gray-500 max-w-md mx-auto">Únete a nuestra comunidad de inversores y partners humanitarios.</p>
-        <button className="btn-primary px-10 py-4 text-lg flex items-center gap-2 mx-auto">
+      <Card variant="cream" padding="xl" rounded="3xl" className="text-center space-y-6">
+        <h3 className="text-2xl md:text-3xl font-display font-bold">¿Listo para ser parte del cambio?</h3>
+        <p className="text-gray-500 max-w-md mx-auto text-sm md:text-base">Únete a nuestra comunidad de inversores y partners humanitarios.</p>
+        <Button size="lg" className="w-full sm:w-auto flex items-center justify-center gap-2 mx-auto">
           Contactar con el Equipo
           <ArrowRight size={20} />
-        </button>
-      </section>
+        </Button>
+      </Card>
     </div>
   );
 }

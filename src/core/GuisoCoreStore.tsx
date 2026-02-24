@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { impactEngine, LevelThreshold } from '../system/impactEngine';
 import { useWallet } from './WalletProvider';
 
+import { web3Bridge } from '../web3/web3Provider';
+
 /**
  * Tipos de datos para el Core Store
  */
@@ -12,6 +14,7 @@ export interface Transaction {
   target: string;
   date: string;
   impactPoints: number;
+  txHash?: string;
 }
 
 export interface UserState {
@@ -48,7 +51,7 @@ interface GuisoCoreContextType {
   activeImpactMoment: { points: number; target: string } | null;
 
   // Actions
-  supportCause: (projectId: string, projectTitle: string, amount: number) => void;
+  supportCause: (projectId: string, projectTitle: string, amount: number) => Promise<void>;
   earnImpact: (points: number) => void;
   updateGlobalImpact: (impact: number, meals?: number) => void;
   dismissNotification: () => void;
@@ -109,11 +112,22 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Persistencia: Cargar estado inicial
   useEffect(() => {
     const savedStore = localStorage.getItem('guiso_core_store');
+    const demoStarted = localStorage.getItem('guiso_demo_started') === 'true';
+    
+    console.log("Demo state from localStorage:", demoStarted);
+
     if (savedStore) {
       const parsed = JSON.parse(savedStore);
-      setUser(parsed.user);
+      // Merge with INITIAL_USER to ensure new properties exist
+      setUser(prev => ({ 
+        ...INITIAL_USER, 
+        ...parsed.user, 
+        hasSeenWelcome: demoStarted || (parsed.user?.hasSeenWelcome ?? false)
+      }));
       setToken(parsed.token);
       setGlobal(parsed.global);
+    } else if (demoStarted) {
+      setUser(prev => ({ ...prev, hasSeenWelcome: true }));
     }
   }, []);
 
@@ -126,8 +140,16 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    * Acción: Apoyar una causa social
    * Conecta la reducción de balance con el aumento de impacto global y personal.
    */
-  const supportCause = useCallback((projectId: string, projectTitle: string, amount: number) => {
+  const supportCause = useCallback(async (projectId: string, projectTitle: string, amount: number) => {
     if (amount > token.gsoBalance) return;
+
+    const transactionAdapter = web3Bridge.getTransaction();
+    const result = await transactionAdapter.sendTransaction(amount, projectTitle);
+
+    if (!result.success) {
+      console.error('Transaction failed:', result.error);
+      return;
+    }
 
     const impactGenerated = impactEngine.calculateImpactPoints(amount);
     
@@ -139,6 +161,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       target: projectTitle,
       date: new Date().toISOString().split('T')[0],
       impactPoints: impactGenerated,
+      txHash: result.txHash
     };
 
     setToken(prev => ({
@@ -204,6 +227,8 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   const startDemo = useCallback(() => {
+    console.log("Starting Demo Experience...");
+    localStorage.setItem('guiso_demo_started', 'true');
     setUser(prev => ({
       ...prev,
       isDemoModeActive: true,
@@ -213,6 +238,8 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   const skipDemo = useCallback(() => {
+    console.log("Skipping Demo Experience...");
+    localStorage.setItem('guiso_demo_started', 'true');
     setUser(prev => ({
       ...prev,
       isDemoModeActive: false,
@@ -228,10 +255,12 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   const resetDemo = useCallback(() => {
+    console.log("Resetting Demo Experience...");
+    localStorage.removeItem('guiso_core_store');
+    localStorage.removeItem('guiso_demo_started');
     setUser(INITIAL_USER);
     setToken(INITIAL_TOKEN);
     setGlobal(INITIAL_GLOBAL_STATS_ADAPTED);
-    localStorage.removeItem('guiso_core_store');
     window.location.reload();
   }, []);
 

@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { web3Bridge } from '../web3/web3Provider';
 
 interface WalletContextType {
   address: string | null;
@@ -15,10 +16,13 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
 
+  const walletAdapter = web3Bridge.getWallet();
+
   // Persistence
   useEffect(() => {
     const savedAddress = localStorage.getItem('guiso_wallet_address');
     if (savedAddress) {
+      // In a real app, we might need to re-verify connection
       setAddress(savedAddress);
       setIsConnected(true);
     }
@@ -26,21 +30,24 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   const connect = useCallback(async () => {
     setIsConnecting(true);
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1200));
-    
-    const mockAddress = `0x${Math.random().toString(16).slice(2, 10)}...${Math.random().toString(16).slice(2, 6)}`;
-    setAddress(mockAddress);
-    setIsConnected(true);
-    setIsConnecting(false);
-    localStorage.setItem('guiso_wallet_address', mockAddress);
-  }, []);
+    try {
+      const newAddress = await walletAdapter.connect();
+      setAddress(newAddress);
+      setIsConnected(true);
+      localStorage.setItem('guiso_wallet_address', newAddress);
+    } catch (error) {
+      console.error('Failed to connect wallet:', error);
+    } finally {
+      setIsConnecting(false);
+    }
+  }, [walletAdapter]);
 
-  const disconnect = useCallback(() => {
+  const disconnect = useCallback(async () => {
+    await walletAdapter.disconnect();
     setAddress(null);
     setIsConnected(false);
     localStorage.removeItem('guiso_wallet_address');
-  }, []);
+  }, [walletAdapter]);
 
   return (
     <WalletContext.Provider value={{ address, isConnected, isConnecting, connect, disconnect }}>

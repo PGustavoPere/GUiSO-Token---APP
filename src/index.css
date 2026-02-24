@@ -20,11 +20,3 @@
     @apply font-display font-bold tracking-tight;
   }
 }
-
-.glass-card {
-  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-sm rounded-2xl;
-}
-
-.btn-primary {
-  @apply bg-guiso-orange hover:bg-guiso-terracotta text-white font-semibold py-2 px-6 rounded-full transition-all duration-200 shadow-md hover:shadow-lg active:scale-95;
-}

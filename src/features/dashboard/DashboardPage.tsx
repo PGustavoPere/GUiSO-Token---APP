@@ -7,6 +7,7 @@ import ImpactTransactionPanel from '../../components/ImpactTransactionPanel';
 import ImpactHistory from '../../components/ImpactHistory';
 import InvestorPanel from '../../components/InvestorPanel';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
+import { Card, Button } from '../../components/ui';
 
 export default function DashboardPage() {
   const { user } = useGuisoCore();
@@ -14,16 +15,16 @@ export default function DashboardPage() {
   return (
     <div className="space-y-12 pb-20">
       {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-[3rem] bg-guiso-dark p-8 md:p-16 text-white">
+      <section className="relative overflow-hidden rounded-[2rem] md:rounded-[3rem] bg-guiso-dark p-6 md:p-16 text-white">
         <div className="absolute top-0 right-0 w-1/2 h-full opacity-20 pointer-events-none">
           <div className="absolute top-[-20%] right-[-10%] w-[80%] h-[80%] rounded-full bg-guiso-orange blur-[120px]" />
         </div>
         
-        <div className="relative z-10 max-w-2xl space-y-8">
+        <div className="relative z-10 max-w-2xl space-y-6 md:space-y-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-bold uppercase tracking-widest"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[10px] md:text-xs font-bold uppercase tracking-widest"
           >
             <Zap size={14} className="text-guiso-orange" />
             Social Impact MVP v1.0
@@ -33,7 +34,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-5xl md:text-7xl font-display font-bold leading-[0.9] tracking-tight"
+            className="text-4xl md:text-7xl font-display font-bold leading-[1.1] md:leading-[0.9] tracking-tight"
           >
             Tus Acciones, <br />
             <span className="text-guiso-orange">Impacto Real.</span>
@@ -43,7 +44,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="text-lg text-white/60 leading-relaxed"
+            className="text-base md:text-lg text-white/60 leading-relaxed"
           >
             GUISO transforma cada transacción en una oportunidad para ayudar. 
             Conecta tu wallet y empieza a generar impacto humanitario hoy mismo.
@@ -53,13 +54,15 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="flex flex-wrap gap-4"
+            className="flex flex-col sm:flex-row flex-wrap gap-4"
           >
-            <Link to="/impacto" className="btn-primary px-8 py-4 text-lg flex items-center gap-2">
-              Explorar Causas
-              <ArrowRight size={20} />
+            <Link to="/impacto" className="w-full sm:w-auto">
+              <Button size="lg" className="w-full flex items-center justify-center gap-2">
+                Explorar Causas
+                <ArrowRight size={20} />
+              </Button>
             </Link>
-            <div className="flex items-center gap-3 px-6 py-4 rounded-full border border-white/20 text-sm font-bold">
+            <div className="flex items-center justify-center gap-3 px-6 py-4 rounded-full border border-white/20 text-sm font-bold w-full sm:w-auto">
               <ShieldCheck size={20} className="text-green-400" />
               Impacto Verificado
             </div>
@@ -93,7 +96,7 @@ export default function DashboardPage() {
           </section>
 
           {/* Education Card */}
-          <div className="glass-card p-6 bg-guiso-cream border-guiso-orange/20">
+          <Card variant="cream" padding="md" rounded="2xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-guiso-orange rounded-xl flex items-center justify-center text-white">
                 <Heart size={20} />
@@ -107,7 +110,7 @@ export default function DashboardPage() {
             <Link to="/comunidad" className="text-guiso-orange text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
               Saber más sobre niveles <ArrowRight size={14} />
             </Link>
-          </div>
+          </Card>
         </div>
       </div>
     </div>

@@ -5,6 +5,7 @@ import { useGuisoCore } from '../core/GuisoCoreStore';
 import { useWallet } from '../core/WalletProvider';
 import { impactEngine } from '../system/impactEngine';
 import ImpactStoryCard from './ImpactStoryCard';
+import { Card, Button, Badge } from './ui';
 
 const CAUSES = [
   { id: 'kitchen', title: 'Comedor Comunitario', icon: Utensils, description: 'Provee comidas calientes a familias en riesgo.' },
@@ -39,16 +40,17 @@ export default function ImpactTransactionPanel() {
         <motion.div 
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="glass-card p-8 text-center space-y-4 border-green-100 bg-green-50/30"
         >
-          <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto">
-            <Sparkles size={32} />
-          </div>
-          <h3 className="text-xl font-display font-bold text-guiso-dark">¡Impacto Generado!</h3>
-          <p className="text-sm text-gray-500">Has aportado {amount} GSO a {selectedCause.title}.</p>
-          <div className="inline-block px-4 py-2 bg-guiso-orange/10 text-guiso-orange rounded-full text-xs font-bold">
-            +{impactEngine.calculateImpactPoints(amount)} Impact Points
-          </div>
+          <Card variant="glass" padding="lg" className="text-center space-y-4 border-green-100 bg-green-50/30">
+            <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto">
+              <Sparkles size={32} />
+            </div>
+            <h3 className="text-xl font-display font-bold text-guiso-dark">¡Impacto Generado!</h3>
+            <p className="text-sm text-gray-500">Has aportado {amount} GSO a {selectedCause.title}.</p>
+            <Badge variant="success">
+              +{impactEngine.calculateImpactPoints(amount)} Impact Points
+            </Badge>
+          </Card>
         </motion.div>
         
         <ImpactStoryCard 
@@ -62,33 +64,33 @@ export default function ImpactTransactionPanel() {
 
   if (!user.isWalletConnected) {
     return (
-      <div className="glass-card p-12 text-center space-y-6 border-dashed border-2 border-guiso-orange/20">
-        <div className="w-20 h-20 bg-guiso-orange/10 rounded-full flex items-center justify-center mx-auto text-guiso-orange">
-          <Wallet size={40} />
+      <Card variant="glass" padding="xl" className="text-center space-y-6 border-dashed border-2 border-guiso-orange/20">
+        <div className="w-16 h-16 md:w-20 md:h-20 bg-guiso-orange/10 rounded-full flex items-center justify-center mx-auto text-guiso-orange">
+          <Wallet size={32} className="md:w-10 md:h-10" />
         </div>
         <div className="max-w-xs mx-auto">
           <h3 className="text-xl font-display font-bold mb-2">Conecta tu Wallet</h3>
           <p className="text-gray-500 text-sm">Para empezar a generar impacto social, necesitas conectar tu billetera digital.</p>
         </div>
-        <button 
+        <Button 
           onClick={connect}
           disabled={isConnecting}
-          className="btn-primary px-8 py-3"
+          className="w-full sm:w-auto px-8 py-3"
         >
           {isConnecting ? 'Conectando...' : 'Conectar Wallet'}
-        </button>
-      </div>
+        </Button>
+      </Card>
     );
   }
 
   return (
-    <div className="glass-card p-8 space-y-8">
-      <div className="flex items-center justify-between">
+    <Card variant="glass" padding="md" className="space-y-8">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h3 className="text-xl font-display font-bold">Generar Impacto</h3>
-        <div className="flex items-center gap-2 px-3 py-1 bg-guiso-orange/10 rounded-full text-guiso-orange text-xs font-bold">
+        <Badge variant="primary" className="w-full sm:w-auto justify-center gap-2">
           <Coins size={14} />
           <span>{token.gsoBalance.toLocaleString()} GSO Disponibles</span>
-        </div>
+        </Badge>
       </div>
 
       {/* Cause Selection */}
@@ -131,12 +133,12 @@ export default function ImpactTransactionPanel() {
           />
           <div className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xl">GSO</div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {[50, 100, 500, 1000].map(val => (
             <button 
               key={val}
               onClick={() => setAmount(val)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex-1 min-w-[60px] px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 amount === val ? 'bg-guiso-orange text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
               }`}
             >
@@ -146,18 +148,19 @@ export default function ImpactTransactionPanel() {
         </div>
       </div>
 
-      <button 
+      <Button 
         onClick={handleSupport}
         disabled={amount <= 0 || amount > token.gsoBalance}
-        className="w-full btn-primary py-5 text-lg flex items-center justify-center gap-3 shadow-xl shadow-guiso-orange/20 hover:shadow-2xl hover:-translate-y-1 transition-all disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none"
+        size="lg"
+        className="w-full flex items-center justify-center gap-3 shadow-xl shadow-guiso-orange/20 hover:shadow-2xl hover:-translate-y-1 transition-all disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none"
       >
-        <Sparkles size={24} />
+        <Sparkles size={20} className="md:w-6 md:h-6" />
         Confirmar Impacto Social
-      </button>
+      </Button>
       
       <p className="text-center text-[10px] text-gray-400">
         Al confirmar, tus tokens se enviarán directamente a la causa seleccionada y recibirás puntos de impacto instantáneos.
       </p>
-    </div>
+    </Card>
   );
 }

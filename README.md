@@ -78,6 +78,14 @@ The application includes a specialized **Investor Demo Mode** designed for partn
 - **Vision Section:** Deep dive into the philosophy, neutrality, and long-term roadmap.
 - **Demo Reset:** Instantly reset the experience to showcase the first-time user journey.
 
+## 🌉 Web3 Bridge Architecture
+GUISO uses a specialized bridge layer to separate humanitarian logic from blockchain complexity:
+- **Abstraction Layer:** All UI components interact with a `web3Bridge` rather than direct blockchain libraries.
+- **Adapters:** Modular `WalletAdapter` and `TransactionAdapter` allow switching between simulation and real networks.
+- **Simulation Mode:** Default state for development and demos, using mock transactions and local state.
+- **Web3 Mode:** Future state where adapters will connect to EVM-compatible providers (MetaMask, WalletConnect) and interact with GSO Smart Contracts.
+- **Impact Sync:** Transactions generate `txHash` placeholders that map directly to the humanitarian impact ledger.
+
 ## 🔮 Future Blockchain Integration
 - **Smart Contracts:** Transition from mock state to EVM-compatible smart contracts for GSO tokens.
 - **On-chain Proof of Impact:** Minting soulbound tokens (SBTs) or NFTs as verifiable credentials of social contribution.

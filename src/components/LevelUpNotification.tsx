@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, Sparkles, X } from 'lucide-react';
 import { useGuisoCore } from '../core/GuisoCoreStore';
+import { Button } from './ui';
 
 export default function LevelUpNotification() {
   const { levelUpNotification, dismissNotification } = useGuisoCore();
@@ -14,15 +15,15 @@ export default function LevelUpNotification() {
             initial={{ scale: 0.8, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.8, opacity: 0, y: 20 }}
-            className="bg-white rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl relative"
+            className="bg-white rounded-[2rem] md:rounded-[2.5rem] w-full max-w-sm overflow-hidden shadow-2xl relative"
           >
             {/* Decorative Background */}
             <div className="absolute inset-0 bg-gradient-to-b from-guiso-orange/10 to-transparent pointer-events-none" />
             
-            <div className="p-10 text-center relative z-10">
+            <div className="p-8 md:p-10 text-center relative z-10">
               <button 
                 onClick={dismissNotification}
-                className="absolute top-6 right-6 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="absolute top-4 right-4 md:top-6 md:right-6 p-2 hover:bg-gray-100 rounded-full transition-colors"
               >
                 <X size={20} className="text-gray-400" />
               </button>
@@ -46,12 +47,13 @@ export default function LevelUpNotification() {
               </p>
 
               <div className="flex flex-col gap-3">
-                <button
+                <Button
                   onClick={dismissNotification}
-                  className="w-full btn-primary py-4 text-lg"
+                  size="lg"
+                  className="w-full"
                 >
                   Continuar Impacto
-                </button>
+                </Button>
                 <div className="flex items-center justify-center gap-2 text-xs text-guiso-orange font-bold">
                   <Sparkles size={14} />
                   <span>Tu impacto es imparable</span>

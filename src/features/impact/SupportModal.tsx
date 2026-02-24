@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Heart, Coins, Sparkles } from 'lucide-react';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { impactEngine } from '../../system/impactEngine';
+import { Button } from '../../components/ui';
 
 interface SupportModalProps {
   project: { id: string; title: string };
@@ -24,21 +25,21 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <motion.div 
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
+        className="bg-white rounded-[2rem] md:rounded-3xl w-full max-w-md overflow-hidden shadow-2xl"
       >
         <AnimatePresence mode="wait">
           {!isSuccess ? (
             <motion.div 
               key="form"
               exit={{ y: -20, opacity: 0 }}
-              className="p-8"
+              className="p-6 md:p-8"
             >
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-display font-bold">Apoyar Causa</h3>
+                <h3 className="text-xl md:text-2xl font-display font-bold">Apoyar Causa</h3>
                 <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                   <X size={20} />
                 </button>
@@ -50,7 +51,7 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
               </div>
 
               <div className="space-y-4 mb-8">
-                <div className="flex justify-between text-sm font-bold">
+                <div className="flex flex-col sm:flex-row justify-between text-xs md:text-sm font-bold gap-1">
                   <span>Cantidad GSO</span>
                   <span className={amount > token.gsoBalance ? "text-red-500" : "text-guiso-orange"}>
                     Balance: {token.gsoBalance.toLocaleString()} GSO
@@ -62,7 +63,7 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
                     type="number" 
                     value={amount}
                     onChange={(e) => setAmount(Number(e.target.value))}
-                    className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-2xl font-display font-bold focus:outline-none focus:ring-2 focus:ring-guiso-orange/20"
+                    className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-xl md:text-2xl font-display font-bold focus:outline-none focus:ring-2 focus:ring-guiso-orange/20"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">GSO</div>
                 </div>
@@ -80,32 +81,33 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
                 </div>
               </div>
 
-              <button 
+              <Button 
                 onClick={handleSupport}
                 disabled={amount <= 0 || amount > token.gsoBalance}
-                className="w-full btn-primary py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                size="lg"
+                className="w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Heart size={20} />
                 Confirmar Apoyo
-              </button>
+              </Button>
             </motion.div>
           ) : (
             <motion.div 
               key="success"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="p-12 text-center space-y-6"
+              className="p-8 md:p-12 text-center space-y-6"
             >
-              <div className="w-24 h-24 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto">
-                <Sparkles size={48} className="animate-pulse" />
+              <div className="w-20 h-20 md:w-24 md:h-24 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto">
+                <Sparkles size={40} className="animate-pulse md:w-12 md:h-12" />
               </div>
               <div>
-                <h3 className="text-3xl font-display font-bold text-guiso-dark mb-2">¡Impacto Generado!</h3>
-                <p className="text-guiso-orange font-bold text-sm mb-2 italic">"{impactEngine.getRandomMotivation()}"</p>
-                <p className="text-gray-500">Has aportado {amount} GSO a esta causa. Tus puntos de impacto han sido actualizados.</p>
+                <h3 className="text-2xl md:text-3xl font-display font-bold text-guiso-dark mb-2">¡Impacto Generado!</h3>
+                <p className="text-guiso-orange font-bold text-xs md:text-sm mb-2 italic">"{impactEngine.getRandomMotivation()}"</p>
+                <p className="text-gray-500 text-sm md:text-base">Has aportado {amount} GSO a esta causa. Tus puntos de impacto han sido actualizados.</p>
               </div>
               <div className="flex justify-center gap-2">
-                <div className="px-4 py-2 bg-guiso-orange/10 text-guiso-orange rounded-full text-sm font-bold">
+                <div className="px-4 py-2 bg-guiso-orange/10 text-guiso-orange rounded-full text-xs md:text-sm font-bold">
                   +{impactEngine.calculateImpactPoints(amount)} Impact Points
                 </div>
               </div>

@@ -3,6 +3,7 @@ import { api, Project } from '../../services/api';
 import { Heart, CheckCircle2, Clock, MapPin, Share2, Sparkles } from 'lucide-react';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import SupportModal from './SupportModal';
+import { Card, Button, Badge } from '../../components/ui';
 
 export default function ImpactPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -30,13 +31,13 @@ export default function ImpactPage() {
 
   return (
     <div className="space-y-10">
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+      <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-4xl mb-2">Impacto Social</h1>
-          <p className="text-gray-500">Proyectos financiados y apoyados por la comunidad GUISO.</p>
+          <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">Impacto Social</h1>
+          <p className="text-gray-500 text-sm md:text-base">Proyectos financiados y apoyados por la comunidad GUISO.</p>
         </div>
-        <div className="flex gap-2">
-          <div className="px-4 py-2 bg-white rounded-full text-sm font-bold border border-gray-100 shadow-sm flex items-center gap-2">
+        <div className="flex gap-2 w-full sm:w-auto">
+          <div className="px-4 py-2 bg-white rounded-full text-xs md:text-sm font-bold border border-gray-100 shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto">
             <Sparkles size={16} className="text-guiso-orange" />
             Tu Impacto: <span className="text-guiso-orange">{user.impactScore} IP</span>
           </div>
@@ -45,7 +46,7 @@ export default function ImpactPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {projects.map((project) => (
-          <div key={project.id} className="glass-card overflow-hidden group">
+          <Card key={project.id} variant="glass" padding="none" className="group">
             <div className="relative h-56 overflow-hidden">
               <img 
                 src={project.image} 
@@ -54,55 +55,51 @@ export default function ImpactPage() {
                 referrerPolicy="no-referrer"
               />
               <div className="absolute top-4 left-4">
-                <span className={cn(
-                  "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg",
-                  project.status === 'active' ? "bg-guiso-orange text-white" : "bg-green-500 text-white"
-                )}>
+                <Badge variant={project.status === 'active' ? 'primary' : 'success'} className="shadow-lg">
                   {project.status === 'active' ? 'En Curso' : 'Completado'}
-                </span>
+                </Badge>
               </div>
             </div>
 
-            <div className="p-8">
-              <div className="flex items-center gap-2 text-xs text-guiso-orange font-bold uppercase tracking-widest mb-3">
+            <div className="p-6 md:p-8">
+              <div className="flex items-center gap-2 text-[10px] md:text-xs text-guiso-orange font-bold uppercase tracking-widest mb-3">
                 <MapPin size={14} />
                 {project.category}
               </div>
-              <h3 className="text-2xl font-display font-bold mb-3">{project.title}</h3>
-              <p className="text-gray-500 text-sm mb-6 line-clamp-2">{project.description}</p>
+              <h3 className="text-xl md:text-2xl font-display font-bold mb-3">{project.title}</h3>
+              <p className="text-gray-500 text-xs md:text-sm mb-6 line-clamp-2">{project.description}</p>
 
               <div className="space-y-4">
                 <div className="flex justify-between items-end mb-1">
                   <span className="text-sm font-bold">{project.raised.toLocaleString()} GSO</span>
-                  <span className="text-xs text-gray-400">Objetivo: {project.goal.toLocaleString()} GSO</span>
+                  <span className="text-[10px] md:text-xs text-gray-400">Objetivo: {project.goal.toLocaleString()} GSO</span>
                 </div>
-                <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
+                <div className="w-full bg-gray-100 h-2 md:h-3 rounded-full overflow-hidden">
                   <div 
                     className={cn("h-full transition-all duration-1000", project.status === 'active' ? "bg-guiso-orange" : "bg-green-500")}
                     style={{ width: `${(project.raised / project.goal) * 100}%` }} 
                   />
                 </div>
-                <div className="flex justify-between items-center pt-4 border-t border-gray-50">
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-4 border-t border-gray-50 gap-4">
+                  <div className="flex items-center gap-2 text-xs md:text-sm text-gray-500">
                     {project.status === 'active' ? <Clock size={16} /> : <CheckCircle2 size={16} className="text-green-500" />}
                     <span>{project.status === 'active' ? 'Quedan 12 días' : 'Finalizado con éxito'}</span>
                   </div>
-                  <button 
+                  <Button 
                     onClick={() => setSelectedProject(project)}
                     disabled={project.status !== 'active' || !user.isWalletConnected}
+                    variant={project.status === 'active' && user.isWalletConnected ? 'primary' : 'ghost'}
                     className={cn(
-                      "px-6 py-2 rounded-full text-sm font-bold transition-all",
-                      project.status === 'active' && user.isWalletConnected 
-                        ? "bg-guiso-orange text-white hover:shadow-lg active:scale-95" 
-                        : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      "w-full sm:w-auto",
+                      (!project.status || !user.isWalletConnected) && "bg-gray-100 text-gray-400 cursor-not-allowed hover:bg-gray-100 hover:text-gray-400"
                     )}
                   >
                     {!user.isWalletConnected ? 'Conecta Wallet' : project.status === 'active' ? 'Apoyar Causa' : 'Ver Evidencia'}
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
-          </div>
+          </Card>
         ))}
       </div>
 
@@ -114,21 +111,21 @@ export default function ImpactPage() {
       )}
 
       {/* Transparency Section */}
-      <div className="glass-card p-10 bg-guiso-terracotta text-white relative overflow-hidden">
+      <Card variant="terracotta" padding="xl" rounded="3xl">
         <div className="relative z-10 max-w-2xl">
-          <h2 className="text-3xl font-display font-bold mb-4">Transparencia Radical</h2>
-          <p className="text-white/80 mb-8">Cada token destinado a ayuda social es rastreable en la blockchain. No solo decimos que ayudamos, lo demostramos con datos inmutables.</p>
-          <div className="flex flex-wrap gap-4">
-            <button className="px-8 py-3 bg-white text-guiso-terracotta font-bold rounded-xl hover:bg-guiso-cream transition-colors">
+          <h2 className="text-2xl md:text-3xl font-display font-bold mb-4">Transparencia Radical</h2>
+          <p className="text-white/80 text-sm md:text-base mb-6 md:mb-8">Cada token destinado a ayuda social es rastreable en la blockchain. No solo decimos que ayudamos, lo demostramos con datos inmutables.</p>
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3 md:gap-4">
+            <Button variant="secondary" className="w-full sm:w-auto bg-white text-guiso-terracotta hover:bg-guiso-cream">
               Explorar Ledger de Impacto
-            </button>
-            <button className="px-8 py-3 bg-guiso-terracotta border border-white/30 text-white font-bold rounded-xl hover:bg-white/10 transition-colors">
+            </Button>
+            <Button variant="outline" className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 hover:text-white">
               Cómo funciona el DAO
-            </button>
+            </Button>
           </div>
         </div>
-        <Heart size={300} className="absolute -right-20 -bottom-20 text-white/5 rotate-12" />
-      </div>
+        <Heart size={200} className="absolute -right-10 -bottom-10 md:-right-20 md:-bottom-20 text-white/5 rotate-12 md:w-[300px] md:h-[300px]" />
+      </Card>
     </div>
   );
 }
