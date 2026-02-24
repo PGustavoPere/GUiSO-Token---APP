@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Heart, Coins, Sparkles } from 'lucide-react';
-import { useGuiso } from '../../context/GuisoContext';
+import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { impactEngine } from '../../system/impactEngine';
 
 interface SupportModalProps {
@@ -10,13 +10,13 @@ interface SupportModalProps {
 }
 
 export default function SupportModal({ project, onClose }: SupportModalProps) {
-  const { balance, supportProject } = useGuiso();
+  const { token, supportCause } = useGuisoCore();
   const [amount, setAmount] = useState(100);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const handleSupport = () => {
-    if (amount > balance) return;
-    supportProject(project.id, project.title, amount);
+    if (amount > token.gsoBalance) return;
+    supportCause(project.id, project.title, amount);
     setIsSuccess(true);
     setTimeout(() => {
       onClose();
@@ -52,8 +52,8 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-sm font-bold">
                   <span>Cantidad GSO</span>
-                  <span className={amount > balance ? "text-red-500" : "text-guiso-orange"}>
-                    Balance: {balance.toLocaleString()} GSO
+                  <span className={amount > token.gsoBalance ? "text-red-500" : "text-guiso-orange"}>
+                    Balance: {token.gsoBalance.toLocaleString()} GSO
                   </span>
                 </div>
                 
@@ -82,7 +82,7 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
 
               <button 
                 onClick={handleSupport}
-                disabled={amount <= 0 || amount > balance}
+                disabled={amount <= 0 || amount > token.gsoBalance}
                 className="w-full btn-primary py-4 text-lg flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Heart size={20} />

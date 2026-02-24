@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, useSpring, useTransform, animate } from 'motion/react';
 import { Heart, Users, Utensils, Sparkles } from 'lucide-react';
-import { useGuiso } from '../context/GuisoContext';
+import { useGuisoCore } from '../core/GuisoCoreStore';
 
 interface CounterProps {
   value: number;
@@ -25,33 +25,33 @@ const AnimatedNumber = ({ value }: { value: number }) => {
 };
 
 export default function ImpactCounter() {
-  const { globalStats } = useGuiso();
+  const { global } = useGuisoCore();
 
   const stats = [
     { 
       label: 'Impacto Global', 
-      value: globalStats.totalImpactPoints, 
+      value: global.totalImpact, 
       icon: Sparkles, 
       suffix: ' IP',
       color: 'text-guiso-orange'
     },
     { 
       label: 'Comidas Provistas', 
-      value: globalStats.estimatedMealsSupported, 
+      value: Math.floor(global.totalImpact / 5), // Symbolic derived value
       icon: Utensils, 
       suffix: '',
       color: 'text-guiso-terracotta'
     },
     { 
       label: 'Causas Apoyadas', 
-      value: globalStats.totalSupportedCauses, 
+      value: global.supportedCauses, 
       icon: Heart, 
       suffix: '',
       color: 'text-red-500'
     },
     { 
       label: 'Miembros Activos', 
-      value: globalStats.activeCommunityMembers, 
+      value: global.communityMembers, 
       icon: Users, 
       suffix: '',
       color: 'text-blue-500'

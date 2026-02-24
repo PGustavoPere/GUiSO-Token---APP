@@ -1,20 +1,24 @@
 import React, { useState } from 'react';
 import { Wallet, Award, History, ExternalLink, ShieldCheck, LogOut, Heart, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useGuiso } from '../../context/GuisoContext';
+import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { impactEngine } from '../../system/impactEngine';
 
 export default function ProfilePage() {
   const { 
-    balance, 
-    impactScore, 
-    communityLevel, 
-    history, 
-    isWalletConnected, 
+    user,
+    token,
     connectWallet,
-    totalSupportedCauses 
-  } = useGuiso();
+    global
+  } = useGuisoCore();
   const [isConnecting, setIsConnecting] = useState(false);
+
+  const impactScore = user.impactScore;
+  const communityLevel = user.communityLevel;
+  const isWalletConnected = user.isWalletConnected;
+  const balance = token.gsoBalance;
+  const history = token.transactions;
+  const totalSupportedCauses = global.supportedCauses;
 
   const nextThreshold = impactEngine.getNextThreshold(impactScore);
   const currentThreshold = impactEngine.calculateLevel(impactScore);
@@ -125,7 +129,7 @@ export default function ProfilePage() {
                         <Heart size={18} />
                       </div>
                       <div>
-                        <p className="font-bold text-sm">Apoyo a {item.projectTitle}</p>
+                        <p className="font-bold text-sm">Apoyo a {item.target}</p>
                         <p className="text-xs text-gray-400">{item.date} • {item.amount} GSO aportados</p>
                       </div>
                     </div>

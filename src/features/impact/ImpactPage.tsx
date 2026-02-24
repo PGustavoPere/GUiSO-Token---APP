@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { api, Project } from '../../services/api';
 import { Heart, CheckCircle2, Clock, MapPin, Share2, Sparkles } from 'lucide-react';
-import { useGuiso } from '../../context/GuisoContext';
+import { useGuisoCore } from '../../core/GuisoCoreStore';
 import SupportModal from './SupportModal';
 
 export default function ImpactPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const { isWalletConnected, impactScore } = useGuiso();
+  const { user } = useGuisoCore();
 
   useEffect(() => {
     api.getProjects().then(data => {
@@ -38,7 +38,7 @@ export default function ImpactPage() {
         <div className="flex gap-2">
           <div className="px-4 py-2 bg-white rounded-full text-sm font-bold border border-gray-100 shadow-sm flex items-center gap-2">
             <Sparkles size={16} className="text-guiso-orange" />
-            Tu Impacto: <span className="text-guiso-orange">{impactScore} IP</span>
+            Tu Impacto: <span className="text-guiso-orange">{user.impactScore} IP</span>
           </div>
         </div>
       </header>
@@ -89,15 +89,15 @@ export default function ImpactPage() {
                   </div>
                   <button 
                     onClick={() => setSelectedProject(project)}
-                    disabled={project.status !== 'active' || !isWalletConnected}
+                    disabled={project.status !== 'active' || !user.isWalletConnected}
                     className={cn(
                       "px-6 py-2 rounded-full text-sm font-bold transition-all",
-                      project.status === 'active' && isWalletConnected 
+                      project.status === 'active' && user.isWalletConnected 
                         ? "bg-guiso-orange text-white hover:shadow-lg active:scale-95" 
                         : "bg-gray-100 text-gray-400 cursor-not-allowed"
                     )}
                   >
-                    {!isWalletConnected ? 'Conecta Wallet' : project.status === 'active' ? 'Apoyar Causa' : 'Ver Evidencia'}
+                    {!user.isWalletConnected ? 'Conecta Wallet' : project.status === 'active' ? 'Apoyar Causa' : 'Ver Evidencia'}
                   </button>
                 </div>
               </div>

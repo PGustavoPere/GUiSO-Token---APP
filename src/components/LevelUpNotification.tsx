@@ -1,10 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Trophy, Sparkles, X } from 'lucide-react';
-import { useGuiso } from '../context/GuisoContext';
+import { useGuisoCore } from '../core/GuisoCoreStore';
 
 export default function LevelUpNotification() {
-  const { levelUpNotification, dismissNotification } = useGuiso();
+  const { levelUpNotification, dismissNotification } = useGuisoCore();
 
   return (
     <AnimatePresence>

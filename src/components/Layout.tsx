@@ -4,7 +4,7 @@ import { LayoutDashboard, Heart, Users, User, Settings, Menu, X } from 'lucide-r
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { useGuiso } from '../context/GuisoContext';
+import { useGuisoCore } from '../core/GuisoCoreStore';
 import LevelUpNotification from './LevelUpNotification';
 
 function cn(...inputs: ClassValue[]) {
@@ -13,7 +13,7 @@ function cn(...inputs: ClassValue[]) {
 
 export default function Layout() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { balance, isWalletConnected } = useGuiso();
+  const { token, user } = useGuisoCore();
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -31,8 +31,8 @@ export default function Layout() {
           <span className="font-display font-bold text-lg">GUISO</span>
         </div>
         <div className="flex items-center gap-4">
-          {isWalletConnected && (
-            <span className="text-xs font-bold text-guiso-orange">{balance.toLocaleString()} GSO</span>
+          {user.isWalletConnected && (
+            <span className="text-xs font-bold text-guiso-orange">{token.gsoBalance.toLocaleString()} GSO</span>
           )}
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -73,9 +73,9 @@ export default function Layout() {
             <p className="text-xs text-gray-500 mb-2">Tu Balance</p>
             <div className="flex justify-between items-end">
               <span className="font-display font-bold text-lg">
-                {isWalletConnected ? `${balance.toLocaleString()} GSO` : '---'}
+                {user.isWalletConnected ? `${token.gsoBalance.toLocaleString()} GSO` : '---'}
               </span>
-              {isWalletConnected && (
+              {user.isWalletConnected && (
                 <span className="text-[10px] text-green-500 font-bold uppercase">Activo</span>
               )}
             </div>
