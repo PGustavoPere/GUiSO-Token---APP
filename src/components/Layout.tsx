@@ -6,6 +6,7 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useGuisoCore } from '../core/GuisoCoreStore';
 import LevelUpNotification from './LevelUpNotification';
+import ImpactMoment from './ImpactMoment';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -119,6 +120,7 @@ export default function Layout() {
 
       {/* Global Notifications */}
       <LevelUpNotification />
+      <ImpactMoment />
     </div>
   );
 }

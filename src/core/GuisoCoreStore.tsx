@@ -18,6 +18,7 @@ export interface UserState {
   impactScore: number;
   communityLevel: string;
   isWalletConnected: boolean;
+  hasExperiencedImpactMoment: boolean;
 }
 
 export interface TokenState {
@@ -39,6 +40,7 @@ interface GuisoCoreContextType {
   
   // UI State
   levelUpNotification: LevelThreshold | null;
+  activeImpactMoment: { points: number; target: string } | null;
 
   // Actions
   connectWallet: () => void;
@@ -46,6 +48,7 @@ interface GuisoCoreContextType {
   earnImpact: (points: number) => void;
   updateGlobalImpact: (impact: number, meals?: number) => void;
   dismissNotification: () => void;
+  dismissImpactMoment: () => void;
 }
 
 const GuisoCoreContext = createContext<GuisoCoreContextType | undefined>(undefined);
@@ -58,6 +61,7 @@ const INITIAL_USER: UserState = {
   impactScore: 0,
   communityLevel: impactEngine.calculateLevel(0).level,
   isWalletConnected: false,
+  hasExperiencedImpactMoment: false,
 };
 
 const INITIAL_TOKEN: TokenState = {
@@ -76,6 +80,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [token, setToken] = useState<TokenState>(INITIAL_TOKEN);
   const [global, setGlobal] = useState<GlobalImpactState>(INITIAL_GLOBAL_STATS_ADAPTED);
   const [levelUpNotification, setLevelUpNotification] = useState<LevelThreshold | null>(null);
+  const [activeImpactMoment, setActiveImpactMoment] = useState<{ points: number; target: string } | null>(null);
 
   // Persistencia: Cargar estado inicial
   useEffect(() => {
@@ -133,10 +138,16 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setLevelUpNotification(nextLevel);
     }
 
+    // Trigger Impact Moment if first time
+    if (!user.hasExperiencedImpactMoment) {
+      setActiveImpactMoment({ points: impactGenerated, target: projectTitle });
+    }
+
     setUser(prev => ({
       ...prev,
       impactScore: newImpactScore,
       communityLevel: nextLevel.level,
+      hasExperiencedImpactMoment: true,
     }));
 
     // 3. Actualizar Global Impact
@@ -144,7 +155,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       ...prev,
       totalImpact: prev.totalImpact + impactGenerated,
     }));
-  }, [token.gsoBalance, user.impactScore]);
+  }, [token.gsoBalance, user.impactScore, user.hasExperiencedImpactMoment]);
 
   /**
    * Acción: Ganar impacto (por otras acciones como votar)
@@ -171,17 +182,23 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setLevelUpNotification(null);
   }, []);
 
+  const dismissImpactMoment = useCallback(() => {
+    setActiveImpactMoment(null);
+  }, []);
+
   return (
     <GuisoCoreContext.Provider value={{
       user,
       token,
       global,
       levelUpNotification,
+      activeImpactMoment,
       connectWallet,
       supportCause,
       earnImpact,
       updateGlobalImpact,
-      dismissNotification
+      dismissNotification,
+      dismissImpactMoment
     }}>
       {children}
     </GuisoCoreContext.Provider>
