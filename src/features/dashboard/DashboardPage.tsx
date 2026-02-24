@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api, TokenStats } from '../../services/api';
 import { TrendingUp, Users, Coins, BarChart3, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import ImpactCounter from '../../components/ImpactCounter';
 
 const mockChartData = [
   { name: 'Lun', price: 0.038 },
@@ -27,7 +28,7 @@ export default function DashboardPage() {
   if (loading || !stats) {
     return (
       <div className="space-y-8 animate-pulse">
-        <div className="h-10 bg-gray-200 rounded w-1/4" />
+        <div className="h-64 bg-gray-200 rounded-3xl" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[1, 2, 3].map(i => <div key={i} className="h-32 bg-gray-200 rounded-2xl" />)}
         </div>
@@ -44,10 +45,13 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-10">
-      <header>
+      <header className="hidden md:block">
         <h1 className="text-4xl mb-2">Dashboard del Token</h1>
         <p className="text-gray-500">Métricas de utilidad y salud del ecosistema GUISO.</p>
       </header>
+
+      {/* Global Impact Banner */}
+      <ImpactCounter />
 
       {/* Stat Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
