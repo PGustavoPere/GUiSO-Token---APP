@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { impactEngine, LevelThreshold } from '../system/impactEngine';
 
 interface Action {
   id: string;
@@ -24,6 +25,8 @@ interface GuisoContextType {
   history: Action[];
   globalStats: GlobalStats;
   isWalletConnected: boolean;
+  levelUpNotification: LevelThreshold | null;
+  dismissNotification: () => void;
   connectWallet: () => void;
   supportProject: (projectId: string, projectTitle: string, amount: number) => void;
 }
@@ -43,6 +46,7 @@ export const GuisoProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [impactScore, setImpactScore] = useState(0);
   const [history, setHistory] = useState<Action[]>([]);
   const [globalStats, setGlobalStats] = useState<GlobalStats>(INITIAL_GLOBAL_STATS);
+  const [levelUpNotification, setLevelUpNotification] = useState<LevelThreshold | null>(null);
 
   // Load data from localStorage
   useEffect(() => {
@@ -74,11 +78,15 @@ export const GuisoProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setIsWalletConnected(true);
   };
 
+  const dismissNotification = () => {
+    setLevelUpNotification(null);
+  };
+
   const supportProject = (projectId: string, projectTitle: string, amount: number) => {
     if (amount > balance) return;
 
-    const impactGenerated = Math.floor(amount * 0.1);
-    const mealsGenerated = Math.floor(amount / 50); // Symbolic: 50 GSO = 1 meal
+    const impactGenerated = impactEngine.calculateImpactPoints(amount);
+    const mealsGenerated = impactEngine.calculateMeals(amount);
     
     const newAction: Action = {
       id: Math.random().toString(36).substr(2, 9),
@@ -89,8 +97,18 @@ export const GuisoProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       date: new Date().toISOString().split('T')[0],
     };
 
+    const newImpactScore = impactScore + impactGenerated;
+    
+    // Check for level up
+    const currentLevel = impactEngine.calculateLevel(impactScore);
+    const nextLevel = impactEngine.calculateLevel(newImpactScore);
+
+    if (currentLevel.level !== nextLevel.level) {
+      setLevelUpNotification(nextLevel);
+    }
+
     setBalance(prev => prev - amount);
-    setImpactScore(prev => prev + impactGenerated);
+    setImpactScore(newImpactScore);
     setHistory(prev => [newAction, ...prev]);
 
     // Update Global Stats
@@ -98,29 +116,22 @@ export const GuisoProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ...prev,
       totalImpactPoints: prev.totalImpactPoints + impactGenerated,
       estimatedMealsSupported: prev.estimatedMealsSupported + mealsGenerated,
-      // If it's a new cause for the user, we could increment totalSupportedCauses globally 
-      // but for simulation we'll just keep it as a growing number
     }));
   };
 
   const totalSupportedCauses = new Set(history.map(a => a.projectId)).size;
-
-  const getCommunityLevel = () => {
-    if (impactScore > 500) return 'Guerrero de la Comunidad';
-    if (impactScore > 200) return 'Colaborador Senior';
-    if (impactScore > 50) return 'Iniciador Social';
-    return 'Nuevo Miembro';
-  };
 
   return (
     <GuisoContext.Provider value={{
       balance,
       impactScore,
       totalSupportedCauses,
-      communityLevel: getCommunityLevel(),
+      communityLevel: impactEngine.calculateLevel(impactScore).level,
       history,
       globalStats,
       isWalletConnected,
+      levelUpNotification,
+      dismissNotification,
       connectWallet,
       supportProject
     }}>

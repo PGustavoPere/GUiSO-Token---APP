@@ -1,0 +1,70 @@
+/**
+ * Impact Engine - GUISO SocialFi System
+ * Handles level calculations, impact logic, and motivational feedback.
+ */
+
+export enum CommunityLevel {
+  LEVEL_1 = "Colaborador",
+  LEVEL_2 = "Impulsor",
+  LEVEL_3 = "Agente GUISO",
+  LEVEL_4 = "Constructor Social",
+}
+
+export interface LevelThreshold {
+  level: CommunityLevel;
+  minPoints: number;
+  message: string;
+}
+
+export const LEVEL_THRESHOLDS: LevelThreshold[] = [
+  { level: CommunityLevel.LEVEL_1, minPoints: 0, message: "¡Bienvenido a la revolución social!" },
+  { level: CommunityLevel.LEVEL_2, minPoints: 100, message: "Tu impacto está creciendo. ¡Sigue así!" },
+  { level: CommunityLevel.LEVEL_3, minPoints: 500, message: "Eres un pilar fundamental para GUISO." },
+  { level: CommunityLevel.LEVEL_4, minPoints: 1500, message: "Leyenda comunitaria. Tu impacto es incalculable." },
+];
+
+export const MOTIVATIONAL_MESSAGES = [
+  "¡Cada grano de ayuda cuenta!",
+  "Tu acción de hoy es el cambio de mañana.",
+  "Gracias por ser parte del cambio real.",
+  "Impacto verificado. Corazón contento.",
+  "La comunidad GUISO brilla gracias a ti.",
+];
+
+export const impactEngine = {
+  /**
+   * Calculates the current level based on impact points.
+   */
+  calculateLevel(points: number): LevelThreshold {
+    const reversedThresholds = [...LEVEL_THRESHOLDS].reverse();
+    return reversedThresholds.find(t => points >= t.minPoints) || LEVEL_THRESHOLDS[0];
+  },
+
+  /**
+   * Gets the next level threshold.
+   */
+  getNextThreshold(points: number): LevelThreshold | null {
+    return LEVEL_THRESHOLDS.find(t => t.minPoints > points) || null;
+  },
+
+  /**
+   * Returns a random motivational message.
+   */
+  getRandomMotivation(): string {
+    return MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)];
+  },
+
+  /**
+   * Calculates impact points from a GSO amount (10%).
+   */
+  calculateImpactPoints(amount: number): number {
+    return Math.floor(amount * 0.1);
+  },
+
+  /**
+   * Calculates symbolic meals from a GSO amount (50 GSO = 1 meal).
+   */
+  calculateMeals(amount: number): number {
+    return Math.floor(amount / 50);
+  }
+};

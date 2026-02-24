@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Heart, Coins, Sparkles } from 'lucide-react';
 import { useGuiso } from '../../context/GuisoContext';
+import { impactEngine } from '../../system/impactEngine';
 
 interface SupportModalProps {
   project: { id: string; title: string };
@@ -100,11 +101,12 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
               </div>
               <div>
                 <h3 className="text-3xl font-display font-bold text-guiso-dark mb-2">¡Impacto Generado!</h3>
+                <p className="text-guiso-orange font-bold text-sm mb-2 italic">"{impactEngine.getRandomMotivation()}"</p>
                 <p className="text-gray-500">Has aportado {amount} GSO a esta causa. Tus puntos de impacto han sido actualizados.</p>
               </div>
               <div className="flex justify-center gap-2">
                 <div className="px-4 py-2 bg-guiso-orange/10 text-guiso-orange rounded-full text-sm font-bold">
-                  +{Math.floor(amount * 0.1)} Impact Points
+                  +{impactEngine.calculateImpactPoints(amount)} Impact Points
                 </div>
               </div>
             </motion.div>

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useGuiso } from '../context/GuisoContext';
+import LevelUpNotification from './LevelUpNotification';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -115,6 +116,9 @@ export default function Layout() {
       <main className="flex-1 p-4 md:p-8 lg:p-12 max-w-7xl mx-auto w-full">
         <Outlet />
       </main>
+
+      {/* Global Notifications */}
+      <LevelUpNotification />
     </div>
   );
 }

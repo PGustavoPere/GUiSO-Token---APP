@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Wallet, Award, History, ExternalLink, ShieldCheck, LogOut, Heart, Sparkles } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useGuiso } from '../../context/GuisoContext';
+import { impactEngine } from '../../system/impactEngine';
 
 export default function ProfilePage() {
   const { 
@@ -14,6 +15,13 @@ export default function ProfilePage() {
     totalSupportedCauses 
   } = useGuiso();
   const [isConnecting, setIsConnecting] = useState(false);
+
+  const nextThreshold = impactEngine.getNextThreshold(impactScore);
+  const currentThreshold = impactEngine.calculateLevel(impactScore);
+  
+  const progress = nextThreshold 
+    ? ((impactScore - currentThreshold.minPoints) / (nextThreshold.minPoints - currentThreshold.minPoints)) * 100 
+    : 100;
 
   const handleConnect = () => {
     setIsConnecting(true);
@@ -143,15 +151,19 @@ export default function ProfilePage() {
             <div className="space-y-4">
               <div className="flex justify-between text-xs font-bold mb-1">
                 <span>Nivel Actual</span>
-                <span className="text-guiso-orange">{impactScore} / 500 IP</span>
+                <span className="text-guiso-orange">
+                  {impactScore} / {nextThreshold ? nextThreshold.minPoints : 'MAX'} IP
+                </span>
               </div>
               <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
                 <div 
                   className="bg-guiso-orange h-full transition-all duration-500" 
-                  style={{ width: `${Math.min((impactScore / 500) * 100, 100)}%` }} 
+                  style={{ width: `${progress}%` }} 
                 />
               </div>
-              <p className="text-[10px] text-gray-400 text-center italic">Próximo rango: Guerrero de la Comunidad</p>
+              <p className="text-[10px] text-gray-400 text-center italic">
+                {nextThreshold ? `Próximo rango: ${nextThreshold.level}` : '¡Has alcanzado el nivel máximo!'}
+              </p>
             </div>
           </div>
         </div>
