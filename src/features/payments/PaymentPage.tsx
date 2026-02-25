@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Store, Wallet, CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-react';
+import { Store, Wallet, CheckCircle2, XCircle, Clock, AlertCircle, CreditCard } from 'lucide-react';
 import { usePaymentStore } from './PaymentStore';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { useWallet } from '../../core/WalletProvider';
 import { web3Bridge } from '../../web3/web3Provider';
 import { Card, Button } from '../../components/ui';
 import TransactionStatusBadge, { TransactionStatus } from '../../components/TransactionStatusBadge';
+import FiatPaymentModal from '../fiatBridge/FiatPaymentModal';
 
 export default function PaymentPage() {
   const { paymentId } = useParams<{ paymentId: string }>();
@@ -18,6 +19,7 @@ export default function PaymentPage() {
   
   const [payment, setPayment] = useState(paymentId ? loadPaymentIntent(paymentId) : null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isFiatModalOpen, setIsFiatModalOpen] = useState(false);
 
   useEffect(() => {
     if (paymentId) {
@@ -182,6 +184,23 @@ export default function PaymentPage() {
                       'Pagar con GUISO'
                     )}
                   </Button>
+                  
+                  <div className="relative flex items-center py-2">
+                    <div className="flex-grow border-t border-gray-200"></div>
+                    <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">o</span>
+                    <div className="flex-grow border-t border-gray-200"></div>
+                  </div>
+
+                  <Button 
+                    onClick={() => setIsFiatModalOpen(true)}
+                    disabled={isProcessing}
+                    variant="outline"
+                    className="w-full py-4 text-lg border-blue-200 text-blue-700 hover:bg-blue-50"
+                  >
+                    <CreditCard className="mr-2" />
+                    Pagar con dinero local (ARS)
+                  </Button>
+
                   {errorMsg && (
                     <p className="text-red-500 text-xs font-bold text-center mt-2 flex items-center justify-center gap-1">
                       <XCircle size={14} /> {errorMsg}
@@ -201,6 +220,13 @@ export default function PaymentPage() {
           )}
         </Card>
       </motion.div>
+
+      {isFiatModalOpen && (
+        <FiatPaymentModal 
+          payment={payment} 
+          onClose={() => setIsFiatModalOpen(false)} 
+        />
+      )}
     </div>
   );
 }
