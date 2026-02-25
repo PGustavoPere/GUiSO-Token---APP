@@ -4,6 +4,8 @@ import { X, Heart, Coins, Sparkles } from 'lucide-react';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { impactEngine } from '../../system/impactEngine';
 import { Button } from '../../components/ui';
+import { web3Bridge } from '../../web3/web3Provider';
+import TransactionStatusBadge, { TransactionStatus } from '../../components/TransactionStatusBadge';
 
 interface SupportModalProps {
   project: { id: string; title: string };
@@ -11,24 +13,40 @@ interface SupportModalProps {
 }
 
 export default function SupportModal({ project, onClose }: SupportModalProps) {
-  const { token, supportCause } = useGuisoCore();
+  const { token, recordSupportTransaction } = useGuisoCore();
   const [amount, setAmount] = useState(100);
   const [isSuccess, setIsSuccess] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [txStatus, setTxStatus] = useState<TransactionStatus>('idle');
 
   const handleSupport = async () => {
     if (amount > token.gsoBalance) return;
-    setIsProcessing(true);
-    const hash = await supportCause(project.id, project.title, amount);
-    setIsProcessing(false);
     
-    if (hash) {
-      setTxHash(hash);
+    setTxStatus('pending');
+    const transactionAdapter = web3Bridge.getTransaction();
+    const result = await transactionAdapter.sendTransaction(amount, project.title);
+    
+    if (!result.success) {
+      setTxStatus('failed');
+      setTimeout(() => setTxStatus('idle'), 3000);
+      return;
+    }
+    
+    setTxHash(result.txHash);
+    setTxStatus('confirming');
+    
+    const confirmed = await transactionAdapter.waitForTransaction(result.txHash);
+    
+    if (confirmed) {
+      setTxStatus('confirmed');
+      recordSupportTransaction(project.id, project.title, amount, result.txHash);
       setIsSuccess(true);
       setTimeout(() => {
         onClose();
       }, 5000);
+    } else {
+      setTxStatus('failed');
+      setTimeout(() => setTxStatus('idle'), 3000);
     }
   };
 
@@ -91,11 +109,11 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
 
               <Button 
                 onClick={handleSupport}
-                disabled={amount <= 0 || amount > token.gsoBalance || isProcessing}
+                disabled={amount <= 0 || amount > token.gsoBalance || txStatus === 'pending' || txStatus === 'confirming'}
                 size="lg"
                 className="w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isProcessing ? (
+                {txStatus === 'pending' || txStatus === 'confirming' ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Procesando...
@@ -107,6 +125,7 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
                   </>
                 )}
               </Button>
+              <TransactionStatusBadge status={txStatus} txHash={txHash} />
             </motion.div>
           ) : (
             <motion.div 

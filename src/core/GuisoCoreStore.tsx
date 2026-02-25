@@ -51,7 +51,7 @@ interface GuisoCoreContextType {
   activeImpactMoment: { points: number; target: string } | null;
 
   // Actions
-  supportCause: (projectId: string, projectTitle: string, amount: number) => Promise<string | undefined>;
+  recordSupportTransaction: (projectId: string, projectTitle: string, amount: number, txHash: string) => void;
   earnImpact: (points: number) => void;
   updateGlobalImpact: (impact: number, meals?: number) => void;
   dismissNotification: () => void;
@@ -137,19 +137,10 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [user, token, global]);
 
   /**
-   * Acción: Apoyar una causa social
-   * Conecta la reducción de balance con el aumento de impacto global y personal.
+   * Acción: Registrar una transacción de apoyo confirmada
    */
-  const supportCause = useCallback(async (projectId: string, projectTitle: string, amount: number): Promise<string | undefined> => {
+  const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string) => {
     if (amount > token.gsoBalance) return;
-
-    const transactionAdapter = web3Bridge.getTransaction();
-    const result = await transactionAdapter.sendTransaction(amount, projectTitle);
-
-    if (!result.success) {
-      console.error('Transaction failed:', result.error);
-      return;
-    }
 
     const impactGenerated = impactEngine.calculateImpactPoints(amount);
     
@@ -161,7 +152,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       target: projectTitle,
       date: new Date().toISOString().split('T')[0],
       impactPoints: impactGenerated,
-      txHash: result.txHash
+      txHash: txHash
     };
 
     setToken(prev => ({
@@ -195,8 +186,6 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       ...prev,
       totalImpact: prev.totalImpact + impactGenerated,
     }));
-    
-    return result.txHash;
   }, [token.gsoBalance, user.impactScore, user.hasExperiencedImpactMoment]);
 
   /**
@@ -273,7 +262,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       global,
       levelUpNotification,
       activeImpactMoment,
-      supportCause,
+      recordSupportTransaction,
       earnImpact,
       updateGlobalImpact,
       dismissNotification,

@@ -15,6 +15,7 @@ export interface TransactionResult {
 
 export interface TransactionAdapter {
   sendTransaction(amount: number, cause: string): Promise<TransactionResult>;
+  waitForTransaction(txHash: string): Promise<boolean>;
 }
 
 export interface Web3Config {

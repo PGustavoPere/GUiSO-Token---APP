@@ -16,6 +16,15 @@ export class MockTransactionAdapter implements TransactionAdapter {
       }, 1500);
     });
   }
+
+  async waitForTransaction(txHash: string): Promise<boolean> {
+    console.log(`[Simulation] Waiting for confirmation of ${txHash}`);
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true);
+      }, 2000);
+    });
+  }
 }
 
 export class Web3TransactionAdapter implements TransactionAdapter {
@@ -40,9 +49,6 @@ export class Web3TransactionAdapter implements TransactionAdapter {
 
       console.log('Transaction sent:', tx.hash);
 
-      // Wait for 1 confirmation
-      await tx.wait(1);
-
       return {
         success: true,
         txHash: tx.hash
@@ -54,6 +60,24 @@ export class Web3TransactionAdapter implements TransactionAdapter {
         txHash: '',
         error: error.message || 'Transaction failed'
       };
+    }
+  }
+
+  async waitForTransaction(txHash: string): Promise<boolean> {
+    if (!(window as any).ethereum) {
+      return false;
+    }
+
+    try {
+      const provider = new ethers.BrowserProvider((window as any).ethereum);
+      
+      // Wait for 1 confirmation with a 60s timeout
+      const receipt = await provider.waitForTransaction(txHash, 1, 60000);
+      
+      return receipt !== null && receipt.status === 1;
+    } catch (error) {
+      console.error('Failed to confirm transaction:', error);
+      return false;
     }
   }
 }

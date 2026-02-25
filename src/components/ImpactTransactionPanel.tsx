@@ -6,6 +6,8 @@ import { useWallet } from '../core/WalletProvider';
 import { impactEngine } from '../system/impactEngine';
 import ImpactStoryCard from './ImpactStoryCard';
 import { Card, Button, Badge } from './ui';
+import { web3Bridge } from '../web3/web3Provider';
+import TransactionStatusBadge, { TransactionStatus } from './TransactionStatusBadge';
 
 const CAUSES = [
   { id: 'kitchen', title: 'Comedor Comunitario', icon: Utensils, description: 'Provee comidas calientes a familias en riesgo.' },
@@ -14,23 +16,36 @@ const CAUSES = [
 ];
 
 export default function ImpactTransactionPanel() {
-  const { token, supportCause, user } = useGuisoCore();
+  const { token, recordSupportTransaction, user } = useGuisoCore();
   const { connect, isConnecting } = useWallet();
   const [selectedCause, setSelectedCause] = useState(CAUSES[0]);
   const [amount, setAmount] = useState(100);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showStory, setShowStory] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [txStatus, setTxStatus] = useState<TransactionStatus>('idle');
 
   const handleSupport = async () => {
     if (amount > token.gsoBalance) return;
-    setIsProcessing(true);
-    const hash = await supportCause(selectedCause.id, selectedCause.title, amount);
-    setIsProcessing(false);
     
-    if (hash) {
-      setTxHash(hash);
+    setTxStatus('pending');
+    const transactionAdapter = web3Bridge.getTransaction();
+    const result = await transactionAdapter.sendTransaction(amount, selectedCause.title);
+    
+    if (!result.success) {
+      setTxStatus('failed');
+      setTimeout(() => setTxStatus('idle'), 3000);
+      return;
+    }
+    
+    setTxHash(result.txHash);
+    setTxStatus('confirming');
+    
+    const confirmed = await transactionAdapter.waitForTransaction(result.txHash);
+    
+    if (confirmed) {
+      setTxStatus('confirmed');
+      recordSupportTransaction(selectedCause.id, selectedCause.title, amount, result.txHash);
       setIsSuccess(true);
       
       // Show story after success if in demo mode
@@ -41,7 +56,11 @@ export default function ImpactTransactionPanel() {
       setTimeout(() => {
         setIsSuccess(false);
         setTxHash(null);
+        setTxStatus('idle');
       }, 5000);
+    } else {
+      setTxStatus('failed');
+      setTimeout(() => setTxStatus('idle'), 3000);
     }
   };
 
@@ -174,11 +193,11 @@ export default function ImpactTransactionPanel() {
 
       <Button 
         onClick={handleSupport}
-        disabled={amount <= 0 || amount > token.gsoBalance || isProcessing}
+        disabled={amount <= 0 || amount > token.gsoBalance || txStatus === 'pending' || txStatus === 'confirming'}
         size="lg"
         className="w-full flex items-center justify-center gap-3 shadow-xl shadow-guiso-orange/20 hover:shadow-2xl hover:-translate-y-1 transition-all disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none"
       >
-        {isProcessing ? (
+        {txStatus === 'pending' || txStatus === 'confirming' ? (
           <>
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             Procesando...
@@ -190,6 +209,8 @@ export default function ImpactTransactionPanel() {
           </>
         )}
       </Button>
+      
+      <TransactionStatusBadge status={txStatus} txHash={txHash} />
       
       <p className="text-center text-[10px] text-gray-400">
         Al confirmar, tus tokens se enviarán directamente a la causa seleccionada y recibirás puntos de impacto instantáneos.
