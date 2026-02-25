@@ -63,7 +63,7 @@ export default function TransactionStatusBadge({ status, txHash }: TransactionSt
         <div className="p-3 bg-white/50 rounded-xl border border-gray-100 w-full text-center">
           <p className="text-xs text-gray-500 font-bold mb-1">Transaction Hash</p>
           <a 
-            href={`https://sepolia.etherscan.io/tx/${txHash}`}
+            href={`https://testnet.bscscan.com/tx/${txHash}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-xs font-mono text-guiso-orange hover:underline break-all"

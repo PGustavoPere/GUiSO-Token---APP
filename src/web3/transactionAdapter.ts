@@ -35,11 +35,17 @@ export class Web3TransactionAdapter implements TransactionAdapter {
 
     try {
       const provider = new ethers.BrowserProvider((window as any).ethereum);
+      const network = await provider.getNetwork();
+      
+      if (network.chainId !== BigInt(97)) {
+        return { success: false, txHash: '', error: 'Please switch to BSC Testnet' };
+      }
+
       const signer = await provider.getSigner();
       
       // In a real scenario, we would interact with the smart contract.
       // For this testnet integration, we will send a 0 value transaction to the contract address
-      // to generate a real transaction hash on Sepolia.
+      // to generate a real transaction hash on BSC Testnet.
       
       const tx = await signer.sendTransaction({
         to: GUISO_CONTRACT_ADDRESS,

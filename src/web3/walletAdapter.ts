@@ -39,19 +39,19 @@ export class MetaMaskAdapter implements WalletAdapter {
       const provider = new ethers.BrowserProvider((window as any).ethereum);
       const network = await provider.getNetwork();
       
-      // Check if on Sepolia
-      if (network.chainId !== BigInt(11155111)) {
+      // Check if on BSC Testnet
+      if (network.chainId !== BigInt(97)) {
         try {
           await (window as any).ethereum.request({
             method: 'wallet_switchEthereumChain',
-            params: [{ chainId: networkConfig.sepolia.chainId }],
+            params: [{ chainId: networkConfig.bsc_testnet.chainId }],
           });
         } catch (switchError: any) {
           // This error code indicates that the chain has not been added to MetaMask.
           if (switchError.code === 4902) {
             await (window as any).ethereum.request({
               method: 'wallet_addEthereumChain',
-              params: [networkConfig.sepolia],
+              params: [networkConfig.bsc_testnet],
             });
           } else {
             throw switchError;

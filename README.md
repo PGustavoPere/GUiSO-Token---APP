@@ -87,8 +87,8 @@ GUISO uses a specialized bridge layer to separate humanitarian logic from blockc
 - **Impact Sync:** Transactions generate `txHash` placeholders that map directly to the humanitarian impact ledger.
 
 ## 🔗 Testnet Integration
-The application is now connected to the **Sepolia Testnet** for a safe development setup.
-- **Real Transactions:** When in Web3 mode, the app generates real transaction hashes on the Sepolia network.
+The application is now connected to the **BNB Smart Chain (BSC) Testnet** for a safe development setup.
+- **Real Transactions:** When in Web3 mode, the app generates real transaction hashes on the BSC Testnet.
 - **Safety:** We only use testnets (never mainnet) to ensure a risk-free environment.
 - **Fallback:** If MetaMask is not installed or the user rejects the connection, the app gracefully falls back to Simulation Mode.
 - **Configuration:** Network settings are managed in `/src/web3/networkConfig.ts`.

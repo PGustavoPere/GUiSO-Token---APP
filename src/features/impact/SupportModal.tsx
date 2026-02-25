@@ -156,7 +156,7 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
                   <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100 w-full">
                     <p className="text-xs text-gray-500 font-bold mb-1">Transaction Hash</p>
                     <a 
-                      href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                      href={`https://testnet.bscscan.com/tx/${txHash}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-xs font-mono text-guiso-orange hover:underline break-all"

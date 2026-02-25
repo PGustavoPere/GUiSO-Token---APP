@@ -1,13 +1,13 @@
 export const networkConfig = {
-  sepolia: {
-    chainId: '0xaa36a7', // 11155111
-    chainName: 'Sepolia',
+  bsc_testnet: {
+    chainId: '0x61', // 97
+    chainName: 'BNB Smart Chain Testnet',
     nativeCurrency: {
-      name: 'Sepolia Ether',
-      symbol: 'SEP',
+      name: 'Test BNB',
+      symbol: 'tBNB',
       decimals: 18,
     },
-    rpcUrls: [(import.meta as any).env?.VITE_SEPOLIA_RPC_URL || 'https://rpc.sepolia.org'],
-    blockExplorerUrls: ['https://sepolia.etherscan.io'],
+    rpcUrls: [(import.meta as any).env?.VITE_BSC_TESTNET_RPC_URL || 'https://data-seed-prebsc-1-s1.binance.org:8545/'],
+    blockExplorerUrls: ['https://testnet.bscscan.com'],
   }
 };
