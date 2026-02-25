@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import ImpactDashboard from '../../components/ImpactDashboard';
 import ImpactTransactionPanel from '../../components/ImpactTransactionPanel';
 import ImpactHistory from '../../components/ImpactHistory';
+import CertificateHistory from '../impactCertificate/CertificateHistory';
 import InvestorPanel from '../../components/InvestorPanel';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { Card, Button } from '../../components/ui';
@@ -85,6 +86,10 @@ export default function DashboardPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-display font-bold px-2">Historial Reciente</h2>
             <ImpactHistory />
+          </section>
+
+          <section className="space-y-4">
+            <CertificateHistory />
           </section>
         </div>
 

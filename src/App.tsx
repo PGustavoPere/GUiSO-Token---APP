@@ -17,6 +17,8 @@ import DemoWelcome from './components/DemoWelcome';
 import DemoGuide from './components/DemoGuide';
 import PaymentPage from './features/payments/PaymentPage';
 import MerchantDashboard from './features/merchant/MerchantDashboard';
+import ImpactCertificatePage from './features/impactCertificate/ImpactCertificatePage';
+import { AutoCertificateGenerator } from './features/impactCertificate/AutoCertificateGenerator';
 import { Card, Button } from './components/ui';
 
 // Placeholder for Community until implemented
@@ -48,6 +50,7 @@ export default function App() {
         <PaymentProvider>
           <MerchantProvider>
             <BrowserRouter>
+              <AutoCertificateGenerator />
               <Routes>
                 <Route path="/" element={<Layout />}>
                   <Route index element={<DashboardPage />} />
@@ -58,6 +61,7 @@ export default function App() {
                   <Route path="merchant" element={<MerchantDashboard />} />
                 </Route>
                 <Route path="/pay/:paymentId" element={<PaymentPage />} />
+                <Route path="/impact/:certificateId" element={<ImpactCertificatePage />} />
               </Routes>
               <DemoWelcome />
               <DemoGuide />
