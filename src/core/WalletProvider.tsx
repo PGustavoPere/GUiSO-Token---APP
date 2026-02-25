@@ -31,7 +31,8 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const connect = useCallback(async () => {
     setIsConnecting(true);
     try {
-      const newAddress = await walletAdapter.connect();
+      const currentAdapter = web3Bridge.getWallet();
+      const newAddress = await currentAdapter.connect();
       setAddress(newAddress);
       setIsConnected(true);
       localStorage.setItem('guiso_wallet_address', newAddress);
@@ -40,14 +41,15 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     } finally {
       setIsConnecting(false);
     }
-  }, [walletAdapter]);
+  }, []);
 
   const disconnect = useCallback(async () => {
-    await walletAdapter.disconnect();
+    const currentAdapter = web3Bridge.getWallet();
+    await currentAdapter.disconnect();
     setAddress(null);
     setIsConnected(false);
     localStorage.removeItem('guiso_wallet_address');
-  }, [walletAdapter]);
+  }, []);
 
   return (
     <WalletContext.Provider value={{ address, isConnected, isConnecting, connect, disconnect }}>

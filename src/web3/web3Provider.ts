@@ -1,6 +1,6 @@
 import { AppMode, WalletAdapter, TransactionAdapter } from './types';
-import { MockWalletAdapter } from './walletAdapter';
-import { MockTransactionAdapter } from './transactionAdapter';
+import { MockWalletAdapter, MetaMaskAdapter } from './walletAdapter';
+import { MockTransactionAdapter, Web3TransactionAdapter } from './transactionAdapter';
 
 class Web3Bridge {
   private mode: AppMode = 'simulation';
@@ -19,10 +19,14 @@ class Web3Bridge {
       this.walletAdapter = new MockWalletAdapter();
       this.transactionAdapter = new MockTransactionAdapter();
     } else {
-      // Future: Initialize real adapters here
-      console.warn('Web3 mode not fully implemented, falling back to simulation');
-      this.walletAdapter = new MockWalletAdapter();
-      this.transactionAdapter = new MockTransactionAdapter();
+      if ((window as any).ethereum) {
+        this.walletAdapter = new MetaMaskAdapter();
+        this.transactionAdapter = new Web3TransactionAdapter();
+      } else {
+        console.warn('MetaMask not found, falling back to simulation');
+        this.walletAdapter = new MockWalletAdapter();
+        this.transactionAdapter = new MockTransactionAdapter();
+      }
     }
   }
 

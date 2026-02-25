@@ -14,14 +14,22 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
   const { token, supportCause } = useGuisoCore();
   const [amount, setAmount] = useState(100);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSupport = () => {
+  const handleSupport = async () => {
     if (amount > token.gsoBalance) return;
-    supportCause(project.id, project.title, amount);
-    setIsSuccess(true);
-    setTimeout(() => {
-      onClose();
-    }, 2500);
+    setIsProcessing(true);
+    const hash = await supportCause(project.id, project.title, amount);
+    setIsProcessing(false);
+    
+    if (hash) {
+      setTxHash(hash);
+      setIsSuccess(true);
+      setTimeout(() => {
+        onClose();
+      }, 5000);
+    }
   };
 
   return (
@@ -83,12 +91,21 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
 
               <Button 
                 onClick={handleSupport}
-                disabled={amount <= 0 || amount > token.gsoBalance}
+                disabled={amount <= 0 || amount > token.gsoBalance || isProcessing}
                 size="lg"
                 className="w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Heart size={20} />
-                Confirmar Apoyo
+                {isProcessing ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Procesando...
+                  </>
+                ) : (
+                  <>
+                    <Heart size={20} />
+                    Confirmar Apoyo
+                  </>
+                )}
               </Button>
             </motion.div>
           ) : (
@@ -106,10 +123,23 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
                 <p className="text-guiso-orange font-bold text-xs md:text-sm mb-2 italic">"{impactEngine.getRandomMotivation()}"</p>
                 <p className="text-gray-500 text-sm md:text-base">Has aportado {amount} GSO a esta causa. Tus puntos de impacto han sido actualizados.</p>
               </div>
-              <div className="flex justify-center gap-2">
+              <div className="flex flex-col items-center gap-2">
                 <div className="px-4 py-2 bg-guiso-orange/10 text-guiso-orange rounded-full text-xs md:text-sm font-bold">
                   +{impactEngine.calculateImpactPoints(amount)} Impact Points
                 </div>
+                {txHash && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100 w-full">
+                    <p className="text-xs text-gray-500 font-bold mb-1">Transaction Hash</p>
+                    <a 
+                      href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-mono text-guiso-orange hover:underline break-all"
+                    >
+                      {txHash}
+                    </a>
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

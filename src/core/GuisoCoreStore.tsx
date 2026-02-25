@@ -51,7 +51,7 @@ interface GuisoCoreContextType {
   activeImpactMoment: { points: number; target: string } | null;
 
   // Actions
-  supportCause: (projectId: string, projectTitle: string, amount: number) => Promise<void>;
+  supportCause: (projectId: string, projectTitle: string, amount: number) => Promise<string | undefined>;
   earnImpact: (points: number) => void;
   updateGlobalImpact: (impact: number, meals?: number) => void;
   dismissNotification: () => void;
@@ -140,7 +140,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    * Acción: Apoyar una causa social
    * Conecta la reducción de balance con el aumento de impacto global y personal.
    */
-  const supportCause = useCallback(async (projectId: string, projectTitle: string, amount: number) => {
+  const supportCause = useCallback(async (projectId: string, projectTitle: string, amount: number): Promise<string | undefined> => {
     if (amount > token.gsoBalance) return;
 
     const transactionAdapter = web3Bridge.getTransaction();
@@ -195,6 +195,8 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       ...prev,
       totalImpact: prev.totalImpact + impactGenerated,
     }));
+    
+    return result.txHash;
   }, [token.gsoBalance, user.impactScore, user.hasExperiencedImpactMoment]);
 
   /**

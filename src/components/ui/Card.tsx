@@ -5,6 +5,8 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'glass' | 'dark' | 'terracotta' | 'cream';
   padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
   rounded?: 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full';
+  children?: React.ReactNode;
+  className?: string;
 }
 
 export function Card({ 

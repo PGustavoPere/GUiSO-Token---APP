@@ -93,9 +93,17 @@ export default function Layout() {
               <Cpu size={12} className="text-guiso-orange" />
               <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Bridge Status</span>
             </div>
-            <span className="text-[8px] font-bold bg-guiso-orange/10 text-guiso-orange px-2 py-0.5 rounded-full uppercase">
+            <button 
+              onClick={() => {
+                const newMode = web3Bridge.getMode() === 'simulation' ? 'web3' : 'simulation';
+                web3Bridge.setMode(newMode);
+                // Force re-render to show updated mode
+                setIsMenuOpen(prev => prev);
+              }}
+              className="text-[8px] font-bold bg-guiso-orange/10 text-guiso-orange px-2 py-0.5 rounded-full uppercase hover:bg-guiso-orange/20 transition-colors cursor-pointer"
+            >
               {web3Bridge.getMode()}
-            </span>
+            </button>
           </div>
 
           <button

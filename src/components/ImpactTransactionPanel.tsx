@@ -20,18 +20,29 @@ export default function ImpactTransactionPanel() {
   const [amount, setAmount] = useState(100);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showStory, setShowStory] = useState(false);
+  const [txHash, setTxHash] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleSupport = () => {
+  const handleSupport = async () => {
     if (amount > token.gsoBalance) return;
-    supportCause(selectedCause.id, selectedCause.title, amount);
-    setIsSuccess(true);
+    setIsProcessing(true);
+    const hash = await supportCause(selectedCause.id, selectedCause.title, amount);
+    setIsProcessing(false);
     
-    // Show story after success if in demo mode
-    if (user.isDemoModeActive) {
-      setTimeout(() => setShowStory(true), 1000);
+    if (hash) {
+      setTxHash(hash);
+      setIsSuccess(true);
+      
+      // Show story after success if in demo mode
+      if (user.isDemoModeActive) {
+        setTimeout(() => setShowStory(true), 1000);
+      }
+      
+      setTimeout(() => {
+        setIsSuccess(false);
+        setTxHash(null);
+      }, 5000);
     }
-    
-    setTimeout(() => setIsSuccess(false), 3000);
   };
 
   if (isSuccess) {
@@ -50,6 +61,19 @@ export default function ImpactTransactionPanel() {
             <Badge variant="success">
               +{impactEngine.calculateImpactPoints(amount)} Impact Points
             </Badge>
+            {txHash && (
+              <div className="mt-4 p-3 bg-white/50 rounded-xl border border-green-200">
+                <p className="text-xs text-gray-500 font-bold mb-1">Transaction Hash</p>
+                <a 
+                  href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-mono text-guiso-orange hover:underline break-all"
+                >
+                  {txHash}
+                </a>
+              </div>
+            )}
           </Card>
         </motion.div>
         
@@ -150,12 +174,21 @@ export default function ImpactTransactionPanel() {
 
       <Button 
         onClick={handleSupport}
-        disabled={amount <= 0 || amount > token.gsoBalance}
+        disabled={amount <= 0 || amount > token.gsoBalance || isProcessing}
         size="lg"
         className="w-full flex items-center justify-center gap-3 shadow-xl shadow-guiso-orange/20 hover:shadow-2xl hover:-translate-y-1 transition-all disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none"
       >
-        <Sparkles size={20} className="md:w-6 md:h-6" />
-        Confirmar Impacto Social
+        {isProcessing ? (
+          <>
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            Procesando...
+          </>
+        ) : (
+          <>
+            <Sparkles size={20} className="md:w-6 md:h-6" />
+            Confirmar Impacto Social
+          </>
+        )}
       </Button>
       
       <p className="text-center text-[10px] text-gray-400">
