@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { GuisoCoreProvider } from './core/GuisoCoreStore';
 import { WalletProvider } from './core/WalletProvider';
 import { PaymentProvider } from './features/payments/PaymentStore';
+import { MerchantProvider } from './features/merchant/MerchantStore';
 import Layout from './components/Layout';
 import DashboardPage from './features/dashboard/DashboardPage';
 import ImpactPage from './features/impact/ImpactPage';
@@ -15,6 +16,7 @@ import VisionPage from './features/vision/VisionPage';
 import DemoWelcome from './components/DemoWelcome';
 import DemoGuide from './components/DemoGuide';
 import PaymentPage from './features/payments/PaymentPage';
+import MerchantDashboard from './features/merchant/MerchantDashboard';
 import { Card, Button } from './components/ui';
 
 // Placeholder for Community until implemented
@@ -44,20 +46,23 @@ export default function App() {
     <WalletProvider>
       <GuisoCoreProvider>
         <PaymentProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Layout />}>
-                <Route index element={<DashboardPage />} />
-                <Route path="impacto" element={<ImpactPage />} />
-                <Route path="comunidad" element={<CommunityPage />} />
-                <Route path="perfil" element={<ProfilePage />} />
-                <Route path="vision" element={<VisionPage />} />
-              </Route>
-              <Route path="/pay/:paymentId" element={<PaymentPage />} />
-            </Routes>
-            <DemoWelcome />
-            <DemoGuide />
-          </BrowserRouter>
+          <MerchantProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Layout />}>
+                  <Route index element={<DashboardPage />} />
+                  <Route path="impacto" element={<ImpactPage />} />
+                  <Route path="comunidad" element={<CommunityPage />} />
+                  <Route path="perfil" element={<ProfilePage />} />
+                  <Route path="vision" element={<VisionPage />} />
+                  <Route path="merchant" element={<MerchantDashboard />} />
+                </Route>
+                <Route path="/pay/:paymentId" element={<PaymentPage />} />
+              </Routes>
+              <DemoWelcome />
+              <DemoGuide />
+            </BrowserRouter>
+          </MerchantProvider>
         </PaymentProvider>
       </GuisoCoreProvider>
     </WalletProvider>
