@@ -3,6 +3,7 @@ import { impactEngine, LevelThreshold } from '../system/impactEngine';
 import { useWallet } from './WalletProvider';
 
 import { web3Bridge } from '../web3/web3Provider';
+import { tokenBalanceService } from '../web3/tokenBalanceService';
 
 /**
  * Tipos de datos para el Core Store
@@ -32,6 +33,8 @@ export interface UserState {
 export interface TokenState {
   gsoBalance: number;
   transactions: Transaction[];
+  impactPower: number;
+  influenceBadge: string;
 }
 
 export interface GlobalImpactState {
@@ -84,6 +87,8 @@ const INITIAL_USER: UserState = {
 const INITIAL_TOKEN: TokenState = {
   gsoBalance: 10000,
   transactions: [],
+  impactPower: 15000,
+  influenceBadge: 'Community Pillar',
 };
 
 const INITIAL_GLOBAL: GlobalImpactState = {
@@ -107,6 +112,17 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       isWalletConnected: isConnected,
       walletAddress: address
     }));
+
+    if (isConnected && address && web3Bridge.getMode() === 'web3') {
+      tokenBalanceService.getBalance(address).then(result => {
+        setToken(prev => ({
+          ...prev,
+          gsoBalance: result.balance,
+          impactPower: tokenBalanceService.getImpactPower(result.balance),
+          influenceBadge: tokenBalanceService.getInfluenceBadge(result.balance),
+        }));
+      });
+    }
   }, [isConnected, address]);
 
   // Persistencia: Cargar estado inicial
@@ -155,10 +171,15 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       txHash: txHash
     };
 
-    setToken(prev => ({
-      gsoBalance: prev.gsoBalance - amount,
-      transactions: [newTransaction, ...prev.transactions],
-    }));
+    setToken(prev => {
+      const newBalance = prev.gsoBalance - amount;
+      return {
+        gsoBalance: newBalance,
+        transactions: [newTransaction, ...prev.transactions],
+        impactPower: tokenBalanceService.getImpactPower(newBalance),
+        influenceBadge: tokenBalanceService.getInfluenceBadge(newBalance),
+      };
+    });
 
     // 2. Actualizar User State (Impact Score y Nivel)
     const newImpactScore = user.impactScore + impactGenerated;

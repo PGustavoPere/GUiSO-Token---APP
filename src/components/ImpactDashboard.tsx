@@ -1,18 +1,32 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, Utensils, Heart, Users, TrendingUp } from 'lucide-react';
+import { Sparkles, Utensils, Heart, Users, TrendingUp, Coins, Zap } from 'lucide-react';
 import { useGuisoCore } from '../core/GuisoCoreStore';
-import { Card } from './ui';
+import { Card, Badge } from './ui';
 
 export default function ImpactDashboard() {
-  const { global, user } = useGuisoCore();
+  const { global, user, token } = useGuisoCore();
 
   const meals = Math.floor(global.totalImpact / 5);
   const communityIndex = Math.min(100, (global.communityMembers / 1000) * 100);
 
   const stats = [
     { 
-      label: 'Tu Impacto Personal', 
+      label: 'GUISO Balance', 
+      value: token.gsoBalance, 
+      icon: Coins, 
+      color: 'bg-yellow-50 text-yellow-500',
+      suffix: ' GSO'
+    },
+    { 
+      label: 'Impact Power', 
+      value: token.impactPower, 
+      icon: Zap, 
+      color: 'bg-blue-50 text-blue-500',
+      suffix: ' IP'
+    },
+    { 
+      label: 'Lifetime Impact', 
       value: user.impactScore, 
       icon: Sparkles, 
       color: 'bg-guiso-orange/10 text-guiso-orange',
@@ -23,20 +37,6 @@ export default function ImpactDashboard() {
       value: meals, 
       icon: Utensils, 
       color: 'bg-guiso-terracotta/10 text-guiso-terracotta',
-      suffix: ''
-    },
-    { 
-      label: 'Causas Activas', 
-      value: global.supportedCauses, 
-      icon: Heart, 
-      color: 'bg-red-50 text-red-500',
-      suffix: ''
-    },
-    { 
-      label: 'Comunidad Creciendo', 
-      value: `${communityIndex.toFixed(1)}%`, 
-      icon: TrendingUp, 
-      color: 'bg-blue-50 text-blue-500',
       suffix: ''
     },
   ];
@@ -71,9 +71,12 @@ export default function ImpactDashboard() {
       <Card variant="glass" padding="lg" rounded="2xl">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-2">
-            <h3 className="text-xl font-display font-bold">Impacto Colectivo</h3>
+            <div className="flex items-center gap-3">
+              <h3 className="text-xl font-display font-bold">Token Influence</h3>
+              <Badge variant="primary">{token.influenceBadge}</Badge>
+            </div>
             <p className="text-sm text-gray-500 max-w-sm">
-              Estamos a solo <span className="text-guiso-orange font-bold">{(1000 - global.communityMembers).toLocaleString()}</span> miembros de alcanzar nuestra próxima meta comunitaria.
+              Tu nivel de influencia en la comunidad está determinado por tu balance de tokens GUISO.
             </p>
           </div>
           <div className="w-full md:w-64 space-y-3">

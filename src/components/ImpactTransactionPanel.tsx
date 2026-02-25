@@ -189,6 +189,12 @@ export default function ImpactTransactionPanel() {
             </button>
           ))}
         </div>
+        
+        {amount > token.gsoBalance && (
+          <p className="text-red-500 text-xs font-bold text-center mt-2">
+            Necesitás GUISO Tokens para generar impacto.
+          </p>
+        )}
       </div>
 
       <Button 
