@@ -8,7 +8,7 @@ import { useGuisoCore } from '../core/GuisoCoreStore';
 import { useWallet } from '../core/WalletProvider';
 import LevelUpNotification from './LevelUpNotification';
 import ImpactMoment from './ImpactMoment';
-import { Globe, RotateCcw, Cpu, Store } from 'lucide-react';
+import { Globe, RotateCcw, Cpu, Store, Activity } from 'lucide-react';
 import { web3Bridge } from '../web3/web3Provider';
 import { Button } from './ui';
 
@@ -28,6 +28,7 @@ export default function Layout() {
     { to: '/vision', icon: Globe, label: 'Visión' },
     { to: '/perfil', icon: User, label: 'Mi Perfil' },
     { to: '/merchant', icon: Store, label: 'Comercios' },
+    { to: '/impact-explorer', icon: Activity, label: 'Impact Explorer' },
   ];
 
   return (
