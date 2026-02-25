@@ -19,7 +19,7 @@ This document outlines the strategic phases for the evolution of the GUISO Token
 
 ## 🧪 Phase 3: Blockchain Testnet
 *Focus: Real Transactions*
-- [ ] **Smart Contract Deployment:** GSO Treasury and Impact contracts on Testnet (Base/Polygon).
+- [ ] **Smart Contract Deployment:** GSO Treasury and Impact contracts on Testnet (ERC-20/BSC).
 - [ ] **Real Support Actions:** Moving from simulated "Support" to real token transfers.
 - [ ] **Automated Rewards:** Smart contracts distributing IP points automatically.
 
