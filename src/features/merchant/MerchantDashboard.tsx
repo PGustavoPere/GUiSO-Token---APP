@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Store, Plus, Wallet, CheckCircle2, Clock, XCircle } from 'lucide-react';
+import { Store, Plus, Wallet, CheckCircle2, Clock, XCircle, Shield } from 'lucide-react';
 import { useMerchantStore } from './MerchantStore';
 import { usePaymentStore } from '../payments/PaymentStore';
+import { useTrustStore } from '../trust/TrustStore';
 import { PaymentIntent } from '../payments/types';
 import { useWallet } from '../../core/WalletProvider';
 import { Card, Button, Badge } from '../../components/ui';
@@ -11,6 +12,7 @@ import CreatePaymentModal from './CreatePaymentModal';
 export default function MerchantDashboard() {
   const { merchant, registerMerchant, isMerchant } = useMerchantStore();
   const { payments } = usePaymentStore();
+  const { getMerchantTrust } = useTrustStore();
   const { isConnected, connect, address } = useWallet();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [regName, setRegName] = useState('');
@@ -96,6 +98,11 @@ export default function MerchantDashboard() {
     .filter(p => p.walletAddress === merchant?.walletAddress)
     .sort((a, b) => b.createdAt - a.createdAt);
 
+  const trustProfile = merchant ? getMerchantTrust(merchant.walletAddress) : null;
+  const trustScore = trustProfile?.trustScore || 50;
+  const trustColor = trustScore >= 80 ? 'bg-green-500' : trustScore >= 50 ? 'bg-yellow-500' : 'bg-red-500';
+  const trustTextColor = trustScore >= 80 ? 'text-green-500' : trustScore >= 50 ? 'text-yellow-500' : 'text-red-500';
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed': return <Badge variant="success" className="flex items-center gap-1"><CheckCircle2 size={12}/> Pagado</Badge>;
@@ -121,6 +128,39 @@ export default function MerchantDashboard() {
           <Plus size={20} /> Crear Cobro
         </Button>
       </div>
+
+      {trustProfile && (
+        <Card variant="glass" padding="md" className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-guiso-dark flex items-center gap-2">
+              <Shield size={20} className={trustTextColor} />
+              Trust Score
+            </h3>
+            <span className={`text-2xl font-display font-bold ${trustTextColor}`}>
+              {trustScore}%
+            </span>
+          </div>
+          
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div className={`h-2.5 rounded-full ${trustColor}`} style={{ width: `${trustScore}%` }}></div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 text-center pt-2">
+            <div>
+              <p className="text-xs text-gray-400">Pagos Exitosos</p>
+              <p className="font-bold text-gray-700">{trustProfile.successfulPayments}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400">Pagos Fallidos</p>
+              <p className="font-bold text-gray-700">{trustProfile.failedPayments}</p>
+            </div>
+            <div>
+              <p className="text-xs text-gray-400">Impacto Generado</p>
+              <p className="font-bold text-guiso-orange">+{trustProfile.totalImpactGenerated}</p>
+            </div>
+          </div>
+        </Card>
+      )}
 
       <Card variant="glass" padding="md" className="space-y-6">
         <h3 className="text-xl font-display font-bold">Cobros Recientes</h3>

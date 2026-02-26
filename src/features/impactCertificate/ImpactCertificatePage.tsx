@@ -1,17 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, ArrowLeft, Share2, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Share2, CheckCircle2, ShieldAlert, Shield } from 'lucide-react';
 import { impactCertificateService } from './impactCertificateService';
 import { ImpactCertificate } from './types';
 import ImpactShareCard from './ImpactShareCard';
 import { Button } from '../../components/ui';
+import { useTrustStore } from '../trust/TrustStore';
 
 export default function ImpactCertificatePage() {
   const { certificateId } = useParams<{ certificateId: string }>();
   const navigate = useNavigate();
   const [certificate, setCertificate] = useState<ImpactCertificate | null>(null);
   const [showToast, setShowToast] = useState(false);
+  const { getTrustByTxHash } = useTrustStore();
 
   useEffect(() => {
     if (certificateId) {
@@ -70,6 +72,54 @@ export default function ImpactCertificatePage() {
           </div>
 
           <ImpactShareCard certificate={certificate} />
+
+          {/* Impact Credibility Section */}
+          {(() => {
+            const trustProfile = getTrustByTxHash(certificate.txHash);
+            if (!trustProfile) return null;
+
+            const isVerified = trustProfile.trustScore >= 80;
+            const isWarning = trustProfile.trustScore < 50;
+
+            return (
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mt-8">
+                <h3 className="text-lg font-bold text-guiso-dark mb-4 flex items-center gap-2">
+                  <Shield size={20} className="text-blue-500" />
+                  Impact Credibility
+                </h3>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Merchant Trust Score</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`text-3xl font-display font-bold ${
+                        isVerified ? 'text-green-500' : isWarning ? 'text-red-500' : 'text-yellow-500'
+                      }`}>
+                        {trustProfile.trustScore}%
+                      </span>
+                      {isVerified && (
+                        <div className="flex items-center gap-1 bg-green-50 text-green-700 px-2 py-1 rounded-full text-xs font-bold">
+                          <ShieldCheck size={14} />
+                          Verified Merchant
+                        </div>
+                      )}
+                      {isWarning && (
+                        <div className="flex items-center gap-1 bg-red-50 text-red-700 px-2 py-1 rounded-full text-xs font-bold">
+                          <ShieldAlert size={14} />
+                          Low Trust
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-400">Total Payments</p>
+                    <p className="text-sm font-bold text-gray-700">{trustProfile.totalPayments}</p>
+                    <p className="text-xs text-gray-400 mt-1">Impact Generated</p>
+                    <p className="text-sm font-bold text-guiso-orange">+{trustProfile.totalImpactGenerated} pts</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="flex justify-center gap-4 mt-8">
             <Button 

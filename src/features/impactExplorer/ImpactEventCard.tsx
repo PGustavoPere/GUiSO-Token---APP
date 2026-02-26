@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Heart, ExternalLink, Clock } from 'lucide-react';
+import { Heart, ExternalLink, Clock, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ImpactEvent } from './types';
+import { useTrustStore } from '../trust/TrustStore';
 
 import { HTMLMotionProps } from 'motion/react';
 
@@ -21,20 +22,32 @@ const timeAgo = (timestamp: number) => {
   return `${days} days ago`;
 };
 
-export default function ImpactEventCard({ event }: ImpactEventCardProps) {
+export default function ImpactEventCard({ event, ...props }: ImpactEventCardProps) {
+  const { getTrustByTxHash } = useTrustStore();
+  const trustProfile = getTrustByTxHash(event.txHash);
+  
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       layout
       className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between"
+      {...props}
     >
       <div className="flex items-center gap-4">
         <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center text-green-500 shrink-0">
           <Heart size={24} className="fill-current" />
         </div>
         <div>
-          <h4 className="font-bold text-guiso-dark text-lg leading-tight">{event.title}</h4>
+          <h4 className="font-bold text-guiso-dark text-lg leading-tight flex items-center gap-2">
+            {event.title}
+            {trustProfile && trustProfile.trustScore >= 80 && (
+              <Shield size={16} className="text-green-500" title={`Trust Score: ${trustProfile.trustScore}%`} />
+            )}
+            {trustProfile && trustProfile.trustScore < 50 && (
+              <Shield size={16} className="text-red-500" title={`Trust Score: ${trustProfile.trustScore}%`} />
+            )}
+          </h4>
           <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
             <span className="flex items-center gap-1 font-mono">
               {event.walletShort}
