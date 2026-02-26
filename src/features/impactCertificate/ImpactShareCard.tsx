@@ -1,12 +1,16 @@
 import React from 'react';
 import { ImpactCertificate } from './types';
-import { ShieldCheck, ExternalLink, CheckCircle2, Link as LinkIcon } from 'lucide-react';
+import { ShieldCheck, ExternalLink, CheckCircle2, Link as LinkIcon, Award } from 'lucide-react';
+import { useIdentityStore } from '../identity/IdentityStore';
 
 interface ImpactShareCardProps {
   certificate: ImpactCertificate;
 }
 
 export default function ImpactShareCard({ certificate }: ImpactShareCardProps) {
+  const { getIdentity } = useIdentityStore();
+  const identity = getIdentity(certificate.wallet);
+
   return (
     <div className="bg-gradient-to-br from-guiso-orange to-orange-600 p-1 rounded-3xl shadow-2xl max-w-md mx-auto transform transition-all hover:scale-[1.02]">
       <div className="bg-white rounded-[1.4rem] p-8 text-center relative overflow-hidden">
@@ -50,10 +54,17 @@ export default function ImpactShareCard({ certificate }: ImpactShareCardProps) {
               {new Date(certificate.createdAt).toLocaleDateString()}
             </span>
           </div>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center pb-2 border-b border-gray-200/50">
             <span className="text-xs text-gray-500 font-bold">Wallet</span>
             <span className="text-xs font-mono text-gray-900">
               {certificate.wallet.slice(0, 6)}...{certificate.wallet.slice(-4)}
+            </span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-500 font-bold">Identity</span>
+            <span className="text-xs font-bold text-guiso-orange flex items-center gap-1">
+              <Award size={12} />
+              {identity.title}
             </span>
           </div>
         </div>
