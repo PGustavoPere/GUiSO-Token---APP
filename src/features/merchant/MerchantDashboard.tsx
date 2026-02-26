@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Store, Plus, Wallet, CheckCircle2, Clock, XCircle, Shield } from 'lucide-react';
+import { Store, Plus, Wallet, CheckCircle2, Clock, XCircle, Shield, ShieldAlert, ShieldCheck, Award } from 'lucide-react';
 import { useMerchantStore } from './MerchantStore';
 import { usePaymentStore } from '../payments/PaymentStore';
 import { useTrustStore } from '../trust/TrustStore';
+import { getTrustLevel, getTrustLevelMeta } from '../trust/trustLevelEngine';
 import { PaymentIntent } from '../payments/types';
 import { useWallet } from '../../core/WalletProvider';
 import { Card, Button, Badge } from '../../components/ui';
@@ -102,6 +103,9 @@ export default function MerchantDashboard() {
   const trustScore = trustProfile?.trustScore || 50;
   const trustColor = trustScore >= 80 ? 'bg-green-500' : trustScore >= 50 ? 'bg-yellow-500' : 'bg-red-500';
   const trustTextColor = trustScore >= 80 ? 'text-green-500' : trustScore >= 50 ? 'text-yellow-500' : 'text-red-500';
+  
+  const trustLevel = getTrustLevel(trustScore);
+  const trustLevelMeta = getTrustLevelMeta(trustLevel);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -132,10 +136,19 @@ export default function MerchantDashboard() {
       {trustProfile && (
         <Card variant="glass" padding="md" className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-guiso-dark flex items-center gap-2">
-              <Shield size={20} className={trustTextColor} />
-              Trust Score
-            </h3>
+            <div className="flex items-center gap-3">
+              <h3 className="text-lg font-bold text-guiso-dark flex items-center gap-2">
+                <Shield size={20} className={trustTextColor} />
+                Trust Score
+              </h3>
+              <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold bg-gray-50 border border-gray-100 ${trustLevelMeta.color}`}>
+                {trustLevelMeta.icon === 'ShieldAlert' && <ShieldAlert size={14} />}
+                {trustLevelMeta.icon === 'Shield' && <Shield size={14} />}
+                {trustLevelMeta.icon === 'ShieldCheck' && <ShieldCheck size={14} />}
+                {trustLevelMeta.icon === 'Award' && <Award size={14} />}
+                {trustLevelMeta.label}
+              </div>
+            </div>
             <span className={`text-2xl font-display font-bold ${trustTextColor}`}>
               {trustScore}%
             </span>

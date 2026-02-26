@@ -2,11 +2,37 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Globe, Activity } from 'lucide-react';
 import { useImpactExplorerStore } from './ImpactExplorerStore';
+import { useTrustStore } from '../trust/TrustStore';
+import { getTrustLevel, getTrustLevelMeta } from '../trust/trustLevelEngine';
 import ImpactEventCard from './ImpactEventCard';
 
 export default function ImpactExplorerPage() {
   const { getRecentEvents } = useImpactExplorerStore();
-  const events = getRecentEvents();
+  const { getTrustByTxHash } = useTrustStore();
+  
+  const events = getRecentEvents().sort((a, b) => {
+    const trustA = getTrustByTxHash(a.txHash);
+    const trustB = getTrustByTxHash(b.txHash);
+    
+    const scoreA = trustA?.trustScore || 0;
+    const scoreB = trustB?.trustScore || 0;
+    
+    const levelA = getTrustLevel(scoreA);
+    const levelB = getTrustLevel(scoreB);
+    
+    const priorityA = getTrustLevelMeta(levelA).priority;
+    const priorityB = getTrustLevelMeta(levelB).priority;
+    
+    if (priorityA !== priorityB) {
+      return priorityB - priorityA;
+    }
+    
+    if (scoreA !== scoreB) {
+      return scoreB - scoreA;
+    }
+    
+    return b.timestamp - a.timestamp;
+  });
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-20">

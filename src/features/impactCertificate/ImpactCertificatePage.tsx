@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, ArrowLeft, Share2, CheckCircle2, ShieldAlert, Shield } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Share2, CheckCircle2, ShieldAlert, Shield, Award } from 'lucide-react';
 import { impactCertificateService } from './impactCertificateService';
 import { ImpactCertificate } from './types';
 import ImpactShareCard from './ImpactShareCard';
 import { Button } from '../../components/ui';
 import { useTrustStore } from '../trust/TrustStore';
+import { useTrustSnapshotStore } from '../trust/TrustSnapshotStore';
+import { getTrustLevel, getTrustLevelMeta } from '../trust/trustLevelEngine';
 
 export default function ImpactCertificatePage() {
   const { certificateId } = useParams<{ certificateId: string }>();
@@ -14,6 +16,7 @@ export default function ImpactCertificatePage() {
   const [certificate, setCertificate] = useState<ImpactCertificate | null>(null);
   const [showToast, setShowToast] = useState(false);
   const { getTrustByTxHash } = useTrustStore();
+  const { getSnapshotByTxHash } = useTrustSnapshotStore();
 
   useEffect(() => {
     if (certificateId) {
@@ -72,6 +75,79 @@ export default function ImpactCertificatePage() {
           </div>
 
           <ImpactShareCard certificate={certificate} />
+
+          {/* Impact Status Section */}
+          {(() => {
+            const trustProfile = getTrustByTxHash(certificate.txHash);
+            if (!trustProfile) return null;
+
+            const trustLevel = getTrustLevel(trustProfile.trustScore);
+            const trustLevelMeta = getTrustLevelMeta(trustLevel);
+
+            return (
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mt-8">
+                <h3 className="text-lg font-bold text-guiso-dark mb-4 flex items-center gap-2">
+                  <Award size={20} className="text-guiso-orange" />
+                  Impact Status
+                </h3>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-gray-500 font-medium">Merchant Trust Level</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold bg-gray-50 border border-gray-100 ${trustLevelMeta.color}`}>
+                        {trustLevelMeta.icon === 'ShieldAlert' && <ShieldAlert size={16} />}
+                        {trustLevelMeta.icon === 'Shield' && <Shield size={16} />}
+                        {trustLevelMeta.icon === 'ShieldCheck' && <ShieldCheck size={16} />}
+                        {trustLevelMeta.icon === 'Award' && <Award size={16} />}
+                        {trustLevelMeta.label}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs text-gray-400">Trust Score</p>
+                    <p className={`text-xl font-display font-bold ${trustLevelMeta.color}`}>
+                      {trustProfile.trustScore}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Impact Proof Section */}
+          {(() => {
+            const snapshot = getSnapshotByTxHash(certificate.txHash);
+            if (!snapshot) return null;
+
+            return (
+              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mt-8">
+                <h3 className="text-lg font-bold text-guiso-dark mb-4 flex items-center gap-2">
+                  <ShieldCheck size={20} className="text-purple-500" />
+                  Impact Proof
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="text-sm text-gray-500 font-medium">Proof Hash (SHA-256)</span>
+                    <span className="text-xs font-mono text-gray-900 bg-gray-50 px-2 py-1 rounded border border-gray-200">
+                      {snapshot.proofHash.slice(0, 16)}...{snapshot.proofHash.slice(-16)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="text-sm text-gray-500 font-medium">Timestamp</span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {new Date(snapshot.timestamp).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500 font-medium">Trust Score at Issuance</span>
+                    <span className="text-sm font-bold text-purple-600">
+                      {snapshot.trustScore}%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Impact Credibility Section */}
           {(() => {
