@@ -4,10 +4,12 @@ import { Shield, Award, ArrowUpRight, Activity } from 'lucide-react';
 import { useIdentityStore } from './IdentityStore';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { Card } from '../../components/ui';
+import { useTranslation } from '../../i18n';
 
 export default function IdentityPanel() {
   const { user } = useGuisoCore();
   const { getIdentity } = useIdentityStore();
+  const { t } = useTranslation();
 
   if (!user.walletAddress) {
     return null;
@@ -33,29 +35,29 @@ export default function IdentityPanel() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-display font-bold text-guiso-dark flex items-center gap-2">
           <Shield className="text-guiso-orange" size={24} />
-          My Impact Identity
+          {t('identity.title')}
         </h2>
         <div className="px-3 py-1 bg-guiso-orange/10 text-guiso-orange rounded-full text-xs font-bold uppercase tracking-wider">
-          Level {identity.impactLevel}
+          {t('identity.level')} {identity.impactLevel}
         </div>
       </div>
 
       <div className="text-center py-6 border-y border-gray-100">
-        <p className="text-sm text-gray-500 font-medium mb-1">Current Title</p>
+        <p className="text-sm text-gray-500 font-medium mb-1">{t('identity.currentTitle')}</p>
         <h3 className="text-3xl font-display font-bold text-guiso-dark">
-          {identity.title}
+          {t(`identity.${identity.title.toLowerCase().replace(/\s+/g, '')}` as any) || identity.title}
         </h3>
       </div>
 
       <div className="space-y-4">
         <div className="flex justify-between items-end">
           <div>
-            <p className="text-sm text-gray-500 font-medium">Total Impact</p>
-            <p className="text-2xl font-bold text-guiso-orange">{identity.totalImpact} pts</p>
+            <p className="text-sm text-gray-500 font-medium">{t('identity.totalImpact')}</p>
+            <p className="text-2xl font-bold text-guiso-orange">{identity.totalImpact} {t('common.pts')}</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-gray-500 font-medium">Next Level</p>
-            <p className="text-sm font-bold text-gray-400">{identity.totalImpact >= 5000 ? 'MAX' : `${nextThreshold} pts`}</p>
+            <p className="text-sm text-gray-500 font-medium">{t('identity.nextLevel')}</p>
+            <p className="text-sm font-bold text-gray-400">{identity.totalImpact >= 5000 ? t('identity.maxLevel') : `${nextThreshold} ${t('common.pts')}`}</p>
           </div>
         </div>
 
@@ -75,7 +77,7 @@ export default function IdentityPanel() {
             <Activity size={20} />
           </div>
           <div>
-            <p className="text-xs text-gray-500">Total Payments</p>
+            <p className="text-xs text-gray-500">{t('identity.totalPayments')}</p>
             <p className="font-bold text-gray-900">{identity.totalPayments}</p>
           </div>
         </div>
@@ -84,7 +86,7 @@ export default function IdentityPanel() {
             <Award size={20} />
           </div>
           <div>
-            <p className="text-xs text-gray-500">Certificates</p>
+            <p className="text-xs text-gray-500">{t('identity.certificates')}</p>
             <p className="font-bold text-gray-900">{identity.certificatesEarned}</p>
           </div>
         </div>

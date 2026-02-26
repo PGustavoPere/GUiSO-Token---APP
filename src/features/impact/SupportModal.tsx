@@ -6,6 +6,7 @@ import { impactEngine } from '../../system/impactEngine';
 import { Button } from '../../components/ui';
 import { web3Bridge } from '../../web3/web3Provider';
 import TransactionStatusBadge, { TransactionStatus } from '../../components/TransactionStatusBadge';
+import { useTranslation } from '../../i18n';
 
 interface SupportModalProps {
   project: { id: string; title: string };
@@ -18,6 +19,7 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
   const [isSuccess, setIsSuccess] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [txStatus, setTxStatus] = useState<TransactionStatus>('idle');
+  const { t } = useTranslation();
 
   const handleSupport = async () => {
     if (amount > token.gsoBalance) return;
@@ -65,22 +67,22 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
               className="p-6 md:p-8"
             >
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl md:text-2xl font-display font-bold">Apoyar Causa</h3>
+                <h3 className="text-xl md:text-2xl font-display font-bold">{t('impact.supportCause')}</h3>
                 <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                   <X size={20} />
                 </button>
               </div>
 
               <div className="bg-guiso-cream p-4 rounded-2xl mb-6 border border-guiso-orange/10">
-                <p className="text-xs text-gray-500 uppercase font-bold mb-1">Proyecto</p>
+                <p className="text-xs text-gray-500 uppercase font-bold mb-1">{t('impact.project')}</p>
                 <p className="font-display font-bold text-lg text-guiso-dark">{project.title}</p>
               </div>
 
               <div className="space-y-4 mb-8">
                 <div className="flex flex-col sm:flex-row justify-between text-xs md:text-sm font-bold gap-1">
-                  <span>Cantidad GSO</span>
+                  <span>{t('impact.amountGso')}</span>
                   <span className={amount > token.gsoBalance ? "text-red-500" : "text-guiso-orange"}>
-                    Balance: {token.gsoBalance.toLocaleString()} GSO
+                    {t('impact.balance')}: {token.gsoBalance.toLocaleString()} GSO
                   </span>
                 </div>
                 
@@ -108,7 +110,7 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
                 
                 {amount > token.gsoBalance && (
                   <p className="text-red-500 text-xs font-bold text-center mt-2">
-                    Necesitás GUISO Tokens para generar impacto.
+                    {t('impact.needGso')}
                   </p>
                 )}
               </div>
@@ -122,12 +124,12 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
                 {txStatus === 'pending' || txStatus === 'confirming' ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Procesando...
+                    {t('common.processing')}
                   </>
                 ) : (
                   <>
                     <Heart size={20} />
-                    Confirmar Apoyo
+                    {t('impact.confirmSupport')}
                   </>
                 )}
               </Button>
@@ -144,13 +146,13 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
                 <Sparkles size={40} className="animate-pulse md:w-12 md:h-12" />
               </div>
               <div>
-                <h3 className="text-2xl md:text-3xl font-display font-bold text-guiso-dark mb-2">¡Impacto Generado!</h3>
+                <h3 className="text-2xl md:text-3xl font-display font-bold text-guiso-dark mb-2">{t('impact.impactGenerated')}</h3>
                 <p className="text-guiso-orange font-bold text-xs md:text-sm mb-2 italic">"{impactEngine.getRandomMotivation()}"</p>
-                <p className="text-gray-500 text-sm md:text-base">Has aportado {amount} GSO a esta causa. Tus puntos de impacto han sido actualizados.</p>
+                <p className="text-gray-500 text-sm md:text-base">{t('impact.youContributed', { amount: amount.toString() })}</p>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <div className="px-4 py-2 bg-guiso-orange/10 text-guiso-orange rounded-full text-xs md:text-sm font-bold">
-                  +{impactEngine.calculateImpactPoints(amount)} Impact Points
+                  +{impactEngine.calculateImpactPoints(amount)} {t('impact.impactPoints')}
                 </div>
                 {txHash && (
                   <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100 w-full">

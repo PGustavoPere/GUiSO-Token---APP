@@ -9,6 +9,7 @@ import { web3Bridge } from '../../web3/web3Provider';
 import { Card, Button } from '../../components/ui';
 import TransactionStatusBadge, { TransactionStatus } from '../../components/TransactionStatusBadge';
 import FiatPaymentModal from '../fiatBridge/FiatPaymentModal';
+import { useTranslation } from '../../i18n';
 
 export default function PaymentPage() {
   const { paymentId } = useParams<{ paymentId: string }>();
@@ -16,6 +17,7 @@ export default function PaymentPage() {
   const { loadPaymentIntent, updateStatus, attachTransaction, markCompleted } = usePaymentStore();
   const { token, recordSupportTransaction, user } = useGuisoCore();
   const { connect, isConnecting } = useWallet();
+  const { t } = useTranslation();
   
   const [payment, setPayment] = useState(paymentId ? loadPaymentIntent(paymentId) : null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -42,9 +44,9 @@ export default function PaymentPage() {
       <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
         <Card variant="glass" padding="lg" className="text-center max-w-md w-full">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold mb-2">Pago no encontrado</h2>
-          <p className="text-gray-500 mb-6">El enlace de pago es inválido o no existe.</p>
-          <Button onClick={() => navigate('/')}>Volver al inicio</Button>
+          <h2 className="text-xl font-bold mb-2">{t('payments.notFound')}</h2>
+          <p className="text-gray-500 mb-6">{t('payments.invalidLink')}</p>
+          <Button onClick={() => navigate('/')}>{t('certificates.backToHome')}</Button>
         </Card>
       </div>
     );
@@ -53,7 +55,7 @@ export default function PaymentPage() {
   const handlePayment = async () => {
     if (!user.isWalletConnected) return;
     if (token.gsoBalance < payment.tokenAmount) {
-      setErrorMsg('Balance insuficiente de GUISO Tokens');
+      setErrorMsg(t('errors.insufficientBalance'));
       return;
     }
     if (payment.status === 'completed' || payment.status === 'confirming' || payment.status === 'pending') {
@@ -69,7 +71,7 @@ export default function PaymentPage() {
       
       if (!result.success) {
         updateStatus(payment.id, 'failed');
-        setErrorMsg(result.error || 'Transacción fallida');
+        setErrorMsg(result.error || t('errors.transactionFailed'));
         setTimeout(() => updateStatus(payment.id, 'awaiting_payment'), 3000);
         return;
       }
@@ -83,12 +85,12 @@ export default function PaymentPage() {
         recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, result.txHash);
       } else {
         updateStatus(payment.id, 'failed');
-        setErrorMsg('La transacción no pudo ser confirmada');
+        setErrorMsg(t('errors.unconfirmedTransaction'));
         setTimeout(() => updateStatus(payment.id, 'awaiting_payment'), 3000);
       }
     } catch (err: any) {
       updateStatus(payment.id, 'failed');
-      setErrorMsg(err.message || 'Error inesperado');
+      setErrorMsg(err.message || t('errors.unexpectedError'));
       setTimeout(() => updateStatus(payment.id, 'awaiting_payment'), 3000);
     }
   };
@@ -125,12 +127,12 @@ export default function PaymentPage() {
 
           <div className="bg-white rounded-2xl p-6 mb-6 border border-gray-100 shadow-sm">
             <div className="flex justify-between items-center mb-4">
-              <span className="text-gray-500 font-medium">Total a pagar</span>
+              <span className="text-gray-500 font-medium">{t('payments.totalToPay')}</span>
               <span className="text-2xl font-bold text-guiso-dark">${payment.fiatAmount.toFixed(2)}</span>
             </div>
             <div className="h-px bg-gray-100 w-full my-4" />
             <div className="flex justify-between items-center">
-              <span className="text-sm font-bold text-guiso-orange">Monto en GUISO</span>
+              <span className="text-sm font-bold text-guiso-orange">{t('payments.amountInGuiso')}</span>
               <span className="text-lg font-bold text-guiso-orange">{payment.tokenAmount.toLocaleString()} GSO</span>
             </div>
           </div>
@@ -138,7 +140,7 @@ export default function PaymentPage() {
           {isExpired ? (
             <div className="text-center p-4 bg-red-50 rounded-xl text-red-600 font-medium flex items-center justify-center gap-2">
               <Clock size={20} />
-              El pago ha expirado
+              {t('payments.expired')}
             </div>
           ) : isCompleted ? (
             <motion.div 
@@ -147,9 +149,9 @@ export default function PaymentPage() {
               className="text-center p-6 bg-green-50 rounded-xl border border-green-100"
             >
               <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
-              <h3 className="text-lg font-bold text-green-700 mb-1">¡Pago Completado!</h3>
-              <p className="text-sm text-green-600">Tu impacto ha sido registrado.</p>
-              <Button onClick={() => navigate('/')} className="mt-4 w-full">Volver al inicio</Button>
+              <h3 className="text-lg font-bold text-green-700 mb-1">{t('payments.completed')}</h3>
+              <p className="text-sm text-green-600">{t('payments.impactRegistered')}</p>
+              <Button onClick={() => navigate('/')} className="mt-4 w-full">{t('certificates.backToHome')}</Button>
             </motion.div>
           ) : (
             <div className="space-y-4">
@@ -160,12 +162,12 @@ export default function PaymentPage() {
                   className="w-full py-4 text-lg"
                 >
                   <Wallet className="mr-2" />
-                  {isConnecting ? 'Conectando...' : 'Conectar Wallet para Pagar'}
+                  {isConnecting ? t('common.loading') : t('payments.connectToPay')}
                 </Button>
               ) : (
                 <>
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-500">Tu balance:</span>
+                    <span className="text-gray-500">{t('payments.yourBalance')}:</span>
                     <span className={token.gsoBalance < payment.tokenAmount ? "text-red-500 font-bold" : "text-guiso-dark font-bold"}>
                       {token.gsoBalance.toLocaleString()} GSO
                     </span>
@@ -178,16 +180,16 @@ export default function PaymentPage() {
                     {isProcessing ? (
                       <span className="flex items-center justify-center gap-2">
                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Procesando Pago...
+                        {t('payments.processing')}
                       </span>
                     ) : (
-                      'Pagar con GUISO'
+                      t('payments.payWithGuiso')
                     )}
                   </Button>
                   
                   <div className="relative flex items-center py-2">
                     <div className="flex-grow border-t border-gray-200"></div>
-                    <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">o</span>
+                    <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">{t('common.or')}</span>
                     <div className="flex-grow border-t border-gray-200"></div>
                   </div>
 
@@ -198,7 +200,7 @@ export default function PaymentPage() {
                     className="w-full py-4 text-lg border-blue-200 text-blue-700 hover:bg-blue-50"
                   >
                     <CreditCard className="mr-2" />
-                    Pagar con dinero local (ARS)
+                    {t('payments.payWithFiat')}
                   </Button>
 
                   {errorMsg && (
@@ -215,7 +217,7 @@ export default function PaymentPage() {
           
           {!isCompleted && !isExpired && (
             <p className="text-center text-xs text-gray-400 mt-6">
-              Expira en {Math.max(0, Math.floor((payment.expiresAt - Date.now()) / 60000))} minutos
+              {t('payments.expiresIn')} {Math.max(0, Math.floor((payment.expiresAt - Date.now()) / 60000))} {t('common.minutes')}
             </p>
           )}
         </Card>

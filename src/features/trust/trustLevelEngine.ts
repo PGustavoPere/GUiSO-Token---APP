@@ -1,3 +1,5 @@
+import { t } from '../../i18n';
+
 export type TrustLevel = 'unverified' | 'verified' | 'trusted' | 'elite';
 
 export interface TrustLevelMeta {

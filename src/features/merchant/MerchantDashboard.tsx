@@ -9,12 +9,14 @@ import { PaymentIntent } from '../payments/types';
 import { useWallet } from '../../core/WalletProvider';
 import { Card, Button, Badge } from '../../components/ui';
 import CreatePaymentModal from './CreatePaymentModal';
+import { useTranslation } from '../../i18n';
 
 export default function MerchantDashboard() {
   const { merchant, registerMerchant, isMerchant } = useMerchantStore();
   const { payments } = usePaymentStore();
   const { getMerchantTrust } = useTrustStore();
   const { isConnected, connect, address } = useWallet();
+  const { t } = useTranslation();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [regName, setRegName] = useState('');
   const [prevCompletedCount, setPrevCompletedCount] = useState(0);
@@ -43,16 +45,16 @@ export default function MerchantDashboard() {
   if (!isConnected) {
     return (
       <div className="max-w-4xl mx-auto space-y-8">
-        <h1 className="text-3xl md:text-4xl font-display font-bold">Portal de Comercios</h1>
+        <h1 className="text-3xl md:text-4xl font-display font-bold">{t('merchant.portal')}</h1>
         <Card variant="glass" padding="xl" className="text-center space-y-6">
           <div className="w-20 h-20 bg-guiso-orange/10 rounded-full flex items-center justify-center mx-auto text-guiso-orange">
             <Wallet size={32} />
           </div>
           <div>
-            <h3 className="text-xl font-display font-bold mb-2">Conecta tu Wallet</h3>
-            <p className="text-gray-500 max-w-md mx-auto">Para acceder al portal de comercios y empezar a cobrar con GUISO, necesitas conectar tu billetera.</p>
+            <h3 className="text-xl font-display font-bold mb-2">{t('navigation.connectWallet')}</h3>
+            <p className="text-gray-500 max-w-md mx-auto">{t('merchant.connectPrompt')}</p>
           </div>
-          <Button onClick={connect} className="px-8 py-3">Conectar Wallet</Button>
+          <Button onClick={connect} className="px-8 py-3">{t('navigation.connectWallet')}</Button>
         </Card>
       </div>
     );
@@ -61,24 +63,24 @@ export default function MerchantDashboard() {
   if (!isMerchant) {
     return (
       <div className="max-w-4xl mx-auto space-y-8">
-        <h1 className="text-3xl md:text-4xl font-display font-bold">Portal de Comercios</h1>
+        <h1 className="text-3xl md:text-4xl font-display font-bold">{t('merchant.portal')}</h1>
         <Card variant="glass" padding="xl" className="max-w-md mx-auto space-y-6">
           <div className="text-center">
             <div className="w-16 h-16 bg-guiso-orange/10 rounded-full flex items-center justify-center mx-auto text-guiso-orange mb-4">
               <Store size={24} />
             </div>
-            <h3 className="text-xl font-display font-bold mb-2">Registra tu Comercio</h3>
-            <p className="text-gray-500 text-sm">Empieza a aceptar pagos con impacto social.</p>
+            <h3 className="text-xl font-display font-bold mb-2">{t('merchant.register')}</h3>
+            <p className="text-gray-500 text-sm">{t('merchant.registerDesc')}</p>
           </div>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-bold text-gray-600 mb-1">Nombre del Comercio</label>
+              <label className="block text-sm font-bold text-gray-600 mb-1">{t('merchant.merchantName')}</label>
               <input 
                 type="text" 
                 value={regName}
                 onChange={(e) => setRegName(e.target.value)}
-                placeholder="Ej. Panadería La Unión"
+                placeholder={t('merchant.merchantNamePlaceholder')}
                 className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-guiso-orange/20"
               />
             </div>
@@ -87,7 +89,7 @@ export default function MerchantDashboard() {
               disabled={!regName}
               className="w-full"
             >
-              Registrar Comercio
+              {t('merchant.registerButton')}
             </Button>
           </div>
         </Card>
@@ -109,12 +111,12 @@ export default function MerchantDashboard() {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'completed': return <Badge variant="success" className="flex items-center gap-1"><CheckCircle2 size={12}/> Pagado</Badge>;
+      case 'completed': return <Badge variant="success" className="flex items-center gap-1"><CheckCircle2 size={12}/> {t('payments.completed')}</Badge>;
       case 'pending':
-      case 'confirming': return <Badge variant="primary" className="flex items-center gap-1 animate-pulse"><Clock size={12}/> Procesando</Badge>;
-      case 'failed': return <Badge variant="danger" className="flex items-center gap-1"><XCircle size={12}/> Fallido</Badge>;
-      case 'expired': return <Badge variant="neutral" className="flex items-center gap-1"><Clock size={12}/> Expirado</Badge>;
-      default: return <Badge variant="neutral" className="flex items-center gap-1"><Clock size={12}/> Esperando</Badge>;
+      case 'confirming': return <Badge variant="primary" className="flex items-center gap-1 animate-pulse"><Clock size={12}/> {t('payments.processing')}</Badge>;
+      case 'failed': return <Badge variant="danger" className="flex items-center gap-1"><XCircle size={12}/> {t('payments.failed')}</Badge>;
+      case 'expired': return <Badge variant="neutral" className="flex items-center gap-1"><Clock size={12}/> {t('payments.expired')}</Badge>;
+      default: return <Badge variant="neutral" className="flex items-center gap-1"><Clock size={12}/> {t('payments.waiting')}</Badge>;
     }
   };
 
@@ -125,11 +127,11 @@ export default function MerchantDashboard() {
           <h1 className="text-3xl md:text-4xl font-display font-bold text-guiso-dark">{merchant?.name}</h1>
           <p className="text-gray-500 flex items-center gap-2 mt-1">
             <span className="w-2 h-2 bg-green-500 rounded-full" />
-            Conectado: {address?.slice(0, 6)}...{address?.slice(-4)}
+            {t('merchant.connected')}: {address?.slice(0, 6)}...{address?.slice(-4)}
           </p>
         </div>
         <Button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 shadow-lg shadow-guiso-orange/20">
-          <Plus size={20} /> Crear Cobro
+          <Plus size={20} /> {t('payments.createPayment')}
         </Button>
       </div>
 
@@ -160,15 +162,15 @@ export default function MerchantDashboard() {
           
           <div className="grid grid-cols-3 gap-4 text-center pt-2">
             <div>
-              <p className="text-xs text-gray-400">Pagos Exitosos</p>
+              <p className="text-xs text-gray-400">{t('trust.successfulPayments')}</p>
               <p className="font-bold text-gray-700">{trustProfile.successfulPayments}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-400">Pagos Fallidos</p>
+              <p className="text-xs text-gray-400">{t('trust.failedPayments')}</p>
               <p className="font-bold text-gray-700">{trustProfile.failedPayments}</p>
             </div>
             <div>
-              <p className="text-xs text-gray-400">Impacto Generado</p>
+              <p className="text-xs text-gray-400">{t('trust.impactGenerated')}</p>
               <p className="font-bold text-guiso-orange">+{trustProfile.totalImpactGenerated}</p>
             </div>
           </div>
@@ -176,12 +178,12 @@ export default function MerchantDashboard() {
       )}
 
       <Card variant="glass" padding="md" className="space-y-6">
-        <h3 className="text-xl font-display font-bold">Cobros Recientes</h3>
+        <h3 className="text-xl font-display font-bold">{t('payments.recentPayments')}</h3>
         
         {merchantPayments.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             <Store size={48} className="mx-auto mb-4 opacity-20" />
-            <p>Aún no has creado ningún cobro.</p>
+            <p>{t('payments.noPayments')}</p>
           </div>
         ) : (
           <div className="space-y-3">

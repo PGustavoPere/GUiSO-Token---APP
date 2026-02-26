@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, ArrowRight, Heart, ShieldCheck, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from '../../i18n';
 import ImpactDashboard from '../../components/ImpactDashboard';
 import ImpactTransactionPanel from '../../components/ImpactTransactionPanel';
 import ImpactHistory from '../../components/ImpactHistory';
@@ -13,6 +14,7 @@ import { Card, Button } from '../../components/ui';
 
 export default function DashboardPage() {
   const { user } = useGuisoCore();
+  const { t } = useTranslation();
 
   return (
     <div className="space-y-12 pb-20">
@@ -29,7 +31,7 @@ export default function DashboardPage() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[10px] md:text-xs font-bold uppercase tracking-widest"
           >
             <Zap size={14} className="text-guiso-orange" />
-            Social Impact MVP v1.0
+            {t('impact.mvpBadge')}
           </motion.div>
           
           <motion.h1 
@@ -38,8 +40,8 @@ export default function DashboardPage() {
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-7xl font-display font-bold leading-[1.1] md:leading-[0.9] tracking-tight"
           >
-            Tus Acciones, <br />
-            <span className="text-guiso-orange">Impacto Real.</span>
+            {t('impact.heroTitle1')} <br />
+            <span className="text-guiso-orange">{t('impact.heroTitle2')}</span>
           </motion.h1>
           
           <motion.p 
@@ -48,8 +50,7 @@ export default function DashboardPage() {
             transition={{ delay: 0.2 }}
             className="text-base md:text-lg text-white/60 leading-relaxed"
           >
-            GUISO transforma cada transacción en una oportunidad para ayudar. 
-            Conecta tu wallet y empieza a generar impacto humanitario hoy mismo.
+            {t('impact.heroDesc')}
           </motion.p>
 
           <motion.div 
@@ -60,13 +61,13 @@ export default function DashboardPage() {
           >
             <Link to="/impacto" className="w-full sm:w-auto">
               <Button size="lg" className="w-full flex items-center justify-center gap-2">
-                Explorar Causas
+                {t('impact.exploreCauses')}
                 <ArrowRight size={20} />
               </Button>
             </Link>
             <div className="flex items-center justify-center gap-3 px-6 py-4 rounded-full border border-white/20 text-sm font-bold w-full sm:w-auto">
               <ShieldCheck size={20} className="text-green-400" />
-              Impacto Verificado
+              {t('impact.verifiedImpact')}
             </div>
           </motion.div>
         </div>
@@ -80,17 +81,17 @@ export default function DashboardPage() {
         {/* Main Column */}
         <div className="lg:col-span-2 space-y-8">
           <section id="dashboard-stats" className="space-y-4">
-            <h2 className="text-2xl font-display font-bold px-2">Panel de Control</h2>
+            <h2 className="text-2xl font-display font-bold px-2">{t('impact.dashboard')}</h2>
             <ImpactDashboard />
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-display font-bold px-2">My Impact Identity</h2>
+            <h2 className="text-2xl font-display font-bold px-2">{t('identity.title')}</h2>
             <IdentityPanel />
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-display font-bold px-2">Historial Reciente</h2>
+            <h2 className="text-2xl font-display font-bold px-2">{t('impact.recentHistory')}</h2>
             <ImpactHistory />
           </section>
 
@@ -102,7 +103,7 @@ export default function DashboardPage() {
         {/* Sidebar Column */}
         <div className="space-y-8">
           <section id="transaction-panel" className="space-y-4">
-            <h2 className="text-2xl font-display font-bold px-2">Acción Rápida</h2>
+            <h2 className="text-2xl font-display font-bold px-2">{t('impact.quickAction')}</h2>
             <ImpactTransactionPanel />
           </section>
 
@@ -112,14 +113,13 @@ export default function DashboardPage() {
               <div className="w-10 h-10 bg-guiso-orange rounded-xl flex items-center justify-center text-white">
                 <Heart size={20} />
               </div>
-              <h4 className="font-display font-bold">¿Cómo funciona?</h4>
+              <h4 className="font-display font-bold">{t('impact.howItWorks')}</h4>
             </div>
             <p className="text-sm text-gray-500 leading-relaxed mb-4">
-              Cada vez que aportas GSO, el sistema calcula el impacto humanitario generado. 
-              Tus puntos de impacto (IP) determinan tu nivel en la comunidad y tu poder de decisión.
+              {t('impact.howItWorksDesc')}
             </p>
             <Link to="/comunidad" className="text-guiso-orange text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
-              Saber más sobre niveles <ArrowRight size={14} />
+              {t('impact.learnMore')} <ArrowRight size={14} />
             </Link>
           </Card>
         </div>

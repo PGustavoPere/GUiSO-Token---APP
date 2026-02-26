@@ -5,6 +5,7 @@ import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { useWallet } from '../../core/WalletProvider';
 import { impactEngine } from '../../system/impactEngine';
 import { Card, Button, Badge } from '../../components/ui';
+import { useTranslation } from '../../i18n';
 
 export default function ProfilePage() {
   const { 
@@ -13,6 +14,7 @@ export default function ProfilePage() {
     global
   } = useGuisoCore();
   const { address, isConnected, connect, isConnecting } = useWallet();
+  const { t } = useTranslation();
 
   const impactScore = user.impactScore;
   const communityLevel = user.communityLevel;
@@ -38,8 +40,8 @@ export default function ProfilePage() {
         <div className="w-24 h-24 bg-guiso-orange/10 rounded-3xl flex items-center justify-center text-guiso-orange mb-4">
           <Wallet size={48} />
         </div>
-        <h1 className="text-4xl font-display font-bold">Conecta tu Wallet</h1>
-        <p className="text-gray-500 max-w-md">Para ver tu balance de GSO y participar en las decisiones de la comunidad, necesitas conectar tu cartera Web3.</p>
+        <h1 className="text-4xl font-display font-bold">{t('navigation.connectWallet')}</h1>
+        <p className="text-gray-500 max-w-md">{t('common.connectWalletDesc')}</p>
         <Button 
           onClick={handleConnect}
           disabled={isConnecting}
@@ -49,16 +51,16 @@ export default function ProfilePage() {
           {isConnecting ? (
             <>
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Conectando...
+              {t('common.loading')}
             </>
           ) : (
             <>
               <Wallet size={20} />
-              Conectar Wallet
+              {t('navigation.connectWallet')}
             </>
           )}
         </Button>
-        <p className="text-xs text-gray-400">Soportamos MetaMask, WalletConnect y Coinbase Wallet.</p>
+        <p className="text-xs text-gray-400">{t('common.supportedWallets')}</p>
       </div>
     );
   }
@@ -85,22 +87,22 @@ export default function ProfilePage() {
         <div className="lg:col-span-2 space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <Card variant="dark" padding="md" rounded="2xl" className="relative overflow-hidden">
-              <p className="text-white/60 text-xs md:text-sm mb-1 uppercase tracking-widest font-bold">Balance GSO</p>
+              <p className="text-white/60 text-xs md:text-sm mb-1 uppercase tracking-widest font-bold">{t('impact.balanceGSO')}</p>
               <h3 className="text-3xl md:text-4xl font-display font-bold mb-4">{balance.toLocaleString()} GSO</h3>
               <div className="flex gap-2 md:gap-3">
-                <Button variant="primary" size="sm" className="flex-1">Enviar</Button>
-                <Button variant="secondary" size="sm" className="flex-1">Recibir</Button>
+                <Button variant="primary" size="sm" className="flex-1">{t('buttons.send')}</Button>
+                <Button variant="secondary" size="sm" className="flex-1">{t('buttons.receive')}</Button>
               </div>
             </Card>
 
             <Card variant="glass" padding="md" rounded="2xl" className="flex flex-col justify-between">
               <div>
-                <p className="text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-widest font-bold">Puntos de Impacto</p>
-                <h3 className="text-3xl md:text-4xl font-display font-bold text-guiso-orange">{impactScore} IP</h3>
+                <p className="text-gray-500 text-xs md:text-sm mb-1 uppercase tracking-widest font-bold">{t('impact.impactPoints')}</p>
+                <h3 className="text-3xl md:text-4xl font-display font-bold text-guiso-orange">{impactScore} {t('common.pts')}</h3>
               </div>
               <div className="mt-4 md:mt-6 flex items-center gap-2 text-[10px] md:text-xs text-gray-400">
                 <Sparkles size={14} className="text-guiso-orange" />
-                Causas Apoyadas: {totalSupportedCauses}
+                {t('impact.supportedCauses')}: {totalSupportedCauses}
               </div>
             </Card>
           </div>
@@ -109,7 +111,7 @@ export default function ProfilePage() {
           <Card variant="glass" padding="md" rounded="2xl">
             <h3 className="text-lg md:text-xl font-display font-bold mb-4 md:mb-6 flex items-center gap-2">
               <History size={20} className="text-guiso-orange" />
-              Historial de Acciones Sociales
+              {t('impact.socialActionHistory')}
             </h3>
             <div className="space-y-3 md:space-y-4">
               {history.length > 0 ? (
@@ -125,19 +127,19 @@ export default function ProfilePage() {
                         <Heart size={16} className="md:w-[18px] md:h-[18px]" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-bold text-xs md:text-sm truncate">Apoyo a {item.target}</p>
-                        <p className="text-[10px] md:text-xs text-gray-400 truncate">{item.date} • {item.amount} GSO aportados</p>
+                        <p className="font-bold text-xs md:text-sm truncate">{t('impact.supportTo')} {item.target}</p>
+                        <p className="text-[10px] md:text-xs text-gray-400 truncate">{item.date} • {item.amount} {t('impact.gsoContributed')}</p>
                       </div>
                     </div>
                     <div className="text-left sm:text-right pl-11 sm:pl-0">
-                      <p className="text-[10px] md:text-xs font-bold text-green-500">+{item.impactPoints} IP</p>
+                      <p className="text-[10px] md:text-xs font-bold text-green-500">+{item.impactPoints} {t('common.pts')}</p>
                     </div>
                   </motion.div>
                 ))
               ) : (
                 <div className="text-center py-12 text-gray-400">
-                  <p>Aún no has realizado ninguna acción social.</p>
-                  <p className="text-xs">¡Visita la sección de Impacto para comenzar!</p>
+                  <p>{t('impact.noActionsYet')}</p>
+                  <p className="text-xs">{t('impact.visitImpactSection')}</p>
                 </div>
               )}
             </div>
@@ -147,12 +149,12 @@ export default function ProfilePage() {
         {/* Sidebar Info */}
         <div className="space-y-8">
           <Card variant="glass" padding="sm" rounded="2xl" className="border-guiso-orange/20">
-            <h4 className="font-display font-bold mb-4">Progreso de Nivel</h4>
+            <h4 className="font-display font-bold mb-4">{t('impact.levelProgress')}</h4>
             <div className="space-y-4">
               <div className="flex justify-between text-xs font-bold mb-1">
-                <span>Nivel Actual</span>
+                <span>{t('impact.currentLevel')}</span>
                 <span className="text-guiso-orange">
-                  {impactScore} / {nextThreshold ? nextThreshold.minPoints : 'MAX'} IP
+                  {impactScore} / {nextThreshold ? nextThreshold.minPoints : 'MAX'} {t('common.pts')}
                 </span>
               </div>
               <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
@@ -162,7 +164,7 @@ export default function ProfilePage() {
                 />
               </div>
               <p className="text-[10px] text-gray-400 text-center italic">
-                {nextThreshold ? `Próximo rango: ${nextThreshold.level}` : '¡Has alcanzado el nivel máximo!'}
+                {nextThreshold ? `${t('impact.nextRank')}: ${nextThreshold.level}` : t('impact.maxLevelReached')}
               </p>
             </div>
           </Card>

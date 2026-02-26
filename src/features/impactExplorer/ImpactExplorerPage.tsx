@@ -5,10 +5,12 @@ import { useImpactExplorerStore } from './ImpactExplorerStore';
 import { useTrustStore } from '../trust/TrustStore';
 import { getTrustLevel, getTrustLevelMeta } from '../trust/trustLevelEngine';
 import ImpactEventCard from './ImpactEventCard';
+import { useTranslation } from '../../i18n';
 
 export default function ImpactExplorerPage() {
   const { getRecentEvents } = useImpactExplorerStore();
   const { getTrustByTxHash } = useTrustStore();
+  const { t } = useTranslation();
   
   const events = getRecentEvents().sort((a, b) => {
     const trustA = getTrustByTxHash(a.txHash);
@@ -41,14 +43,14 @@ export default function ImpactExplorerPage() {
           <Globe size={32} />
         </div>
         <h1 className="text-4xl md:text-5xl font-display font-bold text-guiso-dark">
-          Impact Explorer
+          {t('navigation.explorer')}
         </h1>
         <p className="text-gray-500 max-w-xl mx-auto text-lg">
-          Explorador público de impacto humanitario. Cada evento representa una transacción verificada en la red GUISO.
+          {t('impact.explorerDesc')}
         </p>
         <div className="inline-flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-full text-sm font-bold">
           <Activity size={16} className="animate-pulse" />
-          Live Network Activity
+          {t('impact.liveActivity')}
         </div>
       </div>
 
@@ -56,7 +58,7 @@ export default function ImpactExplorerPage() {
         {events.length === 0 ? (
           <div className="text-center py-12 text-gray-400 bg-white rounded-3xl border border-gray-100">
             <Globe size={48} className="mx-auto mb-4 opacity-20" />
-            <p>No hay eventos de impacto registrados aún.</p>
+            <p>{t('impact.noEvents')}</p>
           </div>
         ) : (
           <AnimatePresence>
