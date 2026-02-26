@@ -9,6 +9,7 @@ import { Card, Button, Badge } from './ui';
 import { web3Bridge } from '../web3/web3Provider';
 import TransactionStatusBadge, { TransactionStatus } from './TransactionStatusBadge';
 import { useTranslation } from '../i18n';
+import LoadingMessages from './LoadingMessages';
 
 const CAUSES = [
   { id: 'kitchen', title: 'Comedor Comunitario', icon: Utensils, description: 'Provee comidas calientes a familias en riesgo.' },
@@ -77,8 +78,8 @@ export default function ImpactTransactionPanel() {
             <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto">
               <Sparkles size={32} />
             </div>
-            <h3 className="text-xl font-display font-bold text-guiso-dark">¡Impacto Generado!</h3>
-            <p className="text-sm text-gray-500">Has aportado {amount} GSO a {selectedCause.title}.</p>
+            <h3 className="text-xl font-display font-bold text-guiso-dark">{t('impact.impactGenerated')}</h3>
+            <p className="text-sm text-gray-500">{t('impact.youContributed', { amount: amount.toString() })}</p>
             <Badge variant="success">
               +{impactEngine.calculateImpactPoints(amount)} {t('impact.impactPoints')}
             </Badge>
@@ -206,10 +207,15 @@ export default function ImpactTransactionPanel() {
         className="w-full flex items-center justify-center gap-3 shadow-xl shadow-guiso-orange/20 hover:shadow-2xl hover:-translate-y-1 transition-all disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none"
       >
         {txStatus === 'pending' || txStatus === 'confirming' ? (
-          <>
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            {t('payments.processing')}
-          </>
+          <div className="flex flex-col items-center justify-center w-full">
+            <span className="flex items-center justify-center gap-2 mb-1">
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              {t('common.processing')}
+            </span>
+            <div className="text-white/80 w-full">
+              <LoadingMessages />
+            </div>
+          </div>
         ) : (
           <>
             <Sparkles size={20} className="md:w-6 md:h-6" />

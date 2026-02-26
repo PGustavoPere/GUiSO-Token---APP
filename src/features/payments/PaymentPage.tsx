@@ -10,6 +10,7 @@ import { Card, Button } from '../../components/ui';
 import TransactionStatusBadge, { TransactionStatus } from '../../components/TransactionStatusBadge';
 import FiatPaymentModal from '../fiatBridge/FiatPaymentModal';
 import { useTranslation } from '../../i18n';
+import LoadingMessages from '../../components/LoadingMessages';
 
 export default function PaymentPage() {
   const { paymentId } = useParams<{ paymentId: string }>();
@@ -178,10 +179,15 @@ export default function PaymentPage() {
                     className="w-full py-4 text-lg relative overflow-hidden"
                   >
                     {isProcessing ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        {t('payments.processing')}
-                      </span>
+                      <div className="flex flex-col items-center justify-center w-full">
+                        <span className="flex items-center justify-center gap-2 mb-1">
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          {t('payments.processing')}
+                        </span>
+                        <div className="text-white/80 w-full">
+                          <LoadingMessages />
+                        </div>
+                      </div>
                     ) : (
                       t('payments.payWithGuiso')
                     )}

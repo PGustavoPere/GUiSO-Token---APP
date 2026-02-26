@@ -4,6 +4,7 @@ import { X, CreditCard, RefreshCw, Send, CheckCircle2, AlertCircle } from 'lucid
 import { Button } from '../../components/ui';
 import { useFiatPaymentProcessor } from './FiatPaymentProcessor';
 import { PaymentIntent } from '../payments/types';
+import LoadingMessages from '../../components/LoadingMessages';
 import { useTranslation } from '../../i18n';
 
 interface FiatPaymentModalProps {
@@ -72,9 +73,7 @@ export default function FiatPaymentModal({ payment, onClose }: FiatPaymentModalP
               {currentStatus === 'converting' && t('payments.converting')}
               {currentStatus === 'sending_tokens' && t('payments.confirming')}
             </h3>
-            <p className="text-sm text-gray-500">
-              {t('payments.doNotClose')}
-            </p>
+            <LoadingMessages />
           </div>
         </div>
       );

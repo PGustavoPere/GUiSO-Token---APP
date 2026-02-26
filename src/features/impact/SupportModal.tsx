@@ -7,6 +7,7 @@ import { Button } from '../../components/ui';
 import { web3Bridge } from '../../web3/web3Provider';
 import TransactionStatusBadge, { TransactionStatus } from '../../components/TransactionStatusBadge';
 import { useTranslation } from '../../i18n';
+import LoadingMessages from '../../components/LoadingMessages';
 
 interface SupportModalProps {
   project: { id: string; title: string };
@@ -122,10 +123,15 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
                 className="w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {txStatus === 'pending' || txStatus === 'confirming' ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    {t('common.processing')}
-                  </>
+                  <div className="flex flex-col items-center justify-center w-full">
+                    <span className="flex items-center justify-center gap-2 mb-1">
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      {t('common.processing')}
+                    </span>
+                    <div className="text-white/80 w-full">
+                      <LoadingMessages />
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <Heart size={20} />

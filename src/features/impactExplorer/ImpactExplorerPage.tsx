@@ -57,8 +57,8 @@ export default function ImpactExplorerPage() {
       <div className="space-y-4">
         {events.length === 0 ? (
           <div className="text-center py-12 text-gray-400 bg-white rounded-3xl border border-gray-100">
-            <Globe size={48} className="mx-auto mb-4 opacity-20" />
-            <p>{t('impact.noEvents')}</p>
+            <Globe size={48} className="mx-auto mb-4 text-guiso-orange/20" />
+            <p className="text-lg font-medium text-gray-500">{t('impact.noEvents')}</p>
           </div>
         ) : (
           <AnimatePresence>

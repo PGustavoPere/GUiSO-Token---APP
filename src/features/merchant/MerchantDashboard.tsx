@@ -84,6 +84,22 @@ export default function MerchantDashboard() {
                 className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-guiso-orange/20"
               />
             </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-600 mb-1">{t('merchant.descriptionPlaceholder')}</label>
+              <textarea 
+                rows={2}
+                placeholder={t('merchant.descriptionPlaceholder')}
+                className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-guiso-orange/20 resize-none"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-600 mb-1">{t('merchant.impactStoryPlaceholder')}</label>
+              <textarea 
+                rows={2}
+                placeholder={t('merchant.impactStoryPlaceholder')}
+                className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-guiso-orange/20 resize-none"
+              />
+            </div>
             <Button 
               onClick={() => registerMerchant(regName)}
               disabled={!regName}
@@ -139,7 +155,7 @@ export default function MerchantDashboard() {
         <Card variant="glass" padding="md" className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h3 className="text-lg font-bold text-guiso-dark flex items-center gap-2">
+              <h3 className="text-lg font-bold text-guiso-dark flex items-center gap-2" title={t('trust.trustTooltip')}>
                 <Shield size={20} className={trustTextColor} />
                 Trust Score
               </h3>
@@ -148,7 +164,7 @@ export default function MerchantDashboard() {
                 {trustLevelMeta.icon === 'Shield' && <Shield size={14} />}
                 {trustLevelMeta.icon === 'ShieldCheck' && <ShieldCheck size={14} />}
                 {trustLevelMeta.icon === 'Award' && <Award size={14} />}
-                {trustLevelMeta.label}
+                {t(`trust.${trustLevelMeta.level}` as any) || trustLevelMeta.label}
               </div>
             </div>
             <span className={`text-2xl font-display font-bold ${trustTextColor}`}>
@@ -156,6 +172,8 @@ export default function MerchantDashboard() {
             </span>
           </div>
           
+          <p className="text-xs text-gray-500 italic">{t('trust.trustExplanation')}</p>
+
           <div className="w-full bg-gray-200 rounded-full h-2.5">
             <div className={`h-2.5 rounded-full ${trustColor}`} style={{ width: `${trustScore}%` }}></div>
           </div>
@@ -178,12 +196,15 @@ export default function MerchantDashboard() {
       )}
 
       <Card variant="glass" padding="md" className="space-y-6">
-        <h3 className="text-xl font-display font-bold">{t('payments.recentPayments')}</h3>
+        <div className="flex justify-between items-center">
+          <h3 className="text-xl font-display font-bold">{t('payments.recentPayments')}</h3>
+          <p className="text-xs text-guiso-orange font-medium italic hidden sm:block">{t('merchant.humanMessage')}</p>
+        </div>
         
         {merchantPayments.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
-            <Store size={48} className="mx-auto mb-4 opacity-20" />
-            <p>{t('payments.noPayments')}</p>
+            <Store size={48} className="mx-auto mb-4 text-guiso-orange/20" />
+            <p className="text-lg font-medium">{t('payments.noPayments')}</p>
           </div>
         ) : (
           <div className="space-y-3">

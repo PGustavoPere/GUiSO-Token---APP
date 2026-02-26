@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, ArrowLeft, Share2, CheckCircle2, ShieldAlert, Shield, Award } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Share2, CheckCircle2, ShieldAlert, Shield, Award, Heart } from 'lucide-react';
 import { impactCertificateService } from './impactCertificateService';
 import { ImpactCertificate } from './types';
 import ImpactShareCard from './ImpactShareCard';
@@ -77,6 +77,28 @@ export default function ImpactCertificatePage() {
           </div>
 
           <ImpactShareCard certificate={certificate} />
+
+          {/* Emotional Layer Section */}
+          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mt-8">
+            <h3 className="text-lg font-bold text-guiso-dark mb-4 flex items-center gap-2">
+              <Heart size={20} className="text-guiso-orange" />
+              {t('certificates.whatDoesItMean')}
+            </h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3">
+                <CheckCircle2 size={18} className="text-green-500 mt-0.5 shrink-0" />
+                <span className="text-gray-600 text-sm">{t('certificates.meaningVerified')}</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <CheckCircle2 size={18} className="text-green-500 mt-0.5 shrink-0" />
+                <span className="text-gray-600 text-sm">{t('certificates.meaningContribution')}</span>
+              </li>
+              <li className="flex items-start gap-3">
+                <CheckCircle2 size={18} className="text-green-500 mt-0.5 shrink-0" />
+                <span className="text-gray-600 text-sm">{t('certificates.meaningTransparent')}</span>
+              </li>
+            </ul>
+          </div>
 
           {/* Impact Status Section */}
           {(() => {

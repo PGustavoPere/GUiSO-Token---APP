@@ -11,11 +11,11 @@ export default function ImpactHistory() {
 
   if (token.transactions.length === 0) {
     return (
-      <Card variant="glass" padding="lg" className="text-center space-y-4 border-dashed border-2 border-gray-100">
-        <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto text-gray-300">
+      <Card variant="glass" padding="lg" className="text-center space-y-4 border-dashed border-2 border-guiso-orange/20">
+        <div className="w-16 h-16 bg-guiso-orange/10 rounded-full flex items-center justify-center mx-auto text-guiso-orange">
           <History size={32} />
         </div>
-        <p className="text-gray-400 text-sm italic">{t('impact.noEvents')}</p>
+        <p className="text-gray-500 text-sm italic font-medium">{t('impact.noEvents')}</p>
       </Card>
     );
   }
