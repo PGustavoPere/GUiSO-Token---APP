@@ -12,10 +12,7 @@ interface ImpactExplorerContextType {
 const ImpactExplorerContext = createContext<ImpactExplorerContextType | undefined>(undefined);
 
 export const ImpactExplorerProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [events, setEvents] = useState<ImpactEvent[]>([]);
-
-  // Load from local storage and sync with certificates
-  useEffect(() => {
+  const [events, setEvents] = useState<ImpactEvent[]>(() => {
     const saved = localStorage.getItem('guiso_impact_events');
     let loadedEvents: ImpactEvent[] = saved ? JSON.parse(saved) : [];
 
@@ -44,8 +41,8 @@ export const ImpactExplorerProvider: React.FC<{ children: React.ReactNode }> = (
       localStorage.setItem('guiso_impact_events', JSON.stringify(loadedEvents));
     }
     
-    setEvents(loadedEvents);
-  }, []);
+    return loadedEvents;
+  });
 
   // Simulate real-time refresh every 10 seconds
   useEffect(() => {

@@ -19,14 +19,13 @@ const calculateLevelAndTitle = (totalImpact: number): { level: number; title: st
 };
 
 export const IdentityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [identities, setIdentities] = useState<Record<string, ImpactIdentity>>({});
-
-  useEffect(() => {
+  const [identities, setIdentities] = useState<Record<string, ImpactIdentity>>(() => {
     const saved = localStorage.getItem('guiso_identities');
     if (saved) {
-      setIdentities(JSON.parse(saved));
+      return JSON.parse(saved);
     }
-  }, []);
+    return {};
+  });
 
   useEffect(() => {
     localStorage.setItem('guiso_identities', JSON.stringify(identities));

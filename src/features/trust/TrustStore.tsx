@@ -27,15 +27,14 @@ export const calculateTrustScore = (profile: MerchantTrustProfile): number => {
 };
 
 export const TrustProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [profiles, setProfiles] = useState<Record<string, MerchantTrustProfile>>({});
-  const { payments } = usePaymentStore();
-
-  useEffect(() => {
+  const [profiles, setProfiles] = useState<Record<string, MerchantTrustProfile>>(() => {
     const saved = localStorage.getItem('guiso_trust_profiles');
     if (saved) {
-      setProfiles(JSON.parse(saved));
+      return JSON.parse(saved);
     }
-  }, []);
+    return {};
+  });
+  const { payments } = usePaymentStore();
 
   useEffect(() => {
     localStorage.setItem('guiso_trust_profiles', JSON.stringify(profiles));

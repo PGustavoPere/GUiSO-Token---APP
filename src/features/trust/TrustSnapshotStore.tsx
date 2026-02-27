@@ -10,14 +10,13 @@ interface TrustSnapshotContextType {
 const TrustSnapshotContext = createContext<TrustSnapshotContextType | undefined>(undefined);
 
 export const TrustSnapshotProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [snapshots, setSnapshots] = useState<Record<string, TrustSnapshot>>({});
-
-  useEffect(() => {
+  const [snapshots, setSnapshots] = useState<Record<string, TrustSnapshot>>(() => {
     const saved = localStorage.getItem('guiso_trust_snapshots');
     if (saved) {
-      setSnapshots(JSON.parse(saved));
+      return JSON.parse(saved);
     }
-  }, []);
+    return {};
+  });
 
   useEffect(() => {
     localStorage.setItem('guiso_trust_snapshots', JSON.stringify(snapshots));

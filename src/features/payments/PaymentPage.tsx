@@ -40,6 +40,42 @@ export default function PaymentPage() {
     }
   }, [paymentId, loadPaymentIntent]);
 
+  // Resume pending transaction on reload
+  useEffect(() => {
+    let isMounted = true;
+    const resumeTransaction = async () => {
+      if (payment?.status === 'confirming' && payment.txHash) {
+        try {
+          const transactionAdapter = web3Bridge.getTransaction();
+          const confirmed = await transactionAdapter.waitForTransaction(payment.txHash);
+          
+          if (!isMounted) return;
+
+          if (confirmed) {
+            markCompleted(payment.id);
+            recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, payment.txHash);
+          } else {
+            updateStatus(payment.id, 'failed');
+            setErrorMsg(t('errors.unconfirmedTransaction'));
+            setTimeout(() => {
+              if (isMounted) updateStatus(payment.id, 'awaiting_payment');
+            }, 3000);
+          }
+        } catch (err: any) {
+          if (!isMounted) return;
+          updateStatus(payment.id, 'failed');
+          setErrorMsg(err.message || t('errors.unexpectedError'));
+          setTimeout(() => {
+            if (isMounted) updateStatus(payment.id, 'awaiting_payment');
+          }, 3000);
+        }
+      }
+    };
+
+    resumeTransaction();
+    return () => { isMounted = false; };
+  }, [payment?.status, payment?.txHash, payment?.id]);
+
   if (!payment) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">

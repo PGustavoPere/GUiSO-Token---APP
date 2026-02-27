@@ -13,7 +13,7 @@ interface FiatPaymentModalProps {
 }
 
 export default function FiatPaymentModal({ payment, onClose }: FiatPaymentModalProps) {
-  const { processPayment, currentStatus, error } = useFiatPaymentProcessor();
+  const { processPayment, currentStatus, error } = useFiatPaymentProcessor(payment.id);
   const { t } = useTranslation();
 
   const handlePay = () => {

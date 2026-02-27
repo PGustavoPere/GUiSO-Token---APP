@@ -41,22 +41,7 @@ export class MetaMaskAdapter implements WalletAdapter {
       
       // Check if on BSC Testnet
       if (network.chainId !== BigInt(97)) {
-        try {
-          await (window as any).ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: networkConfig.bsc_testnet.chainId }],
-          });
-        } catch (switchError: any) {
-          // This error code indicates that the chain has not been added to MetaMask.
-          if (switchError.code === 4902) {
-            await (window as any).ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [networkConfig.bsc_testnet],
-            });
-          } else {
-            throw switchError;
-          }
-        }
+        throw new Error('WRONG_NETWORK');
       }
 
       const accounts = await provider.send('eth_requestAccounts', []);

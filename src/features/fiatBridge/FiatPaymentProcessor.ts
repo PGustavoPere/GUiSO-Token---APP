@@ -1,19 +1,36 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFiatBridgeStore } from './FiatBridgeStore';
 import { usePaymentStore } from '../payments/PaymentStore';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { web3Bridge } from '../../web3/web3Provider';
 import { FiatPaymentStatus } from './fiatTypes';
 
-export const useFiatPaymentProcessor = () => {
-  const { createFiatPayment, updateStatus, markCompleted } = useFiatBridgeStore();
+export const useFiatPaymentProcessor = (paymentIntentId?: string) => {
+  const { createFiatPayment, updateStatus, markCompleted, getPaymentByIntentId } = useFiatBridgeStore();
   const { loadPaymentIntent, updateStatus: updatePaymentStatus, attachTransaction, markCompleted: markPaymentCompleted } = usePaymentStore();
   const { recordSupportTransaction, user } = useGuisoCore();
   
   const [currentStatus, setCurrentStatus] = useState<FiatPaymentStatus>('created');
   const [error, setError] = useState<string | null>(null);
 
-  const processPayment = async (paymentIntentId: string, arsAmount: number) => {
+  // Recovery logic
+  useEffect(() => {
+    if (paymentIntentId) {
+      const existingFiatPayment = getPaymentByIntentId(paymentIntentId);
+      if (existingFiatPayment) {
+        if (['processing', 'converting', 'sending_tokens'].includes(existingFiatPayment.status)) {
+          // If it was stuck in a transient state, mark it as failed so user can retry
+          updateStatus(existingFiatPayment.id, 'failed');
+          setCurrentStatus('failed');
+          setError('El pago fue interrumpido. Por favor, intenta nuevamente.');
+        } else {
+          setCurrentStatus(existingFiatPayment.status);
+        }
+      }
+    }
+  }, [paymentIntentId, getPaymentByIntentId, updateStatus]);
+
+  const processPayment = async (intentId: string, arsAmount: number) => {
     setError(null);
     setCurrentStatus('processing');
     
@@ -22,7 +39,7 @@ export const useFiatPaymentProcessor = () => {
         throw new Error('Por favor conecta tu wallet primero para registrar el impacto en la blockchain');
       }
 
-      const paymentIntent = loadPaymentIntent(paymentIntentId);
+      const paymentIntent = loadPaymentIntent(intentId);
       
       if (!paymentIntent) {
         throw new Error('Payment intent not found');
@@ -36,7 +53,7 @@ export const useFiatPaymentProcessor = () => {
         throw new Error('Este pago ya está siendo procesado o fue completado');
       }
 
-      const fiatPaymentId = createFiatPayment(paymentIntentId, arsAmount);
+      const fiatPaymentId = createFiatPayment(intentId, arsAmount);
 
       // Step 1: Processing
       updateStatus(fiatPaymentId, 'processing');
@@ -50,7 +67,7 @@ export const useFiatPaymentProcessor = () => {
       // Step 3: Sending tokens
       setCurrentStatus('sending_tokens');
       updateStatus(fiatPaymentId, 'sending_tokens');
-      updatePaymentStatus(paymentIntentId, 'pending');
+      updatePaymentStatus(intentId, 'pending');
 
       const transactionAdapter = web3Bridge.getTransaction();
       const result = await transactionAdapter.sendTransaction(
@@ -62,7 +79,7 @@ export const useFiatPaymentProcessor = () => {
         throw new Error(result.error || 'Transaction failed');
       }
 
-      attachTransaction(paymentIntentId, result.txHash);
+      attachTransaction(intentId, result.txHash);
 
       // Step 4: Wait for confirmation with timeout simulation
       const confirmationPromise = transactionAdapter.waitForTransaction(result.txHash);
@@ -78,9 +95,9 @@ export const useFiatPaymentProcessor = () => {
         updateStatus(fiatPaymentId, 'completed');
         markCompleted(fiatPaymentId);
         
-        markPaymentCompleted(paymentIntentId);
+        markPaymentCompleted(intentId);
         recordSupportTransaction(
-          paymentIntentId, 
+          intentId, 
           `Pago: ${paymentIntent.merchantName}`, 
           paymentIntent.tokenAmount, 
           result.txHash
