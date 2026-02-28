@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useGuisoCore } from '../core/GuisoCoreStore';
+import { useDemoStore } from '../features/demo/DemoStore';
 import { useWallet } from '../core/WalletProvider';
 import LevelUpNotification from './LevelUpNotification';
 import ImpactMoment from './ImpactMoment';
@@ -19,7 +20,8 @@ function cn(...inputs: ClassValue[]) {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { token, user, resetDemo } = useGuisoCore();
+  const { token, user } = useGuisoCore();
+  const { resetDemo } = useDemoStore();
   const { address, isConnected, connect, isConnecting } = useWallet();
   const { t } = useTranslation();
 

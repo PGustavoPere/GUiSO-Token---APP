@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { DemoSession } from './demoTypes';
 import { useMerchantStore } from '../merchant/MerchantStore';
 import { usePaymentStore } from '../payments/PaymentStore';
@@ -26,7 +25,6 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const { registerMerchant } = useMerchantStore();
   const { createPaymentIntent } = usePaymentStore();
-  const navigate = useNavigate();
 
   // Clear demo certificates on load
   useEffect(() => {
@@ -59,9 +57,9 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetDemo = useCallback(() => {
     impactCertificateService.clearDemoCertificates();
+    sessionStorage.removeItem('guiso_demo_session');
     setSession(null);
-    navigate('/');
-  }, [navigate]);
+  }, []);
 
   const createDemoPayment = useCallback(() => {
     if (!session || !session.demoMerchantId) return null;

@@ -2,14 +2,28 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play, RefreshCw, Smartphone, QrCode, X } from 'lucide-react';
 import { useDemoStore } from './DemoStore';
+import { useDemoUI } from './DemoUIStore';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui';
 
 export default function DemoPanel() {
   const { isDemoMode, session, startDemo, resetDemo, createDemoPayment } = useDemoStore();
+  const { panelVisible, setPanelVisible } = useDemoUI();
   const navigate = useNavigate();
 
   if (!isDemoMode) return null;
+
+  if (!panelVisible) {
+    return (
+      <button
+        className="fixed bottom-4 right-4 z-50 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+        onClick={() => setPanelVisible(true)}
+      >
+        <Play size={18} className="fill-white" />
+        <span className="font-bold">Demo</span>
+      </button>
+    );
+  }
 
   const handleSimulateClient = () => {
     if (session?.demoPaymentId) {
@@ -30,7 +44,7 @@ export default function DemoPanel() {
             <Play size={18} className="fill-white" />
             <h3 className="font-bold">Panel de Demo</h3>
           </div>
-          <button onClick={resetDemo} className="text-white/80 hover:text-white transition-colors">
+          <button onClick={() => setPanelVisible(false)} className="text-white/80 hover:text-white transition-colors">
             <X size={20} />
           </button>
         </div>
