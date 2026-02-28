@@ -4,7 +4,7 @@ import { useWallet } from '../../core/WalletProvider';
 
 interface MerchantContextType {
   merchant: Merchant | null;
-  registerMerchant: (name: string, city?: string, category?: string) => void;
+  registerMerchant: (name: string, city?: string, category?: string, addressOverride?: string) => void;
   isMerchant: boolean;
 }
 
@@ -35,16 +35,17 @@ export const MerchantProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [isConnected, address, merchants]);
 
-  const registerMerchant = useCallback((name: string, city?: string, category?: string) => {
-    if (!address) return;
+  const registerMerchant = useCallback((name: string, city?: string, category?: string, addressOverride?: string) => {
+    const targetAddress = addressOverride || address;
+    if (!targetAddress) return;
     const newMerchant: Merchant = {
       id: Math.random().toString(36).substring(2, 15),
       name,
-      walletAddress: address,
+      walletAddress: targetAddress,
       city,
       category,
     };
-    setMerchants(prev => ({ ...prev, [address]: newMerchant }));
+    setMerchants(prev => ({ ...prev, [targetAddress]: newMerchant }));
   }, [address]);
 
   return (

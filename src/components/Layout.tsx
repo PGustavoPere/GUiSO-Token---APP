@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Heart, Users, User, Settings, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
@@ -8,7 +8,7 @@ import { useGuisoCore } from '../core/GuisoCoreStore';
 import { useWallet } from '../core/WalletProvider';
 import LevelUpNotification from './LevelUpNotification';
 import ImpactMoment from './ImpactMoment';
-import { Globe, RotateCcw, Cpu, Store, Activity } from 'lucide-react';
+import { Globe, RotateCcw, Cpu, Store, Activity, Play } from 'lucide-react';
 import { web3Bridge } from '../web3/web3Provider';
 import { Button } from './ui';
 import { useTranslation } from '../i18n';
@@ -17,7 +17,7 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export default function Layout() {
+export default function Layout({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { token, user, resetDemo } = useGuisoCore();
   const { address, isConnected, connect, isConnecting } = useWallet();
@@ -31,6 +31,7 @@ export default function Layout() {
     { to: '/perfil', icon: User, label: t('navigation.profile') },
     { to: '/merchant', icon: Store, label: t('navigation.merchant') },
     { to: '/impact-explorer', icon: Activity, label: t('navigation.explorer') },
+    { to: '/demo', icon: Play, label: 'Modo Demo' },
   ];
 
   return (
@@ -64,7 +65,7 @@ export default function Layout() {
       </header>
 
       {/* Sidebar (Desktop) */}
-      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-100 h-screen sticky top-0">
+      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-100 h-screen sticky top-0 overflow-y-auto overflow-x-hidden">
         <div className="p-8 flex items-center gap-3">
           <div className="w-10 h-10 bg-guiso-orange rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-guiso-orange/20">G</div>
           <div className="flex flex-col">
@@ -152,9 +153,9 @@ export default function Layout() {
             initial={{ opacity: 0, x: -100 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -100 }}
-            className="fixed inset-0 z-40 md:hidden bg-white pt-20 px-6"
+            className="fixed inset-0 z-40 md:hidden bg-white pt-20 px-6 h-screen overflow-y-auto overflow-x-hidden flex flex-col pb-20"
           >
-            <nav className="space-y-4">
+            <nav className="space-y-4 flex flex-col">
               {navItems.map((item) => (
                 <NavLink
                   key={item.to}
@@ -176,7 +177,7 @@ export default function Layout() {
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-8 lg:p-12 max-w-7xl mx-auto w-full">
-        <Outlet />
+        {children}
       </main>
 
       {/* Global Notifications */}

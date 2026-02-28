@@ -23,6 +23,14 @@ export default function PaymentPage() {
   const [payment, setPayment] = useState(paymentId ? loadPaymentIntent(paymentId) : null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isFiatModalOpen, setIsFiatModalOpen] = useState(false);
+  const [showDemoToast, setShowDemoToast] = useState(false);
+
+  useEffect(() => {
+    if (payment?.status === 'completed' && payment.meta?.demo) {
+      setShowDemoToast(true);
+      setTimeout(() => setShowDemoToast(false), 5000);
+    }
+  }, [payment?.status, payment?.meta?.demo]);
 
   useEffect(() => {
     if (paymentId) {
@@ -53,7 +61,7 @@ export default function PaymentPage() {
 
           if (confirmed) {
             markCompleted(payment.id);
-            recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, payment.txHash);
+            recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, payment.txHash, payment.meta);
           } else {
             updateStatus(payment.id, 'failed');
             setErrorMsg(t('errors.unconfirmedTransaction'));
@@ -119,7 +127,7 @@ export default function PaymentPage() {
       
       if (confirmed) {
         markCompleted(payment.id);
-        recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, result.txHash);
+        recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, result.txHash, payment.meta);
       } else {
         updateStatus(payment.id, 'failed');
         setErrorMsg(t('errors.unconfirmedTransaction'));
@@ -151,7 +159,7 @@ export default function PaymentPage() {
       <motion.div 
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-md"
+        className={`w-full max-w-md ${payment.status === 'completed' && payment.meta?.demo ? 'shadow-[0_0_30px_rgba(34,197,94,0.3)] rounded-2xl transition-shadow duration-1000' : ''}`}
       >
         <Card variant="glass" padding="lg" className="shadow-xl">
           <div className="text-center mb-8">
@@ -270,6 +278,18 @@ export default function PaymentPage() {
           payment={payment} 
           onClose={() => setIsFiatModalOpen(false)} 
         />
+      )}
+
+      {showDemoToast && (
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2 font-medium"
+        >
+          <CheckCircle2 size={20} />
+          Impacto real simulado generado ✔
+        </motion.div>
       )}
     </div>
   );

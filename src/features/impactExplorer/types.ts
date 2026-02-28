@@ -6,4 +6,7 @@ export interface ImpactEvent {
   timestamp: number;
   walletShort: string;
   txHash: string;
+  meta?: {
+    demo?: boolean;
+  };
 }

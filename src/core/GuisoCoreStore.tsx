@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { impactEngine, LevelThreshold } from '../system/impactEngine';
 import { useWallet } from './WalletProvider';
 
@@ -16,6 +17,9 @@ export interface Transaction {
   date: string;
   impactPoints: number;
   txHash?: string;
+  meta?: {
+    demo?: boolean;
+  };
 }
 
 export interface UserState {
@@ -54,7 +58,7 @@ interface GuisoCoreContextType {
   activeImpactMoment: { points: number; target: string } | null;
 
   // Actions
-  recordSupportTransaction: (projectId: string, projectTitle: string, amount: number, txHash: string) => void;
+  recordSupportTransaction: (projectId: string, projectTitle: string, amount: number, txHash: string, meta?: { demo?: boolean }) => void;
   earnImpact: (points: number) => void;
   updateGlobalImpact: (impact: number, meals?: number) => void;
   dismissNotification: () => void;
@@ -99,6 +103,7 @@ const INITIAL_GLOBAL: GlobalImpactState = {
 
 export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isConnected, address } = useWallet();
+  const navigate = useNavigate();
   const [user, setUser] = useState<UserState>(() => {
     const savedStore = localStorage.getItem('guiso_core_store');
     const demoStarted = localStorage.getItem('guiso_demo_started') === 'true';
@@ -162,7 +167,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   /**
    * Acción: Registrar una transacción de apoyo confirmada
    */
-  const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string) => {
+  const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string, meta?: { demo?: boolean }) => {
     if (amount > token.gsoBalance) return;
 
     const impactGenerated = impactEngine.calculateImpactPoints(amount);
@@ -175,7 +180,8 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       target: projectTitle,
       date: new Date().toISOString().split('T')[0],
       impactPoints: impactGenerated,
-      txHash: txHash
+      txHash: txHash,
+      meta
     };
 
     setToken(prev => {
@@ -280,8 +286,8 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setUser(INITIAL_USER);
     setToken(INITIAL_TOKEN);
     setGlobal(INITIAL_GLOBAL_STATS_ADAPTED);
-    window.location.reload();
-  }, []);
+    navigate('/');
+  }, [navigate]);
 
   return (
     <GuisoCoreContext.Provider value={{
