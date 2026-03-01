@@ -2,11 +2,16 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Play, ShieldCheck, Heart, FileText } from 'lucide-react';
 import { useDemoStore } from './DemoStore';
+import { useGuidedDemo } from '../demoGuided/useGuidedDemo';
 import { useNavigate } from 'react-router-dom';
 import { Button, Card } from '../../components/ui';
 
+import { useGuisoCore } from '../../core/GuisoCoreStore';
+
 export default function DemoPage() {
   const { isDemoMode, startDemo, resetDemo } = useDemoStore();
+  const { startGuidedDemo, resetGuidedDemo } = useGuidedDemo();
+  const { resetDemo: resetCoreDemo } = useGuisoCore();
   const navigate = useNavigate();
 
   return (
@@ -62,7 +67,11 @@ export default function DemoPage() {
                 <Button onClick={() => navigate('/merchant')} className="px-8 py-4 text-lg">
                   Ir al Comercio Demo
                 </Button>
-                <Button onClick={resetDemo} variant="outline" className="px-8 py-4 text-lg text-red-600 border-red-200 hover:bg-red-50">
+                <Button onClick={() => {
+                  resetDemo();
+                  resetCoreDemo();
+                  resetGuidedDemo();
+                }} variant="outline" className="px-8 py-4 text-lg text-red-600 border-red-200 hover:bg-red-50">
                   Detener Demo
                 </Button>
               </div>
@@ -71,6 +80,7 @@ export default function DemoPage() {
             <Button 
               onClick={() => {
                 startDemo();
+                startGuidedDemo();
                 navigate('/merchant');
               }} 
               className="px-8 py-4 text-lg bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto"

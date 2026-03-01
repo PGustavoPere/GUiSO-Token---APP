@@ -279,6 +279,41 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }));
   }, []);
 
+  useEffect(() => {
+    const handleDemoCertificate = (e: Event) => {
+      const customEvent = e as CustomEvent<{ impactAmount: number }>;
+      const impactGenerated = customEvent.detail.impactAmount;
+      
+      setUser(prev => {
+        const newImpactScore = prev.impactScore + impactGenerated;
+        const nextLevel = impactEngine.calculateLevel(newImpactScore);
+        
+        if (impactEngine.calculateLevel(prev.impactScore).level !== nextLevel.level) {
+          setLevelUpNotification(nextLevel);
+        }
+        
+        if (!prev.hasExperiencedImpactMoment) {
+          setActiveImpactMoment({ points: impactGenerated, target: 'Comedor Esperanza (Demo)' });
+        }
+        
+        return {
+          ...prev,
+          impactScore: newImpactScore,
+          communityLevel: nextLevel.level,
+          hasExperiencedImpactMoment: true,
+        };
+      });
+      
+      setGlobal(prev => ({
+        ...prev,
+        totalImpact: prev.totalImpact + impactGenerated,
+      }));
+    };
+
+    window.addEventListener('demo_certificate_generated', handleDemoCertificate);
+    return () => window.removeEventListener('demo_certificate_generated', handleDemoCertificate);
+  }, []);
+
   const resetDemo = useCallback(() => {
     console.log("Resetting Demo Experience...");
     localStorage.removeItem('guiso_core_store');
@@ -286,8 +321,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setUser(INITIAL_USER);
     setToken(INITIAL_TOKEN);
     setGlobal(INITIAL_GLOBAL_STATS_ADAPTED);
-    navigate('/');
-  }, [navigate]);
+  }, []);
 
   return (
     <GuisoCoreContext.Provider value={{

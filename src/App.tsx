@@ -29,6 +29,8 @@ import { IdentityProvider } from './features/identity/IdentityStore';
 import { AutoIdentityUpdater } from './features/identity/AutoIdentityUpdater';
 import { DemoProvider } from './features/demo/DemoStore';
 import { DemoUIProvider } from './features/demo/DemoUIStore';
+import { GuidedDemoProvider } from './features/demoGuided/GuidedDemoStore';
+import { GuidedDemoOverlay } from './features/demoGuided/GuidedDemoOverlay';
 import DemoPanel from './features/demo/DemoPanel';
 import DemoPage from './features/demo/DemoPage';
 import { Card, Button } from './components/ui';
@@ -72,26 +74,29 @@ export default function App() {
                       <IdentityProvider>
                         <DemoProvider>
                           <DemoUIProvider>
-                            <AutoCertificateGenerator />
-                            <AutoTrustUpdater />
-                            <AutoIdentityUpdater />
-                            <Layout>
-                              <Routes>
-                                <Route path="/" element={<DashboardPage />} />
-                                <Route path="/impacto" element={<ImpactPage />} />
-                                <Route path="/comunidad" element={<CommunityPage />} />
-                                <Route path="/perfil" element={<ProfilePage />} />
-                                <Route path="/vision" element={<VisionPage />} />
-                                <Route path="/merchant" element={<MerchantDashboard />} />
-                                <Route path="/impact-explorer" element={<ImpactExplorerPage />} />
-                                <Route path="/demo" element={<DemoPage />} />
-                                <Route path="/pay/:paymentId" element={<PaymentPage />} />
-                                <Route path="/impact/:certificateId" element={<ImpactCertificatePage />} />
-                              </Routes>
-                            </Layout>
-                            <DemoWelcome />
-                            <DemoGuide />
-                            <DemoPanel />
+                            <GuidedDemoProvider>
+                              <AutoCertificateGenerator />
+                              <AutoTrustUpdater />
+                              <AutoIdentityUpdater />
+                              <Layout>
+                                <Routes>
+                                  <Route path="/" element={<DashboardPage />} />
+                                  <Route path="/impacto" element={<ImpactPage />} />
+                                  <Route path="/comunidad" element={<CommunityPage />} />
+                                  <Route path="/perfil" element={<ProfilePage />} />
+                                  <Route path="/vision" element={<VisionPage />} />
+                                  <Route path="/merchant" element={<MerchantDashboard />} />
+                                  <Route path="/impact-explorer" element={<ImpactExplorerPage />} />
+                                  <Route path="/demo" element={<DemoPage />} />
+                                  <Route path="/pay/:paymentId" element={<PaymentPage />} />
+                                  <Route path="/impact/:certificateId" element={<ImpactCertificatePage />} />
+                                </Routes>
+                              </Layout>
+                              <DemoWelcome />
+                              <DemoGuide />
+                              <DemoPanel />
+                              <GuidedDemoOverlay />
+                            </GuidedDemoProvider>
                           </DemoUIProvider>
                         </DemoProvider>
                       </IdentityProvider>

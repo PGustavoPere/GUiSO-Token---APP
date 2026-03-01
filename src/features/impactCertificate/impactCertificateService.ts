@@ -1,6 +1,8 @@
 import { ImpactCertificate } from './types';
 
 class ImpactCertificateService {
+  private demoStorage: Record<string, ImpactCertificate> = {};
+
   private getStorage(): Record<string, ImpactCertificate> {
     const saved = localStorage.getItem('guiso_certificates');
     return saved ? JSON.parse(saved) : {};
@@ -11,12 +13,11 @@ class ImpactCertificateService {
   }
 
   private getDemoStorage(): Record<string, ImpactCertificate> {
-    const saved = localStorage.getItem('GSO_DEMO_CERTIFICATES');
-    return saved ? JSON.parse(saved) : {};
+    return this.demoStorage;
   }
 
   private saveDemoStorage(data: Record<string, ImpactCertificate>) {
-    localStorage.setItem('GSO_DEMO_CERTIFICATES', JSON.stringify(data));
+    this.demoStorage = data;
   }
 
   public generateCertificate(
@@ -59,6 +60,11 @@ class ImpactCertificateService {
 
   public clearDemoCertificates() {
     localStorage.removeItem('GSO_DEMO_CERTIFICATES');
+  }
+
+  public getDemoCertificates(): ImpactCertificate[] {
+    const demoStorage = this.getDemoStorage();
+    return Object.values(demoStorage);
   }
 
   public getCertificate(id: string): ImpactCertificate | null {

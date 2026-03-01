@@ -6,6 +6,8 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useGuisoCore } from '../core/GuisoCoreStore';
 import { useDemoStore } from '../features/demo/DemoStore';
+import { useDemoBalance } from '../features/demo/demoWallet';
+import { useGuidedDemo } from '../features/demoGuided/useGuidedDemo';
 import { useWallet } from '../core/WalletProvider';
 import LevelUpNotification from './LevelUpNotification';
 import ImpactMoment from './ImpactMoment';
@@ -20,10 +22,14 @@ function cn(...inputs: ClassValue[]) {
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { token, user } = useGuisoCore();
-  const { resetDemo } = useDemoStore();
+  const { token, user, resetDemo: resetCoreDemo } = useGuisoCore();
+  const { isDemoMode, resetDemo } = useDemoStore();
+  const { resetGuidedDemo, lockNavigation } = useGuidedDemo();
   const { address, isConnected, connect, isConnecting } = useWallet();
   const { t } = useTranslation();
+  const demoBalance = useDemoBalance();
+
+  const currentBalance = isDemoMode ? demoBalance : token.gsoBalance;
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: t('navigation.dashboard') },
@@ -45,10 +51,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <span className="font-display font-bold text-lg">GUISO</span>
         </div>
         <div className="flex items-center gap-4">
-          {isConnected ? (
+          {isConnected || isDemoMode ? (
             <div className="flex flex-col items-end">
-              <span className="text-[10px] font-bold text-guiso-orange uppercase tracking-tighter">{token.gsoBalance.toLocaleString()} GSO</span>
-              <span className="text-[8px] text-gray-400 font-mono">{address}</span>
+              <span className="text-[10px] font-bold text-guiso-orange uppercase tracking-tighter">{currentBalance.toLocaleString()} GSO</span>
+              <span className="text-[8px] text-gray-400 font-mono">{isDemoMode ? 'DEMO_WALLET' : address}</span>
             </div>
           ) : (
             <Button 
@@ -81,6 +87,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <NavLink
               key={item.to}
               to={item.to}
+              onClick={(e) => {
+                if (lockNavigation) {
+                  e.preventDefault();
+                }
+              }}
               className={({ isActive }) => cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
                 isActive 
@@ -114,7 +125,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <button
-            onClick={resetDemo}
+            onClick={() => {
+              resetDemo();
+              resetCoreDemo();
+              resetGuidedDemo();
+            }}
             className="w-full flex items-center justify-center gap-2 py-2 text-[10px] font-bold text-gray-400 hover:text-guiso-orange transition-colors uppercase tracking-widest"
           >
             <RotateCcw size={12} />
@@ -125,13 +140,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <p className="text-xs text-gray-500 mb-2">{t('common.wallet')}</p>
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[10px] text-gray-400 truncate">
-                {isConnected ? address : t('errors.walletNotConnected')}
+                {isDemoMode ? 'DEMO_WALLET' : (isConnected ? address : t('errors.walletNotConnected'))}
               </span>
               <div className="flex justify-between items-end mt-1">
                 <span className="font-display font-bold text-lg">
-                  {isConnected ? `${token.gsoBalance.toLocaleString()} GSO` : '---'}
+                  {isConnected || isDemoMode ? `${currentBalance.toLocaleString()} GSO` : '---'}
                 </span>
-                {isConnected ? (
+                {isConnected || isDemoMode ? (
                   <span className="text-[10px] text-green-500 font-bold uppercase">{t('common.status')}</span>
                 ) : (
                   <button 
@@ -162,7 +177,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={(e) => {
+                    if (lockNavigation) {
+                      e.preventDefault();
+                    } else {
+                      setIsMenuOpen(false);
+                    }
+                  }}
                   className={({ isActive }) => cn(
                     "flex items-center gap-4 p-4 rounded-2xl text-lg",
                     isActive ? "bg-guiso-orange text-white font-bold" : "text-gray-600"

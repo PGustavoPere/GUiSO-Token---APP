@@ -10,6 +10,7 @@ import { useTrustStore } from '../trust/TrustStore';
 import { useTrustSnapshotStore } from '../trust/TrustSnapshotStore';
 import { getTrustLevel, getTrustLevelMeta } from '../trust/trustLevelEngine';
 import { useTranslation } from '../../i18n';
+import { useGuidedDemo } from '../demoGuided/useGuidedDemo';
 
 export default function ImpactCertificatePage() {
   const { certificateId } = useParams<{ certificateId: string }>();
@@ -19,6 +20,7 @@ export default function ImpactCertificatePage() {
   const { getTrustByTxHash } = useTrustStore();
   const { getSnapshotByTxHash } = useTrustSnapshotStore();
   const { t } = useTranslation();
+  const { lockNavigation } = useGuidedDemo();
 
   useEffect(() => {
     if (certificateId) {
@@ -41,7 +43,9 @@ export default function ImpactCertificatePage() {
         <div className="text-center">
           <h2 className="text-2xl font-bold mb-2">{t('certificates.notFound')}</h2>
           <p className="text-gray-500 mb-6">{t('certificates.invalidId')}</p>
-          <Button onClick={() => navigate('/')}>{t('certificates.backToHome')}</Button>
+          <Button onClick={() => {
+            if (!lockNavigation) navigate('/');
+          }}>{t('certificates.backToHome')}</Button>
         </div>
       </div>
     );
@@ -51,7 +55,9 @@ export default function ImpactCertificatePage() {
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-3xl mx-auto">
         <button 
-          onClick={() => navigate(-1)}
+          onClick={() => {
+            if (!lockNavigation) navigate(-1);
+          }}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-8"
         >
           <ArrowLeft size={20} />

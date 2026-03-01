@@ -3,13 +3,20 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Play, RefreshCw, Smartphone, QrCode, X } from 'lucide-react';
 import { useDemoStore } from './DemoStore';
 import { useDemoUI } from './DemoUIStore';
+import { useGuidedDemo } from '../demoGuided/useGuidedDemo';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui';
+import { useDemoEngine } from '../../demo/demoEngine';
+
+import { useGuisoCore } from '../../core/GuisoCoreStore';
 
 export default function DemoPanel() {
-  const { isDemoMode, session, startDemo, resetDemo, createDemoPayment } = useDemoStore();
+  const { isDemoMode, session, startDemo, resetDemo: resetStoreDemo, createDemoPayment } = useDemoStore();
   const { panelVisible, setPanelVisible } = useDemoUI();
+  const { resetGuidedDemo, isActive, currentStep, goNext } = useGuidedDemo();
+  const { resetDemo: resetCoreDemo } = useGuisoCore();
   const navigate = useNavigate();
+  const demoEngine = useDemoEngine();
 
   if (!isDemoMode) return null;
 
@@ -52,34 +59,46 @@ export default function DemoPanel() {
         <div className="p-4 space-y-4">
           <div className="text-sm text-gray-600">
             <p><strong>Comercio:</strong> Comedor Esperanza</p>
-            <p><strong>Estado:</strong> {session?.demoPaymentId ? 'Pago Creado' : 'Esperando...'}</p>
+            <p><strong>Estado:</strong> {demoEngine.state === 'idle' ? 'Esperando...' : demoEngine.state === 'payment_created' ? 'Pago Creado' : demoEngine.state === 'client_simulated' ? 'Cliente Simulado' : demoEngine.state === 'processing' ? 'Procesando...' : demoEngine.state === 'certificate_generated' ? 'Certificado Generado' : 'Completado'}</p>
           </div>
 
           <div className="space-y-2">
             <Button 
+              data-demo-target="create-payment"
               onClick={() => {
+                demoEngine.createPayment();
                 const id = createDemoPayment();
                 if (id) navigate(`/merchant`);
+                if (isActive && currentStep === 2) goNext();
               }}
               className="w-full justify-start"
-              variant={session?.demoPaymentId ? 'outline' : 'primary'}
+              variant={demoEngine.state !== 'idle' ? 'outline' : 'primary'}
             >
               <QrCode size={18} className="mr-2" />
               1. Crear Pago Demo
             </Button>
             
             <Button 
-              onClick={handleSimulateClient}
-              disabled={!session?.demoPaymentId}
+              data-demo-target="simulate-client"
+              onClick={() => {
+                handleSimulateClient();
+                if (isActive && currentStep === 3) goNext();
+              }}
+              disabled={demoEngine.state === 'idle'}
               className="w-full justify-start"
-              variant={session?.demoPaymentId ? 'primary' : 'outline'}
+              variant={demoEngine.state !== 'idle' ? 'primary' : 'outline'}
             >
               <Smartphone size={18} className="mr-2" />
               2. Simular Cliente
             </Button>
             
             <Button 
-              onClick={resetDemo}
+              onClick={() => {
+                demoEngine.resetDemo();
+                resetStoreDemo();
+                resetCoreDemo();
+                resetGuidedDemo();
+              }}
               className="w-full justify-start text-red-600 border-red-200 hover:bg-red-50"
               variant="outline"
             >
