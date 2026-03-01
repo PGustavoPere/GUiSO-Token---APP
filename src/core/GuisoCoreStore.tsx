@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { impactEngine, LevelThreshold } from '../system/impactEngine';
 import { useWallet } from './WalletProvider';
+import { isTransactionProcessed, markTransactionProcessed } from './transactionGuard';
 
 import { web3Bridge } from '../web3/web3Provider';
 import { tokenBalanceService } from '../web3/tokenBalanceService';
@@ -164,6 +165,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    */
   const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string) => {
     if (amount > token.gsoBalance) return;
+    if (isTransactionProcessed(`impact_${txHash}`)) return;
 
     const impactGenerated = impactEngine.calculateImpactPoints(amount);
     
@@ -214,6 +216,8 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       ...prev,
       totalImpact: prev.totalImpact + impactGenerated,
     }));
+
+    markTransactionProcessed(`impact_${txHash}`);
   }, [token.gsoBalance, user.impactScore, user.hasExperiencedImpactMoment]);
 
   /**

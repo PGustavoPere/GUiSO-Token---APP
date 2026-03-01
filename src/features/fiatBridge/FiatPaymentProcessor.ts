@@ -100,7 +100,8 @@ export const useFiatPaymentProcessor = (paymentIntentId?: string) => {
           intentId, 
           `Pago: ${paymentIntent.merchantName}`, 
           paymentIntent.tokenAmount, 
-          result.txHash
+          result.txHash,
+          paymentIntent.meta
         );
       } else {
         throw new Error('Transaction could not be confirmed');

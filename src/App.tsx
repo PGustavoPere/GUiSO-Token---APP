@@ -27,6 +27,12 @@ import { TrustSnapshotProvider } from './features/trust/TrustSnapshotStore';
 import { AutoTrustUpdater } from './features/trust/AutoTrustUpdater';
 import { IdentityProvider } from './features/identity/IdentityStore';
 import { AutoIdentityUpdater } from './features/identity/AutoIdentityUpdater';
+import { DemoProvider } from './features/demo/DemoStore';
+import { DemoUIProvider } from './features/demo/DemoUIStore';
+import { GuidedDemoProvider } from './features/demoGuided/GuidedDemoStore';
+import { GuidedDemoOverlay } from './features/demoGuided/GuidedDemoOverlay';
+import DemoPanel from './features/demo/DemoPanel';
+import DemoPage from './features/demo/DemoPage';
 import { Card, Button } from './components/ui';
 
 // Placeholder for Community until implemented
@@ -50,46 +56,58 @@ const CommunityPage = () => (
   </div>
 );
 
+// Clear demo certificates on app load to prevent accumulation
+localStorage.removeItem("GSO_DEMO_CERTIFICATES");
+
 export default function App() {
   console.log("Router mounted");
   return (
-    <WalletProvider>
-      <GuisoCoreProvider>
-        <PaymentProvider>
-          <MerchantProvider>
-            <TrustProvider>
-              <TrustSnapshotProvider>
-                <FiatBridgeProvider>
-                  <ImpactExplorerProvider>
-                    <IdentityProvider>
-                      <BrowserRouter>
-                        <AutoCertificateGenerator />
-                        <AutoTrustUpdater />
-                        <AutoIdentityUpdater />
-                        <Routes>
-                          <Route path="/" element={<Layout />}>
-                            <Route index element={<DashboardPage />} />
-                            <Route path="impacto" element={<ImpactPage />} />
-                            <Route path="comunidad" element={<CommunityPage />} />
-                            <Route path="perfil" element={<ProfilePage />} />
-                            <Route path="vision" element={<VisionPage />} />
-                            <Route path="merchant" element={<MerchantDashboard />} />
-                            <Route path="impact-explorer" element={<ImpactExplorerPage />} />
-                          </Route>
-                          <Route path="/pay/:paymentId" element={<PaymentPage />} />
-                          <Route path="/impact/:certificateId" element={<ImpactCertificatePage />} />
-                        </Routes>
-                        <DemoWelcome />
-                        <DemoGuide />
-                      </BrowserRouter>
-                    </IdentityProvider>
-                  </ImpactExplorerProvider>
-                </FiatBridgeProvider>
-              </TrustSnapshotProvider>
-            </TrustProvider>
-          </MerchantProvider>
-        </PaymentProvider>
-      </GuisoCoreProvider>
-    </WalletProvider>
+    <BrowserRouter>
+      <WalletProvider>
+        <GuisoCoreProvider>
+          <PaymentProvider>
+            <MerchantProvider>
+              <TrustProvider>
+                <TrustSnapshotProvider>
+                  <FiatBridgeProvider>
+                    <ImpactExplorerProvider>
+                      <IdentityProvider>
+                        <DemoProvider>
+                          <DemoUIProvider>
+                            <GuidedDemoProvider>
+                              <AutoCertificateGenerator />
+                              <AutoTrustUpdater />
+                              <AutoIdentityUpdater />
+                              <Layout>
+                                <Routes>
+                                  <Route path="/" element={<DashboardPage />} />
+                                  <Route path="/impacto" element={<ImpactPage />} />
+                                  <Route path="/comunidad" element={<CommunityPage />} />
+                                  <Route path="/perfil" element={<ProfilePage />} />
+                                  <Route path="/vision" element={<VisionPage />} />
+                                  <Route path="/merchant" element={<MerchantDashboard />} />
+                                  <Route path="/impact-explorer" element={<ImpactExplorerPage />} />
+                                  <Route path="/demo" element={<DemoPage />} />
+                                  <Route path="/pay/:paymentId" element={<PaymentPage />} />
+                                  <Route path="/impact/:certificateId" element={<ImpactCertificatePage />} />
+                                </Routes>
+                              </Layout>
+                              <DemoWelcome />
+                              <DemoGuide />
+                              <DemoPanel />
+                              <GuidedDemoOverlay />
+                            </GuidedDemoProvider>
+                          </DemoUIProvider>
+                        </DemoProvider>
+                      </IdentityProvider>
+                    </ImpactExplorerProvider>
+                  </FiatBridgeProvider>
+                </TrustSnapshotProvider>
+              </TrustProvider>
+            </MerchantProvider>
+          </PaymentProvider>
+        </GuisoCoreProvider>
+      </WalletProvider>
+    </BrowserRouter>
   );
 }
