@@ -16,21 +16,11 @@ export const ImpactExplorerProvider: React.FC<{ children: React.ReactNode }> = (
     const saved = localStorage.getItem('guiso_impact_events');
     let loadedEvents: ImpactEvent[] = saved ? JSON.parse(saved) : [];
 
-    // Filter out demo events
-    let updated = false;
-    const filteredEvents = loadedEvents.filter(e => {
-      if (e.meta?.demo) {
-        updated = true;
-        return false;
-      }
-      return true;
-    });
-    loadedEvents = filteredEvents;
-
     // Sync with existing certificates just in case
     const certs = impactCertificateService.getAllCertificates();
     const eventCertIds = new Set(loadedEvents.map(e => e.certificateId));
     
+    let updated = false;
     certs.forEach(cert => {
       if (!eventCertIds.has(cert.id)) {
         loadedEvents.push({
@@ -40,8 +30,7 @@ export const ImpactExplorerProvider: React.FC<{ children: React.ReactNode }> = (
           impactAmount: cert.impactAmount,
           timestamp: cert.createdAt,
           walletShort: `${cert.wallet.slice(0, 6)}...${cert.wallet.slice(-4)}`,
-          txHash: cert.txHash,
-          meta: cert.meta
+          txHash: cert.txHash
         });
         updated = true;
       }

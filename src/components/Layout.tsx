@@ -1,17 +1,14 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Outlet } from 'react-router-dom';
 import { LayoutDashboard, Heart, Users, User, Settings, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useGuisoCore } from '../core/GuisoCoreStore';
-import { useDemoStore } from '../features/demo/DemoStore';
-import { useDemoBalance } from '../features/demo/demoWallet';
-import { useGuidedDemo } from '../features/demoGuided/useGuidedDemo';
 import { useWallet } from '../core/WalletProvider';
 import LevelUpNotification from './LevelUpNotification';
 import ImpactMoment from './ImpactMoment';
-import { Globe, RotateCcw, Cpu, Store, Activity, Play } from 'lucide-react';
+import { Globe, RotateCcw, Cpu, Store, Activity } from 'lucide-react';
 import { web3Bridge } from '../web3/web3Provider';
 import { Button } from './ui';
 import { useTranslation } from '../i18n';
@@ -20,16 +17,11 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function Layout() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { token, user, resetDemo: resetCoreDemo } = useGuisoCore();
-  const { isDemoMode, resetDemo } = useDemoStore();
-  const { resetGuidedDemo, lockNavigation } = useGuidedDemo();
+  const { token, user, resetDemo } = useGuisoCore();
   const { address, isConnected, connect, isConnecting } = useWallet();
   const { t } = useTranslation();
-  const demoBalance = useDemoBalance();
-
-  const currentBalance = isDemoMode ? demoBalance : token.gsoBalance;
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: t('navigation.dashboard') },
@@ -39,7 +31,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { to: '/perfil', icon: User, label: t('navigation.profile') },
     { to: '/merchant', icon: Store, label: t('navigation.merchant') },
     { to: '/impact-explorer', icon: Activity, label: t('navigation.explorer') },
-    { to: '/demo', icon: Play, label: 'Modo Demo' },
   ];
 
   return (
@@ -51,10 +42,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <span className="font-display font-bold text-lg">GUISO</span>
         </div>
         <div className="flex items-center gap-4">
-          {isConnected || isDemoMode ? (
+          {isConnected ? (
             <div className="flex flex-col items-end">
-              <span className="text-[10px] font-bold text-guiso-orange uppercase tracking-tighter">{currentBalance.toLocaleString()} GSO</span>
-              <span className="text-[8px] text-gray-400 font-mono">{isDemoMode ? 'DEMO_WALLET' : address}</span>
+              <span className="text-[10px] font-bold text-guiso-orange uppercase tracking-tighter">{token.gsoBalance.toLocaleString()} GSO</span>
+              <span className="text-[8px] text-gray-400 font-mono">{address}</span>
             </div>
           ) : (
             <Button 
@@ -73,7 +64,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </header>
 
       {/* Sidebar (Desktop) */}
-      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-100 h-screen sticky top-0 overflow-y-auto overflow-x-hidden">
+      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-100 h-screen sticky top-0">
         <div className="p-8 flex items-center gap-3">
           <div className="w-10 h-10 bg-guiso-orange rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-guiso-orange/20">G</div>
           <div className="flex flex-col">
@@ -87,11 +78,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <NavLink
               key={item.to}
               to={item.to}
-              onClick={(e) => {
-                if (lockNavigation) {
-                  e.preventDefault();
-                }
-              }}
               className={({ isActive }) => cn(
                 "flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group",
                 isActive 
@@ -125,11 +111,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
 
           <button
-            onClick={() => {
-              resetDemo();
-              resetCoreDemo();
-              resetGuidedDemo();
-            }}
+            onClick={resetDemo}
             className="w-full flex items-center justify-center gap-2 py-2 text-[10px] font-bold text-gray-400 hover:text-guiso-orange transition-colors uppercase tracking-widest"
           >
             <RotateCcw size={12} />
@@ -140,13 +122,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <p className="text-xs text-gray-500 mb-2">{t('common.wallet')}</p>
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[10px] text-gray-400 truncate">
-                {isDemoMode ? 'DEMO_WALLET' : (isConnected ? address : t('errors.walletNotConnected'))}
+                {isConnected ? address : t('errors.walletNotConnected')}
               </span>
               <div className="flex justify-between items-end mt-1">
                 <span className="font-display font-bold text-lg">
-                  {isConnected || isDemoMode ? `${currentBalance.toLocaleString()} GSO` : '---'}
+                  {isConnected ? `${token.gsoBalance.toLocaleString()} GSO` : '---'}
                 </span>
-                {isConnected || isDemoMode ? (
+                {isConnected ? (
                   <span className="text-[10px] text-green-500 font-bold uppercase">{t('common.status')}</span>
                 ) : (
                   <button 
@@ -170,20 +152,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             initial={{ opacity: 0, x: -100 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -100 }}
-            className="fixed inset-0 z-40 md:hidden bg-white pt-20 px-6 h-screen overflow-y-auto overflow-x-hidden flex flex-col pb-20"
+            className="fixed inset-0 z-40 md:hidden bg-white pt-20 px-6"
           >
-            <nav className="space-y-4 flex flex-col">
+            <nav className="space-y-4">
               {navItems.map((item) => (
                 <NavLink
                   key={item.to}
                   to={item.to}
-                  onClick={(e) => {
-                    if (lockNavigation) {
-                      e.preventDefault();
-                    } else {
-                      setIsMenuOpen(false);
-                    }
-                  }}
+                  onClick={() => setIsMenuOpen(false)}
                   className={({ isActive }) => cn(
                     "flex items-center gap-4 p-4 rounded-2xl text-lg",
                     isActive ? "bg-guiso-orange text-white font-bold" : "text-gray-600"
@@ -200,7 +176,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Main Content */}
       <main className="flex-1 p-4 md:p-8 lg:p-12 max-w-7xl mx-auto w-full">
-        {children}
+        <Outlet />
       </main>
 
       {/* Global Notifications */}

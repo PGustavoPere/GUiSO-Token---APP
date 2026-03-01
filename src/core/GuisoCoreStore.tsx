@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { impactEngine, LevelThreshold } from '../system/impactEngine';
 import { useWallet } from './WalletProvider';
 
@@ -17,9 +16,6 @@ export interface Transaction {
   date: string;
   impactPoints: number;
   txHash?: string;
-  meta?: {
-    demo?: boolean;
-  };
 }
 
 export interface UserState {
@@ -58,7 +54,7 @@ interface GuisoCoreContextType {
   activeImpactMoment: { points: number; target: string } | null;
 
   // Actions
-  recordSupportTransaction: (projectId: string, projectTitle: string, amount: number, txHash: string, meta?: { demo?: boolean }) => void;
+  recordSupportTransaction: (projectId: string, projectTitle: string, amount: number, txHash: string) => void;
   earnImpact: (points: number) => void;
   updateGlobalImpact: (impact: number, meals?: number) => void;
   dismissNotification: () => void;
@@ -103,7 +99,6 @@ const INITIAL_GLOBAL: GlobalImpactState = {
 
 export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isConnected, address } = useWallet();
-  const navigate = useNavigate();
   const [user, setUser] = useState<UserState>(() => {
     const savedStore = localStorage.getItem('guiso_core_store');
     const demoStarted = localStorage.getItem('guiso_demo_started') === 'true';
@@ -167,7 +162,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   /**
    * Acción: Registrar una transacción de apoyo confirmada
    */
-  const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string, meta?: { demo?: boolean }) => {
+  const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string) => {
     if (amount > token.gsoBalance) return;
 
     const impactGenerated = impactEngine.calculateImpactPoints(amount);
@@ -180,8 +175,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       target: projectTitle,
       date: new Date().toISOString().split('T')[0],
       impactPoints: impactGenerated,
-      txHash: txHash,
-      meta
+      txHash: txHash
     };
 
     setToken(prev => {
@@ -279,41 +273,6 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }));
   }, []);
 
-  useEffect(() => {
-    const handleDemoCertificate = (e: Event) => {
-      const customEvent = e as CustomEvent<{ impactAmount: number }>;
-      const impactGenerated = customEvent.detail.impactAmount;
-      
-      setUser(prev => {
-        const newImpactScore = prev.impactScore + impactGenerated;
-        const nextLevel = impactEngine.calculateLevel(newImpactScore);
-        
-        if (impactEngine.calculateLevel(prev.impactScore).level !== nextLevel.level) {
-          setLevelUpNotification(nextLevel);
-        }
-        
-        if (!prev.hasExperiencedImpactMoment) {
-          setActiveImpactMoment({ points: impactGenerated, target: 'Comedor Esperanza (Demo)' });
-        }
-        
-        return {
-          ...prev,
-          impactScore: newImpactScore,
-          communityLevel: nextLevel.level,
-          hasExperiencedImpactMoment: true,
-        };
-      });
-      
-      setGlobal(prev => ({
-        ...prev,
-        totalImpact: prev.totalImpact + impactGenerated,
-      }));
-    };
-
-    window.addEventListener('demo_certificate_generated', handleDemoCertificate);
-    return () => window.removeEventListener('demo_certificate_generated', handleDemoCertificate);
-  }, []);
-
   const resetDemo = useCallback(() => {
     console.log("Resetting Demo Experience...");
     localStorage.removeItem('guiso_core_store');
@@ -321,6 +280,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     setUser(INITIAL_USER);
     setToken(INITIAL_TOKEN);
     setGlobal(INITIAL_GLOBAL_STATS_ADAPTED);
+    window.location.reload();
   }, []);
 
   return (

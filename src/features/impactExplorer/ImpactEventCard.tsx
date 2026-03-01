@@ -33,7 +33,7 @@ export default function ImpactEventCard({ event, ...props }: ImpactEventCardProp
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       layout
-      className={`bg-white rounded-2xl p-4 border shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between ${event.meta?.demo ? 'border-green-400 shadow-[0_0_15px_rgba(34,197,94,0.2)] animate-pulse' : 'border-gray-100'}`}
+      className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between"
       {...props}
     >
       <div className="flex items-center gap-4">
