@@ -170,15 +170,15 @@ export default function PaymentPage() {
   };
 
   const isExpired = payment.status === 'expired';
-  const isCompleted = isDemo ? demoEngine.state === 'completed' || demoEngine.state === 'certificate_generated' : payment.status === 'completed';
-  const isProcessing = isDemo ? demoEngine.state === 'processing' : payment.status === 'pending' || payment.status === 'confirming';
+  const isCompleted = isDemo ? demoEngine.state === 'completed' : payment.status === 'completed';
+  const isProcessing = isDemo ? demoEngine.state === 'processing' || demoEngine.state === 'certificate_generating' : payment.status === 'pending' || payment.status === 'confirming';
 
   const currentBalance = isDemo ? demoBalance : token.gsoBalance;
 
   const mapStatusToTxStatus = (): TransactionStatus => {
     if (isDemo) {
-      if (demoEngine.state === 'processing') return 'confirming';
-      if (demoEngine.state === 'completed' || demoEngine.state === 'certificate_generated') return 'confirmed';
+      if (demoEngine.state === 'processing' || demoEngine.state === 'certificate_generating') return 'confirming';
+      if (demoEngine.state === 'completed') return 'confirmed';
       return 'idle';
     }
     switch (payment.status) {

@@ -5,9 +5,8 @@ import { spendDemoBalance, resetDemoBalance } from '../features/demo/demoWallet'
 export type DemoState =
   | "idle"
   | "payment_created"
-  | "client_simulated"
   | "processing"
-  | "certificate_generated"
+  | "certificate_generating"
   | "completed";
 
 export interface DemoContext {
@@ -23,8 +22,6 @@ class DemoEngine {
     certificates: 0,
   };
   private listeners: Set<Listener> = new Set();
-  private processingTimeout: NodeJS.Timeout | null = null;
-  private certificateTimeout: NodeJS.Timeout | null = null;
 
   subscribe(listener: Listener) {
     this.listeners.add(listener);
@@ -36,56 +33,43 @@ class DemoEngine {
     this.listeners.forEach((l) => l(this.context));
   }
 
-  private setState(newState: DemoState) {
+  setDemoState(newState: DemoState) {
     this.context.state = newState;
     this.notify();
   }
 
   createPayment() {
     if (this.context.state === "idle" || this.context.state === "completed") {
-      this.setState("payment_created");
+      this.setDemoState("payment_created");
     }
   }
 
   simulateClient() {
     if (this.context.state === "payment_created") {
-      this.setState("client_simulated");
-      
-      setTimeout(() => {
-        this.setState("processing");
-        spendDemoBalance(15000);
-        
-        this.processingTimeout = setTimeout(() => {
-          if (this.context.state !== "processing") return;
-          this.setState("certificate_generated");
-          this.context.certificates += 1;
-          
-          impactCertificateService.generateCertificate(
-            `0xDEMO_TX_${Date.now()}`,
-            `0xDEMO_WALLET_${Math.random().toString(16).slice(2, 8)}`,
-            'Comedor Esperanza (Demo)',
-            15000,
-            { demo: true }
-          );
-          
-          this.notify();
-          
-          window.dispatchEvent(new CustomEvent('demo_certificate_generated', {
-            detail: { impactAmount: 15000 }
-          }));
-          
-          this.certificateTimeout = setTimeout(() => {
-            this.setState("completed");
-          }, 500);
-        }, 2000);
-      }, 500);
+      this.setDemoState("processing");
+      spendDemoBalance(15000);
     }
   }
 
-  resetDemo() {
-    if (this.processingTimeout) clearTimeout(this.processingTimeout);
-    if (this.certificateTimeout) clearTimeout(this.certificateTimeout);
+  generateDemoCertificate() {
+    this.context.certificates += 1;
     
+    impactCertificateService.generateCertificate(
+      `0xDEMO_TX_${Date.now()}`,
+      `0xDEMO_WALLET_${Math.random().toString(16).slice(2, 8)}`,
+      'Comedor Esperanza (Demo)',
+      15000,
+      { demo: true }
+    );
+    
+    window.dispatchEvent(new CustomEvent('demo_certificate_generated', {
+      detail: { impactAmount: 15000 }
+    }));
+    
+    this.notify();
+  }
+
+  resetDemo() {
     this.context = {
       state: "idle",
       certificates: 0,
@@ -112,6 +96,8 @@ export function useDemoEngine() {
     ...state,
     createPayment: () => demoEngine.createPayment(),
     simulateClient: () => demoEngine.simulateClient(),
+    setDemoState: (newState: DemoState) => demoEngine.setDemoState(newState),
+    generateDemoCertificate: () => demoEngine.generateDemoCertificate(),
     resetDemo: () => demoEngine.resetDemo(),
   };
 }

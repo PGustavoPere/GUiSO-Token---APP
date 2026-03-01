@@ -6,7 +6,7 @@ import { useDemoUI } from './DemoUIStore';
 import { useGuidedDemo } from '../demoGuided/useGuidedDemo';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui';
-import { useDemoEngine } from '../../demo/demoEngine';
+import { useDemoEngine, demoEngine as globalDemoEngine } from '../../demo/demoEngine';
 
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 
@@ -17,6 +17,23 @@ export default function DemoPanel() {
   const { resetDemo: resetCoreDemo } = useGuisoCore();
   const navigate = useNavigate();
   const demoEngine = useDemoEngine();
+
+  React.useEffect(() => {
+    if (demoEngine.state === "processing") {
+      const timer = setTimeout(() => {
+        globalDemoEngine.setDemoState("certificate_generating");
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+
+    if (demoEngine.state === "certificate_generating") {
+      const timer = setTimeout(() => {
+        globalDemoEngine.generateDemoCertificate();
+        globalDemoEngine.setDemoState("completed");
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [demoEngine.state]);
 
   if (!isDemoMode) return null;
 
@@ -59,7 +76,7 @@ export default function DemoPanel() {
         <div className="p-4 space-y-4">
           <div className="text-sm text-gray-600">
             <p><strong>Comercio:</strong> Comedor Esperanza</p>
-            <p><strong>Estado:</strong> {demoEngine.state === 'idle' ? 'Esperando...' : demoEngine.state === 'payment_created' ? 'Pago Creado' : demoEngine.state === 'client_simulated' ? 'Cliente Simulado' : demoEngine.state === 'processing' ? 'Procesando...' : demoEngine.state === 'certificate_generated' ? 'Certificado Generado' : 'Completado'}</p>
+            <p><strong>Estado:</strong> {demoEngine.state === 'idle' ? 'Esperando...' : demoEngine.state === 'payment_created' ? 'Pago Creado' : demoEngine.state === 'processing' ? 'Procesando...' : demoEngine.state === 'certificate_generating' ? 'Generando Certificado...' : 'Completado'}</p>
           </div>
 
           <div className="space-y-2">
