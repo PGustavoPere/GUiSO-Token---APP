@@ -10,11 +10,7 @@ import { Card, Button } from '../../components/ui';
 import TransactionStatusBadge, { TransactionStatus } from '../../components/TransactionStatusBadge';
 import FiatPaymentModal from '../fiatBridge/FiatPaymentModal';
 import { useTranslation } from '../../i18n';
-import { useGuidedDemo } from '../demoGuided/useGuidedDemo';
 import LoadingMessages from '../../components/LoadingMessages';
-import { useDemoBalance } from '../demo/demoWallet';
-
-import { useDemoEngine } from '../../demo/demoEngine';
 
 export default function PaymentPage() {
   const { paymentId } = useParams<{ paymentId: string }>();
@@ -23,28 +19,10 @@ export default function PaymentPage() {
   const { token, recordSupportTransaction, user } = useGuisoCore();
   const { connect, isConnecting } = useWallet();
   const { t } = useTranslation();
-  const { lockNavigation } = useGuidedDemo();
-  const demoBalance = useDemoBalance();
-  const demoEngine = useDemoEngine();
   
   const [payment, setPayment] = useState(paymentId ? loadPaymentIntent(paymentId) : null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isFiatModalOpen, setIsFiatModalOpen] = useState(false);
-  const [showDemoToast, setShowDemoToast] = useState(false);
-
-  const isDemo = payment?.meta?.demo;
-
-  useEffect(() => {
-    if (isDemo) {
-      if (demoEngine.state === 'completed') {
-        setShowDemoToast(true);
-        setTimeout(() => setShowDemoToast(false), 5000);
-      }
-    } else if (payment?.status === 'completed') {
-      setShowDemoToast(true);
-      setTimeout(() => setShowDemoToast(false), 5000);
-    }
-  }, [payment?.status, isDemo, demoEngine.state]);
 
   useEffect(() => {
     if (paymentId) {
@@ -75,7 +53,7 @@ export default function PaymentPage() {
 
           if (confirmed) {
             markCompleted(payment.id);
-            recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, payment.txHash, payment.meta);
+            recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, payment.txHash);
           } else {
             updateStatus(payment.id, 'failed');
             setErrorMsg(t('errors.unconfirmedTransaction'));
@@ -105,30 +83,15 @@ export default function PaymentPage() {
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h2 className="text-xl font-bold mb-2">{t('payments.notFound')}</h2>
           <p className="text-gray-500 mb-6">{t('payments.invalidLink')}</p>
-          <Button onClick={() => {
-            if (!lockNavigation) navigate('/');
-          }}>{t('certificates.backToHome')}</Button>
+          <Button onClick={() => navigate('/')}>{t('certificates.backToHome')}</Button>
         </Card>
       </div>
     );
   }
 
   const handlePayment = async () => {
-    if (payment.meta?.demo) {
-      if (demoEngine.state === 'idle') {
-        demoEngine.createPayment();
-      }
-      // Need a small timeout to allow state to update if we just called createPayment,
-      // but demoEngine is synchronous so we can just call it immediately.
-      demoEngine.simulateClient();
-      return;
-    }
-
     if (!user.isWalletConnected) return;
-    
-    const currentBalance = token.gsoBalance;
-    
-    if (currentBalance < payment.tokenAmount) {
+    if (token.gsoBalance < payment.tokenAmount) {
       setErrorMsg(t('errors.insufficientBalance'));
       return;
     }
@@ -156,7 +119,7 @@ export default function PaymentPage() {
       
       if (confirmed) {
         markCompleted(payment.id);
-        recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, result.txHash, payment.meta);
+        recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, result.txHash);
       } else {
         updateStatus(payment.id, 'failed');
         setErrorMsg(t('errors.unconfirmedTransaction'));
@@ -169,18 +132,7 @@ export default function PaymentPage() {
     }
   };
 
-  const isExpired = payment.status === 'expired';
-  const isCompleted = isDemo ? demoEngine.state === 'completed' : payment.status === 'completed';
-  const isProcessing = isDemo ? demoEngine.state === 'processing' || demoEngine.state === 'certificate_generating' : payment.status === 'pending' || payment.status === 'confirming';
-
-  const currentBalance = isDemo ? demoBalance : token.gsoBalance;
-
   const mapStatusToTxStatus = (): TransactionStatus => {
-    if (isDemo) {
-      if (demoEngine.state === 'processing' || demoEngine.state === 'certificate_generating') return 'confirming';
-      if (demoEngine.state === 'completed') return 'confirmed';
-      return 'idle';
-    }
     switch (payment.status) {
       case 'pending': return 'pending';
       case 'confirming': return 'confirming';
@@ -190,12 +142,16 @@ export default function PaymentPage() {
     }
   };
 
+  const isExpired = payment.status === 'expired';
+  const isCompleted = payment.status === 'completed';
+  const isProcessing = payment.status === 'pending' || payment.status === 'confirming';
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
       <motion.div 
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className={`w-full max-w-md ${isCompleted && isDemo ? 'shadow-[0_0_30px_rgba(34,197,94,0.3)] rounded-2xl transition-shadow duration-1000' : ''}`}
+        className="w-full max-w-md"
       >
         <Card variant="glass" padding="lg" className="shadow-xl">
           <div className="text-center mb-8">
@@ -232,13 +188,11 @@ export default function PaymentPage() {
               <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
               <h3 className="text-lg font-bold text-green-700 mb-1">{t('payments.completed')}</h3>
               <p className="text-sm text-green-600">{t('payments.impactRegistered')}</p>
-              <Button onClick={() => {
-                if (!lockNavigation) navigate('/');
-              }} className="mt-4 w-full">{t('certificates.backToHome')}</Button>
+              <Button onClick={() => navigate('/')} className="mt-4 w-full">{t('certificates.backToHome')}</Button>
             </motion.div>
           ) : (
             <div className="space-y-4">
-              {(!user.isWalletConnected && !payment.meta?.demo) ? (
+              {!user.isWalletConnected ? (
                 <Button 
                   onClick={connect}
                   disabled={isConnecting}
@@ -251,13 +205,13 @@ export default function PaymentPage() {
                 <>
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-gray-500">{t('payments.yourBalance')}:</span>
-                    <span className={currentBalance < payment.tokenAmount ? "text-red-500 font-bold" : "text-guiso-dark font-bold"}>
-                      {currentBalance.toLocaleString()} GSO
+                    <span className={token.gsoBalance < payment.tokenAmount ? "text-red-500 font-bold" : "text-guiso-dark font-bold"}>
+                      {token.gsoBalance.toLocaleString()} GSO
                     </span>
                   </div>
                   <Button 
                     onClick={handlePayment}
-                    disabled={isProcessing || currentBalance < payment.tokenAmount}
+                    disabled={isProcessing || token.gsoBalance < payment.tokenAmount}
                     className="w-full py-4 text-lg relative overflow-hidden"
                   >
                     {isProcessing ? (
@@ -316,18 +270,6 @@ export default function PaymentPage() {
           payment={payment} 
           onClose={() => setIsFiatModalOpen(false)} 
         />
-      )}
-
-      {showDemoToast && (
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 50 }}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white px-6 py-3 rounded-full shadow-lg flex items-center gap-2 font-medium"
-        >
-          <CheckCircle2 size={20} />
-          Impacto real simulado generado ✔
-        </motion.div>
       )}
     </div>
   );

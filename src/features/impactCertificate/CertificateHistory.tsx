@@ -50,14 +50,13 @@ export default function CertificateHistory() {
             <Link key={cert.id} to={`/impact/${cert.id}`}>
               <motion.div 
                 whileHover={{ scale: 1.02 }}
-                className="p-4 sm:p-5 bg-white rounded-2xl border border-gray-100 hover:border-guiso-orange/30 transition-colors group cursor-pointer"
-                style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}
+                className="p-4 bg-white rounded-2xl border border-gray-100 hover:border-guiso-orange/30 transition-colors group cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-3">
-                  <ShieldCheck className="text-guiso-orange shrink-0" size={24} />
-                  <span className="text-xs font-mono text-gray-400 shrink-0 ml-2">{new Date(cert.createdAt).toLocaleDateString()}</span>
+                  <ShieldCheck className="text-guiso-orange" size={24} />
+                  <span className="text-xs font-mono text-gray-400">{new Date(cert.createdAt).toLocaleDateString()}</span>
                 </div>
-                <h4 className="font-bold text-guiso-dark mb-1">{cert.title}</h4>
+                <h4 className="font-bold text-guiso-dark mb-1 line-clamp-1">{cert.title}</h4>
                 <div className="flex justify-between items-end mt-4">
                   <div>
                     <p className="text-xs text-gray-500">Impacto Generado</p>

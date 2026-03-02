@@ -13,13 +13,14 @@ interface PaymentContextType {
 const PaymentContext = createContext<PaymentContextType | undefined>(undefined);
 
 export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [payments, setPayments] = useState<Record<string, PaymentIntent>>(() => {
+  const [payments, setPayments] = useState<Record<string, PaymentIntent>>({});
+
+  useEffect(() => {
     const saved = localStorage.getItem('guiso_payments');
     if (saved) {
-      return JSON.parse(saved);
+      setPayments(JSON.parse(saved));
     }
-    return {};
-  });
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('guiso_payments', JSON.stringify(payments));

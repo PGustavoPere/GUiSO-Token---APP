@@ -4,7 +4,7 @@ import { useWallet } from '../../core/WalletProvider';
 
 interface MerchantContextType {
   merchant: Merchant | null;
-  registerMerchant: (name: string, city?: string, category?: string, addressOverride?: string) => void;
+  registerMerchant: (name: string, city?: string, category?: string) => void;
   isMerchant: boolean;
 }
 
@@ -12,14 +12,15 @@ const MerchantContext = createContext<MerchantContextType | undefined>(undefined
 
 export const MerchantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { address, isConnected } = useWallet();
-  const [merchants, setMerchants] = useState<Record<string, Merchant>>(() => {
+  const [merchants, setMerchants] = useState<Record<string, Merchant>>({});
+  const [merchant, setMerchant] = useState<Merchant | null>(null);
+
+  useEffect(() => {
     const saved = localStorage.getItem('guiso_merchants');
     if (saved) {
-      return JSON.parse(saved);
+      setMerchants(JSON.parse(saved));
     }
-    return {};
-  });
-  const [merchant, setMerchant] = useState<Merchant | null>(null);
+  }, []);
 
   useEffect(() => {
     if (Object.keys(merchants).length > 0) {
@@ -35,17 +36,16 @@ export const MerchantProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   }, [isConnected, address, merchants]);
 
-  const registerMerchant = useCallback((name: string, city?: string, category?: string, addressOverride?: string) => {
-    const targetAddress = addressOverride || address;
-    if (!targetAddress) return;
+  const registerMerchant = useCallback((name: string, city?: string, category?: string) => {
+    if (!address) return;
     const newMerchant: Merchant = {
       id: Math.random().toString(36).substring(2, 15),
       name,
-      walletAddress: targetAddress,
+      walletAddress: address,
       city,
       category,
     };
-    setMerchants(prev => ({ ...prev, [targetAddress]: newMerchant }));
+    setMerchants(prev => ({ ...prev, [address]: newMerchant }));
   }, [address]);
 
   return (

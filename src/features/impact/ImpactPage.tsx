@@ -17,9 +17,6 @@ export default function ImpactPage() {
     api.getProjects().then(data => {
       setProjects(data);
       setLoading(false);
-    }).catch(err => {
-      console.error("Failed to load projects:", err);
-      setLoading(false);
     });
   }, []);
 
@@ -50,7 +47,7 @@ export default function ImpactPage() {
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {Array.isArray(projects) && projects.map((project) => (
+        {projects.map((project) => (
           <Card key={project.id} variant="glass" padding="none" className="group">
             <div className="relative h-56 overflow-hidden">
               <img 
@@ -76,13 +73,13 @@ export default function ImpactPage() {
 
               <div className="space-y-4">
                 <div className="flex justify-between items-end mb-1">
-                  <span className="text-sm font-bold">{(project.raised || 0).toLocaleString()} GSO</span>
-                  <span className="text-[10px] md:text-xs text-gray-400">{t('impact.goal')}: {(project.goal || 0).toLocaleString()} GSO</span>
+                  <span className="text-sm font-bold">{project.raised.toLocaleString()} GSO</span>
+                  <span className="text-[10px] md:text-xs text-gray-400">{t('impact.goal')}: {project.goal.toLocaleString()} GSO</span>
                 </div>
                 <div className="w-full bg-gray-100 h-2 md:h-3 rounded-full overflow-hidden">
                   <div 
                     className={cn("h-full transition-all duration-1000", project.status === 'active' ? "bg-guiso-orange" : "bg-green-500")}
-                    style={{ width: `${Math.min(100, ((project.raised || 0) / (project.goal || 1)) * 100)}%` }} 
+                    style={{ width: `${(project.raised / project.goal) * 100}%` }} 
                   />
                 </div>
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pt-4 border-t border-gray-50 gap-4">

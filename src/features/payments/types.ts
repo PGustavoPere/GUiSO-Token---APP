@@ -18,7 +18,4 @@ export interface PaymentIntent {
   createdAt: number;
   expiresAt: number;
   txHash?: string;
-  meta?: {
-    demo?: boolean;
-  };
 }

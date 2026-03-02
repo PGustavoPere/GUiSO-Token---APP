@@ -6,7 +6,4 @@ export interface ImpactCertificate {
   impactAmount: number;
   createdAt: number;
   verificationUrl: string;
-  meta?: {
-    demo?: boolean;
-  };
 }

@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { impactEngine, LevelThreshold } from '../system/impactEngine';
 import { useWallet } from './WalletProvider';
-import { isTransactionProcessed, markTransactionProcessed } from './transactionGuard';
 
 import { web3Bridge } from '../web3/web3Provider';
 import { tokenBalanceService } from '../web3/tokenBalanceService';
@@ -100,38 +99,9 @@ const INITIAL_GLOBAL: GlobalImpactState = {
 
 export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isConnected, address } = useWallet();
-  const [user, setUser] = useState<UserState>(() => {
-    const savedStore = localStorage.getItem('guiso_core_store');
-    const demoStarted = localStorage.getItem('guiso_demo_started') === 'true';
-    if (savedStore) {
-      const parsed = JSON.parse(savedStore);
-      return { 
-        ...INITIAL_USER, 
-        ...parsed.user, 
-        hasSeenWelcome: demoStarted || (parsed.user?.hasSeenWelcome ?? false)
-      };
-    }
-    if (demoStarted) {
-      return { ...INITIAL_USER, hasSeenWelcome: true };
-    }
-    return INITIAL_USER;
-  });
-
-  const [token, setToken] = useState<TokenState>(() => {
-    const savedStore = localStorage.getItem('guiso_core_store');
-    if (savedStore) {
-      return JSON.parse(savedStore).token;
-    }
-    return INITIAL_TOKEN;
-  });
-
-  const [global, setGlobal] = useState<GlobalImpactState>(() => {
-    const savedStore = localStorage.getItem('guiso_core_store');
-    if (savedStore) {
-      return JSON.parse(savedStore).global;
-    }
-    return INITIAL_GLOBAL_STATS_ADAPTED;
-  });
+  const [user, setUser] = useState<UserState>(INITIAL_USER);
+  const [token, setToken] = useState<TokenState>(INITIAL_TOKEN);
+  const [global, setGlobal] = useState<GlobalImpactState>(INITIAL_GLOBAL_STATS_ADAPTED);
   const [levelUpNotification, setLevelUpNotification] = useState<LevelThreshold | null>(null);
   const [activeImpactMoment, setActiveImpactMoment] = useState<{ points: number; target: string } | null>(null);
 
@@ -155,6 +125,28 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [isConnected, address]);
 
+  // Persistencia: Cargar estado inicial
+  useEffect(() => {
+    const savedStore = localStorage.getItem('guiso_core_store');
+    const demoStarted = localStorage.getItem('guiso_demo_started') === 'true';
+    
+    console.log("Demo state from localStorage:", demoStarted);
+
+    if (savedStore) {
+      const parsed = JSON.parse(savedStore);
+      // Merge with INITIAL_USER to ensure new properties exist
+      setUser(prev => ({ 
+        ...INITIAL_USER, 
+        ...parsed.user, 
+        hasSeenWelcome: demoStarted || (parsed.user?.hasSeenWelcome ?? false)
+      }));
+      setToken(parsed.token);
+      setGlobal(parsed.global);
+    } else if (demoStarted) {
+      setUser(prev => ({ ...prev, hasSeenWelcome: true }));
+    }
+  }, []);
+
   // Persistencia: Guardar cambios
   useEffect(() => {
     localStorage.setItem('guiso_core_store', JSON.stringify({ user, token, global }));
@@ -165,7 +157,6 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    */
   const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string) => {
     if (amount > token.gsoBalance) return;
-    if (isTransactionProcessed(`impact_${txHash}`)) return;
 
     const impactGenerated = impactEngine.calculateImpactPoints(amount);
     
@@ -216,8 +207,6 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       ...prev,
       totalImpact: prev.totalImpact + impactGenerated,
     }));
-
-    markTransactionProcessed(`impact_${txHash}`);
   }, [token.gsoBalance, user.impactScore, user.hasExperiencedImpactMoment]);
 
   /**

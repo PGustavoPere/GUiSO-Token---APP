@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { impactCertificateService } from './impactCertificateService';
 import { useImpactExplorerStore } from '../impactExplorer/ImpactExplorerStore';
-import { isTransactionProcessed, markTransactionProcessed } from '../../core/transactionGuard';
 
 export function AutoCertificateGenerator() {
   const { token, user } = useGuisoCore();
@@ -17,8 +16,6 @@ export function AutoCertificateGenerator() {
     let generated = false;
     token.transactions.forEach(tx => {
       if (tx.txHash && !existingTxHashes.has(tx.txHash)) {
-        if (isTransactionProcessed(`cert_${tx.txHash}`)) return;
-        
         const cert = impactCertificateService.generateCertificate(
           tx.txHash,
           user.walletAddress!,
@@ -34,8 +31,6 @@ export function AutoCertificateGenerator() {
           walletShort: `${cert.wallet.slice(0, 6)}...${cert.wallet.slice(-4)}`,
           txHash: cert.txHash
         });
-        
-        markTransactionProcessed(`cert_${tx.txHash}`);
         generated = true;
       }
     });
