@@ -1,76 +1,97 @@
-import { create } from 'zustand';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { Proposal } from './communityTypes';
 
-export interface Proposal {
-  id: string;
-  title: string;
-  description: string;
-  status: 'active' | 'passed' | 'rejected';
-  votesFor: number;
-  votesAgainst: number;
-  endDate: string;
-  author: string;
-}
-
-interface CommunityState {
+interface CommunityContextType {
   proposals: Proposal[];
-  userVotes: Record<string, 'for' | 'against'>; // proposalId -> vote
-  vote: (proposalId: string, voteType: 'for' | 'against', votingPower: number) => void;
+  vote: (proposalId: string, walletAddress: string) => void;
+  hasVoted: (proposalId: string, walletAddress: string) => boolean;
 }
 
-const MOCK_PROPOSALS: Proposal[] = [
+const CommunityContext = createContext<CommunityContextType | undefined>(undefined);
+
+const STORAGE_KEY = 'guiso_community_proposals';
+
+const INITIAL_PROPOSALS: Proposal[] = [
   {
     id: 'prop-1',
-    title: 'Financiar Comedor "Los Pibes" en Buenos Aires',
-    description: 'Propuesta para destinar 50,000 GSO del fondo comunitario para asegurar 3 meses de alimentos en el comedor "Los Pibes", que atiende a 150 niños diariamente.',
-    status: 'active',
-    votesFor: 12500,
-    votesAgainst: 450,
-    endDate: new Date(Date.now() + 86400000 * 3).toISOString(), // 3 days from now
-    author: '0x71C...976F'
+    title: 'Comedor comunitario Córdoba',
+    description: 'Financiamiento para raciones diarias y equipamiento de cocina para el barrio San Vicente.',
+    impactGoal: 500,
+    votes: 142,
+    voters: [],
+    createdAt: Date.now() - 86400000 * 2,
   },
   {
     id: 'prop-2',
-    title: 'Aumentar multiplicador de Impact Points (IP) en Q3',
-    description: 'Incrementar el multiplicador base de IP de 1.0x a 1.2x durante el tercer trimestre para incentivar mayores donaciones durante los meses de invierno.',
-    status: 'active',
-    votesFor: 8900,
-    votesAgainst: 2100,
-    endDate: new Date(Date.now() + 86400000 * 5).toISOString(),
-    author: '0x33A...112B'
+    title: 'Kits escolares solidarios',
+    description: 'Distribución de mochilas y útiles completos para 100 niños en zonas rurales de la provincia.',
+    impactGoal: 300,
+    votes: 89,
+    voters: [],
+    createdAt: Date.now() - 86400000,
   },
   {
     id: 'prop-3',
-    title: 'Asociación con Cruz Roja Internacional',
-    description: 'Aprobar la integración técnica y legal para que la Cruz Roja pueda recibir donaciones directas en GSO a través de nuestra plataforma.',
-    status: 'passed',
-    votesFor: 45000,
-    votesAgainst: 1200,
-    endDate: new Date(Date.now() - 86400000 * 2).toISOString(),
-    author: '0x99F...44E1'
+    title: 'Refugio nocturno invierno',
+    description: 'Habilitación de espacio con calefacción y mantas para personas en situación de calle durante junio-agosto.',
+    impactGoal: 1000,
+    votes: 456,
+    voters: [],
+    createdAt: Date.now(),
   }
 ];
 
-export const useCommunityStore = create<CommunityState>((set) => ({
-  proposals: MOCK_PROPOSALS,
-  userVotes: {},
-  vote: (proposalId, voteType, votingPower) => set((state) => {
-    // Prevent double voting
-    if (state.userVotes[proposalId]) return state;
+export const CommunityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [proposals, setProposals] = useState<Proposal[]>(INITIAL_PROPOSALS);
 
-    const updatedProposals = state.proposals.map(p => {
-      if (p.id === proposalId) {
-        return {
-          ...p,
-          votesFor: voteType === 'for' ? p.votesFor + votingPower : p.votesFor,
-          votesAgainst: voteType === 'against' ? p.votesAgainst + votingPower : p.votesAgainst,
-        };
+  // Load from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        setProposals(JSON.parse(saved));
       }
-      return p;
-    });
+    } catch (error) {
+      console.error("Failed to load proposals from localStorage:", error);
+      setProposals(INITIAL_PROPOSALS);
+    }
+  }, []);
 
-    return {
-      proposals: updatedProposals,
-      userVotes: { ...state.userVotes, [proposalId]: voteType }
-    };
-  })
-}));
+  // Save to localStorage whenever proposals change
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(proposals));
+  }, [proposals]);
+
+  const vote = useCallback((proposalId: string, walletAddress: string) => {
+    setProposals(prev => {
+      const updated = prev.map(p => {
+        if (p.id === proposalId && !p.voters.includes(walletAddress)) {
+          return {
+            ...p,
+            votes: p.votes + 1,
+            voters: [...p.voters, walletAddress]
+          };
+        }
+        return p;
+      });
+      return updated;
+    });
+  }, []);
+
+  const hasVoted = useCallback((proposalId: string, walletAddress: string) => {
+    const proposal = proposals.find(p => p.id === proposalId);
+    return proposal ? proposal.voters.includes(walletAddress) : false;
+  }, [proposals]);
+
+  return (
+    <CommunityContext.Provider value={{ proposals, vote, hasVoted }}>
+      {children}
+    </CommunityContext.Provider>
+  );
+};
+
+export const useCommunity = () => {
+  const context = useContext(CommunityContext);
+  if (!context) throw new Error('useCommunity must be used within a CommunityProvider');
+  return context;
+};

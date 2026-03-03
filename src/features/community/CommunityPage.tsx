@@ -1,163 +1,90 @@
 import React from 'react';
+import { useCommunity } from './CommunityStore';
+import { useWallet } from '../../core/WalletProvider';
+import { Card, Button, Badge } from '../../components/ui';
+import { Vote, Users, Info } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Vote, Users, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
-import { Card, Button } from '../../components/ui';
-import { useCommunityStore } from './CommunityStore';
-import { useGuisoCore } from '../../core/GuisoCoreStore';
 
 export default function CommunityPage() {
-  const { proposals, userVotes, vote } = useCommunityStore();
-  const { user } = useGuisoCore();
-  
-  // Voting power based on GSO balance + Impact Points
-  const votingPower = Math.floor(user.balance + (user.impactScore * 0.5));
-
-  const handleVote = (proposalId: string, voteType: 'for' | 'against') => {
-    if (!user.isWalletConnected) {
-      alert("Conecta tu wallet para votar");
-      return;
-    }
-    vote(proposalId, voteType, votingPower);
-  };
+  const { proposals, vote, hasVoted } = useCommunity();
+  const { address, isConnected, connect } = useWallet();
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto pb-12">
-      <header className="space-y-4">
-        <div className="flex items-center gap-3 text-guiso-orange mb-2">
-          <Users size={24} />
-          <span className="font-mono font-bold tracking-wider uppercase text-sm">Gobernanza Descentralizada</span>
+    <div className="space-y-8">
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-display font-bold text-guiso-dark">Comunidad</h1>
+          <p className="text-gray-500">Tu voz decide el próximo paso del ecosistema GUISO.</p>
         </div>
-        <h1 className="text-4xl md:text-5xl font-display font-bold text-guiso-dark">
-          Comunidad DAO
-        </h1>
-        <p className="text-gray-500 max-w-2xl text-lg">
-          Tu voz decide el futuro de GUISO. Usa tu poder de voto (GSO + IP) para aprobar proyectos sociales y cambios en el protocolo.
-        </p>
+        <Badge variant="primary" className="w-fit py-2 px-4 gap-2">
+          <Users size={16} />
+          <span>Gobernanza Activa</span>
+        </Badge>
       </header>
 
-      {/* Voting Power Card */}
-      <Card variant="glass" className="bg-gradient-to-br from-black/80 to-black/40 border-guiso-orange/30">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <h3 className="text-gray-400 font-mono text-sm mb-1">Tu Poder de Voto Actual</h3>
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-display font-bold text-guiso-orange">{votingPower.toLocaleString()}</span>
-              <span className="text-guiso-orange/60 font-mono text-sm">vPwr</span>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">Basado en tu balance de GSO y Puntos de Impacto (IP)</p>
-          </div>
-          {!user.isWalletConnected && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
-              <AlertCircle size={18} />
-              <span>Conecta tu wallet para participar en la gobernanza</span>
-            </div>
-          )}
-        </div>
-      </Card>
-
-      {/* Proposals List */}
-      <div className="space-y-6">
-        <h2 className="text-2xl font-display font-bold text-guiso-dark flex items-center gap-2">
-          <Vote size={24} className="text-guiso-orange" />
-          Propuestas Activas
-        </h2>
-
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {proposals.map((proposal) => {
-          const totalVotes = proposal.votesFor + proposal.votesAgainst;
-          const forPercentage = totalVotes > 0 ? (proposal.votesFor / totalVotes) * 100 : 0;
-          const againstPercentage = totalVotes > 0 ? (proposal.votesAgainst / totalVotes) * 100 : 0;
-          const hasVoted = userVotes[proposal.id];
-          const isActive = proposal.status === 'active';
+          const voted = address ? hasVoted(proposal.id, address) : false;
+          const progress = Math.min((proposal.votes / proposal.impactGoal) * 100, 100);
 
           return (
-            <motion.div
-              key={proposal.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <Card variant="glass" className="hover:border-guiso-orange/50 transition-colors">
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="flex-1 space-y-4">
-                    <div className="flex items-center gap-3">
-                      <span className={`px-3 py-1 rounded-full text-xs font-bold font-mono ${
-                        isActive ? 'bg-guiso-orange/20 text-guiso-orange border border-guiso-orange/30' : 
-                        proposal.status === 'passed' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 
-                        'bg-red-500/20 text-red-400 border border-red-500/30'
-                      }`}>
-                        {isActive ? 'ACTIVA' : proposal.status === 'passed' ? 'APROBADA' : 'RECHAZADA'}
-                      </span>
-                      <span className="text-gray-500 text-sm font-mono flex items-center gap-1">
-                        <Clock size={14} />
-                        {new Date(proposal.endDate).toLocaleDateString()}
-                      </span>
-                    </div>
-                    
-                    <div>
-                      <h3 className="text-xl font-bold text-guiso-orange mb-2">{proposal.title}</h3>
-                      <p className="text-gray-400 text-sm leading-relaxed">{proposal.description}</p>
-                    </div>
+            <Card key={proposal.id} variant="glass" padding="lg" className="flex flex-col h-full">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-xl font-display font-bold text-guiso-dark">{proposal.title}</h3>
+                <Badge variant={voted ? "success" : "neutral"}>
+                  {voted ? "Votado" : "Pendiente"}
+                </Badge>
+              </div>
+              
+              <p className="text-gray-600 text-sm mb-6 flex-1">{proposal.description}</p>
 
-                    <div className="flex items-center gap-2 text-xs text-gray-500 font-mono">
-                      <span>Autor:</span>
-                      <span className="text-guiso-orange/70">{proposal.author}</span>
-                    </div>
-                  </div>
-
-                  <div className="w-full md:w-64 space-y-4 bg-black/30 p-4 rounded-xl border border-white/5">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-green-400 font-bold">A Favor</span>
-                        <span className="text-gray-400">{proposal.votesFor.toLocaleString()}</span>
-                      </div>
-                      <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-green-500" style={{ width: `${forPercentage}%` }} />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-red-400 font-bold">En Contra</span>
-                        <span className="text-gray-400">{proposal.votesAgainst.toLocaleString()}</span>
-                      </div>
-                      <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-                        <div className="h-full bg-red-500" style={{ width: `${againstPercentage}%` }} />
-                      </div>
-                    </div>
-
-                    {isActive && (
-                      <div className="pt-4 mt-4 border-t border-white/10">
-                        {hasVoted ? (
-                          <div className="text-center text-sm font-mono text-guiso-orange flex items-center justify-center gap-2">
-                            <CheckCircle2 size={16} />
-                            Votaste {hasVoted === 'for' ? 'A Favor' : 'En Contra'}
-                          </div>
-                        ) : (
-                          <div className="flex gap-2">
-                            <Button 
-                              className="flex-1 bg-green-500/20 text-green-400 border-green-500/50 hover:bg-green-500/30"
-                              onClick={() => handleVote(proposal.id, 'for')}
-                              disabled={!user.isWalletConnected}
-                            >
-                              A Favor
-                            </Button>
-                            <Button 
-                              className="flex-1 bg-red-500/20 text-red-400 border-red-500/50 hover:bg-red-500/30"
-                              onClick={() => handleVote(proposal.id, 'against')}
-                              disabled={!user.isWalletConnected}
-                            >
-                              En Contra
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-end text-sm">
+                  <span className="text-gray-400 font-medium">Progreso de Votación</span>
+                  <span className="font-bold text-guiso-orange">{proposal.votes} / {proposal.impactGoal} Votos</span>
                 </div>
-              </Card>
-            </motion.div>
+                
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    className="h-full bg-guiso-orange transition-all duration-500"
+                  />
+                </div>
+
+                {!isConnected ? (
+                  <Button variant="outline" className="w-full gap-2" onClick={connect}>
+                    Conectar Wallet para Votar
+                  </Button>
+                ) : (
+                  <Button 
+                    className="w-full gap-2" 
+                    disabled={voted}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => vote(proposal.id, address!)}
+                  >
+                    <Vote size={18} />
+                    {voted ? "Voto Registrado" : "Votar Propuesta"}
+                  </Button>
+                )}
+              </div>
+            </Card>
           );
         })}
       </div>
+
+      <Card variant="glass" padding="md" className="bg-guiso-orange/5 border-guiso-orange/10 flex gap-4 items-start">
+        <div className="p-2 bg-guiso-orange/10 rounded-lg text-guiso-orange">
+          <Info size={20} />
+        </div>
+        <div>
+          <h4 className="font-bold text-guiso-dark">Sobre la Gobernanza</h4>
+          <p className="text-xs text-gray-500 leading-relaxed">
+            Este sistema de votación es una simulación funcional. En la versión final, cada voto será una transacción on-chain 
+            basada en Impact Power derivado de tokens GSO.
+          </p>
+        </div>
+      </Card>
     </div>
   );
 }
