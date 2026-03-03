@@ -3,32 +3,30 @@ import { motion } from 'motion/react';
 import { Sparkles, Utensils, Heart, Users, TrendingUp, Coins, Zap } from 'lucide-react';
 import { useGuisoCore } from '../core/GuisoCoreStore';
 import { Card, Badge } from './ui';
-import { useTranslation } from '../i18n';
 
 export default function ImpactDashboard() {
   const { global, user, token } = useGuisoCore();
-  const { t } = useTranslation();
 
   const meals = Math.floor(global.totalImpact / 5);
   const communityIndex = Math.min(100, (global.communityMembers / 1000) * 100);
 
   const stats = [
     { 
-      label: 'Balance GUISO', 
+      label: 'GUISO Balance', 
       value: token.gsoBalance, 
       icon: Coins, 
       color: 'bg-yellow-50 text-yellow-500',
       suffix: ' GSO'
     },
     { 
-      label: 'Poder de Impacto', 
+      label: 'Impact Power', 
       value: token.impactPower, 
       icon: Zap, 
       color: 'bg-blue-50 text-blue-500',
       suffix: ' IP'
     },
     { 
-      label: 'Impacto Histórico', 
+      label: 'Lifetime Impact', 
       value: user.impactScore, 
       icon: Sparkles, 
       color: 'bg-guiso-orange/10 text-guiso-orange',
@@ -74,11 +72,11 @@ export default function ImpactDashboard() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <h3 className="text-xl font-display font-bold">Influencia del Token</h3>
+              <h3 className="text-xl font-display font-bold">Token Influence</h3>
               <Badge variant="primary">{token.influenceBadge}</Badge>
             </div>
             <p className="text-sm text-gray-500 max-w-sm">
-              Tu nivel de influencia en la comunidad está determinado por tu balance de tokens GUISO.
+              Tu nivel de influencia en el ecosistema está determinado por tu balance de tokens GUISO.
             </p>
           </div>
           <div className="w-full md:w-64 space-y-3">

@@ -13,12 +13,12 @@ export default function CommunityPage() {
     <div className="space-y-8">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-display font-bold text-guiso-dark">Comunidad</h1>
-          <p className="text-gray-500">Tu voz decide el próximo paso del ecosistema GUISO.</p>
+          <h1 className="text-4xl font-display font-bold text-guiso-dark">Ecosistema</h1>
+          <p className="text-gray-500">Tu participación valida el próximo paso del ecosistema GUISO.</p>
         </div>
         <Badge variant="primary" className="w-fit py-2 px-4 gap-2">
           <Users size={16} />
-          <span>Gobernanza Activa</span>
+          <span>Validación Comunitaria</span>
         </Badge>
       </header>
 
@@ -78,10 +78,10 @@ export default function CommunityPage() {
           <Info size={20} />
         </div>
         <div>
-          <h4 className="font-bold text-guiso-dark">Sobre la Gobernanza</h4>
+          <h4 className="font-bold text-guiso-dark">Sobre la Validación</h4>
           <p className="text-xs text-gray-500 leading-relaxed">
             Este sistema de votación es una simulación funcional. En la versión final, cada voto será una transacción on-chain 
-            basada en Impact Power derivado de tokens GSO.
+            basada en Impact Power derivado de la actividad en el ecosistema.
           </p>
         </div>
       </Card>

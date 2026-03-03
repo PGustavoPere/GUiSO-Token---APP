@@ -67,7 +67,7 @@ export default function ImpactCounter() {
       <div className="relative z-10">
         <div className="mb-10">
           <h2 className="text-3xl md:text-4xl font-display font-bold mb-2">Impacto Comunitario Global</h2>
-          <p className="text-white/60 max-w-xl">Cada acción cuenta. Juntos estamos construyendo un ecosistema donde la transparencia alimenta la ayuda real.</p>
+          <p className="text-white/60 max-w-xl">Cada acción cuenta. Juntos estamos construyendo un ecosistema donde la transparencia alimenta el impacto real.</p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">

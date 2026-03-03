@@ -52,7 +52,7 @@ export default function ImpactStoryCard({ isOpen, onClose, target }: ImpactStory
                     Esta transacción simulada representa cómo las finanzas descentralizadas pueden sostener <span className="text-guiso-dark font-bold">{target}</span> de forma real.
                   </p>
                   <p className="text-gray-500 text-sm italic">
-                    "En el modelo GUISO, el valor no se queda atrapado en el protocolo; fluye directamente hacia donde más se necesita, validado por la comunidad."
+                    "En el modelo GUISO, el valor no se queda atrapado en el protocolo; fluye directamente hacia donde más se requiere, validado por el ecosistema."
                   </p>
                 </div>
               </div>

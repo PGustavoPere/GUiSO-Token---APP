@@ -38,7 +38,7 @@ export default function VisionPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-4xl md:text-7xl font-display font-bold tracking-tight max-w-5xl mx-auto leading-tight"
         >
-          GUISO — Tecnología para generar <span className="text-guiso-orange">impacto social real</span>
+          GUISO — Tecnología para generar <span className="text-guiso-orange">impacto verificable</span>
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -46,7 +46,7 @@ export default function VisionPage() {
           transition={{ delay: 0.1 }}
           className="text-lg md:text-xl text-gray-500 max-w-3xl mx-auto leading-relaxed"
         >
-          GUISO es un ecosistema digital que conecta personas, comercios y proyectos sociales mediante pagos con impacto verificable.
+          GUISO es un ecosistema digital que conecta personas, comercios y proyectos mediante pagos con trazabilidad y transparencia.
         </motion.p>
       </section>
 
@@ -58,12 +58,12 @@ export default function VisionPage() {
               <AlertCircle size={24} />
             </div>
             <div className="space-y-6">
-              <h2 className="text-2xl font-display font-bold">El Problema</h2>
+              <h2 className="text-2xl font-display font-bold">El Desafío</h2>
               <ul className="space-y-4">
                 {[
-                  "Las donaciones tradicionales carecen de transparencia.",
-                  "Las comunidades no participan en decisiones.",
-                  "El impacto social es difícil de medir."
+                  "La gestión de recursos carece de transparencia técnica.",
+                  "Los ecosistemas no participan en la validación de resultados.",
+                  "El impacto generado es difícil de medir y verificar."
                 ].map((point, i) => (
                   <li key={i} className="flex items-center gap-3 text-gray-600">
                     <div className="w-1.5 h-1.5 bg-red-400 rounded-full" />
@@ -72,7 +72,7 @@ export default function VisionPage() {
                 ))}
               </ul>
               <p className="text-sm text-gray-500 leading-relaxed">
-                Hoy en día, la confianza en las instituciones sociales está en mínimos históricos debido a la falta de trazabilidad y la desconexión entre el donante y el resultado final.
+                Actualmente, la confianza en los sistemas de impacto está limitada por la falta de trazabilidad y la desconexión entre la acción y el resultado verificado.
               </p>
             </div>
           </div>
@@ -208,7 +208,7 @@ export default function VisionPage() {
           Nuestra Visión Futura
         </h2>
         <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
-          Nuestro objetivo es convertir cada pago cotidiano en una oportunidad de ayudar a alguien y construir comunidades más fuertes mediante tecnología abierta.
+          Nuestro objetivo es convertir cada transacción cotidiana en una oportunidad de impacto y construir ecosistemas más sólidos mediante tecnología abierta.
         </p>
         <div className="pt-8">
           <Button size="lg" className="gap-2">

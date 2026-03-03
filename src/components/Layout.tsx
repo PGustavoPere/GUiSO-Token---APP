@@ -23,8 +23,8 @@ export default function Layout() {
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/impacto', icon: Heart, label: 'Impacto Social' },
-    { to: '/comunidad', icon: Users, label: 'Comunidad' },
+    { to: '/impacto', icon: Heart, label: 'Impacto Verificable' },
+    { to: '/comunidad', icon: Users, label: 'Ecosistema' },
     { to: '/vision', icon: Globe, label: 'Visión' },
     { to: '/perfil', icon: User, label: 'Mi Perfil' },
     { to: '/merchant', icon: Store, label: 'Comercios' },

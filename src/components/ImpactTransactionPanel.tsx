@@ -113,7 +113,7 @@ export default function ImpactTransactionPanel() {
         </div>
         <div className="max-w-xs mx-auto">
           <h3 className="text-xl font-display font-bold mb-2">Conecta tu Wallet</h3>
-          <p className="text-gray-500 text-sm">Para empezar a generar impacto social, necesitas conectar tu billetera digital.</p>
+          <p className="text-gray-500 text-sm">Para empezar a generar impacto verificable, necesitas conectar tu billetera digital.</p>
         </div>
         <Button 
           onClick={connect}
@@ -211,7 +211,7 @@ export default function ImpactTransactionPanel() {
         ) : (
           <>
             <Sparkles size={20} className="md:w-6 md:h-6" />
-            Confirmar Impacto Social
+            Confirmar Registro de Impacto
           </>
         )}
       </Button>
