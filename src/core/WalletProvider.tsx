@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { web3Bridge } from '../web3/web3Provider';
 import { motion, AnimatePresence } from 'motion/react';
 import { AlertTriangle, Wallet } from 'lucide-react';
-import { useTranslation } from '../i18n';
 
 interface WalletContextType {
   address: string | null;
@@ -21,7 +20,6 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [isConnecting, setIsConnecting] = useState(false);
   const [isWrongNetwork, setIsWrongNetwork] = useState(false);
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
-  const { t } = useTranslation();
 
   const handleDisconnect = useCallback(() => {
     setAddress(null);

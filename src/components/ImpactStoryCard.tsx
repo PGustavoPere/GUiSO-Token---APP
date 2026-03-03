@@ -28,7 +28,7 @@ export default function ImpactStoryCard({ isOpen, onClose, target }: ImpactStory
 
             <div className="relative h-40 md:h-48">
               <img
-                src={`https://picsum.photos/seed/${target}/800/400`}
+                src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1000&auto=format&fit=crop"
                 alt="Impact Story"
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"

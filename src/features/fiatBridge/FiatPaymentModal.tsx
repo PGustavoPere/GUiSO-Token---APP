@@ -4,9 +4,6 @@ import { X, CreditCard, RefreshCw, Send, CheckCircle2, AlertCircle } from 'lucid
 import { Button } from '../../components/ui';
 import { useFiatPaymentProcessor } from './FiatPaymentProcessor';
 import { PaymentIntent } from '../payments/types';
-import LoadingMessages from '../../components/LoadingMessages';
-import { useTranslation } from '../../i18n';
-
 interface FiatPaymentModalProps {
   payment: PaymentIntent;
   onClose: () => void;
@@ -14,7 +11,6 @@ interface FiatPaymentModalProps {
 
 export default function FiatPaymentModal({ payment, onClose }: FiatPaymentModalProps) {
   const { processPayment, currentStatus, error } = useFiatPaymentProcessor();
-  const { t } = useTranslation();
 
   const handlePay = () => {
     processPayment(payment.id, payment.fiatAmount);
@@ -40,7 +36,7 @@ export default function FiatPaymentModal({ payment, onClose }: FiatPaymentModalP
           </div>
           
           <div className="bg-gray-50 p-6 rounded-2xl text-center border border-gray-100">
-            <p className="text-sm text-gray-500 mb-1">{t('payments.totalToPay')}</p>
+            <p className="text-sm text-gray-500 mb-1">Total a pagar</p>
             <p className="text-4xl font-display font-bold text-gray-900">
               ${payment.fiatAmount.toFixed(2)} <span className="text-lg text-gray-500">ARS</span>
             </p>
@@ -48,7 +44,7 @@ export default function FiatPaymentModal({ payment, onClose }: FiatPaymentModalP
 
           <Button onClick={handlePay} className="w-full py-4 text-lg bg-blue-600 hover:bg-blue-700 text-white border-0">
             <CreditCard className="mr-2" />
-            {t('payments.payWithFiat')}
+            Pagar con dinero local
           </Button>
         </div>
       );
@@ -69,11 +65,11 @@ export default function FiatPaymentModal({ payment, onClose }: FiatPaymentModalP
           
           <div className="space-y-2">
             <h3 className="text-xl font-bold text-gray-900">
-              {currentStatus === 'processing' && t('payments.processing')}
-              {currentStatus === 'converting' && t('payments.converting')}
-              {currentStatus === 'sending_tokens' && t('payments.confirming')}
+              {currentStatus === 'processing' && 'Procesando pago...'}
+              {currentStatus === 'converting' && 'Convirtiendo a GUISO...'}
+              {currentStatus === 'sending_tokens' && 'Confirmando en blockchain...'}
             </h3>
-            <LoadingMessages />
+            <p className="text-sm text-gray-500">Por favor no cierres esta ventana</p>
           </div>
         </div>
       );
@@ -90,8 +86,8 @@ export default function FiatPaymentModal({ payment, onClose }: FiatPaymentModalP
             <CheckCircle2 size={40} />
           </motion.div>
           <div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">{t('payments.paymentSuccess')}</h3>
-            <p className="text-gray-500">{t('payments.impactVerified')}</p>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">¡Pago Exitoso!</h3>
+            <p className="text-gray-500">Tu impacto ha sido verificado en la blockchain.</p>
           </div>
         </div>
       );
@@ -104,11 +100,11 @@ export default function FiatPaymentModal({ payment, onClose }: FiatPaymentModalP
             <AlertCircle size={40} />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('payments.paymentError')}</h3>
-            <p className="text-red-500 text-sm">{error || t('errors.unexpectedError')}</p>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Error en el pago</h3>
+            <p className="text-red-500 text-sm">{error || 'Ocurrió un error inesperado'}</p>
           </div>
           <Button onClick={onClose} variant="outline" className="w-full">
-            {t('buttons.back')}
+            Volver
           </Button>
         </div>
       );

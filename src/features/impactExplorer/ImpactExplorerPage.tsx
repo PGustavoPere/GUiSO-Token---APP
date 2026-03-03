@@ -3,14 +3,11 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Globe, Activity } from 'lucide-react';
 import { useImpactExplorerStore } from './ImpactExplorerStore';
 import { useTrustStore } from '../trust/TrustStore';
-import { getTrustLevel, getTrustLevelMeta } from '../trust/trustLevelEngine';
 import ImpactEventCard from './ImpactEventCard';
-import { useTranslation } from '../../i18n';
 
 export default function ImpactExplorerPage() {
   const { getRecentEvents } = useImpactExplorerStore();
   const { getTrustByTxHash } = useTrustStore();
-  const { t } = useTranslation();
   
   const events = getRecentEvents().sort((a, b) => {
     const trustA = getTrustByTxHash(a.txHash);
@@ -18,16 +15,6 @@ export default function ImpactExplorerPage() {
     
     const scoreA = trustA?.trustScore || 0;
     const scoreB = trustB?.trustScore || 0;
-    
-    const levelA = getTrustLevel(scoreA);
-    const levelB = getTrustLevel(scoreB);
-    
-    const priorityA = getTrustLevelMeta(levelA).priority;
-    const priorityB = getTrustLevelMeta(levelB).priority;
-    
-    if (priorityA !== priorityB) {
-      return priorityB - priorityA;
-    }
     
     if (scoreA !== scoreB) {
       return scoreB - scoreA;
@@ -43,14 +30,14 @@ export default function ImpactExplorerPage() {
           <Globe size={32} />
         </div>
         <h1 className="text-4xl md:text-5xl font-display font-bold text-guiso-dark">
-          {t('navigation.explorer')}
+          Explorador de Impacto
         </h1>
         <p className="text-gray-500 max-w-xl mx-auto text-lg">
-          {t('impact.explorerDesc')}
+          Explorador público de impacto humanitario. Cada evento representa una transacción verificada en la red GUISO.
         </p>
         <div className="inline-flex items-center gap-2 bg-green-50 text-green-600 px-4 py-2 rounded-full text-sm font-bold">
           <Activity size={16} className="animate-pulse" />
-          {t('impact.liveActivity')}
+          Actividad de Red en Vivo
         </div>
       </div>
 
@@ -58,7 +45,7 @@ export default function ImpactExplorerPage() {
         {events.length === 0 ? (
           <div className="text-center py-12 text-gray-400 bg-white rounded-3xl border border-gray-100">
             <Globe size={48} className="mx-auto mb-4 text-guiso-orange/20" />
-            <p className="text-lg font-medium text-gray-500">{t('impact.noEvents')}</p>
+            <p className="text-lg font-medium text-gray-500">No hay eventos de impacto registrados aún.</p>
           </div>
         ) : (
           <AnimatePresence>

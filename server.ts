@@ -1,7 +1,8 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
-import { mockDatabase } from "./src/server/mockDatabase";
+// In-memory storage for payments
+const payments: Record<string, any> = {};
 
 async function startServer() {
   const app = express();
@@ -33,7 +34,7 @@ async function startServer() {
         status: "active",
         raised: 150000,
         goal: 200000,
-        image: "https://picsum.photos/seed/comedor/800/600",
+        image: "https://images.unsplash.com/photo-1594708767771-a7502209ff51?q=80&w=1000&auto=format&fit=crop",
         category: "Alimentación",
       },
       {
@@ -43,7 +44,7 @@ async function startServer() {
         status: "completed",
         raised: 50000,
         goal: 50000,
-        image: "https://picsum.photos/seed/becas/800/600",
+        image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1000&auto=format&fit=crop",
         category: "Educación",
       }
     ]);
@@ -64,17 +65,18 @@ async function startServer() {
 
   // --- Payments Mock API ---
   app.get("/api/payments", (req, res) => {
-    res.json(mockDatabase.getPayments());
+    res.json(Object.values(payments));
   });
 
   app.post("/api/payments", (req, res) => {
     const data = req.body;
-    const paymentId = mockDatabase.createPayment(data);
-    res.json({ id: paymentId });
+    const id = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    payments[id] = { ...data, id, status: 'awaiting_payment', createdAt: Date.now() };
+    res.json({ id });
   });
 
   app.get("/api/payments/:id", (req, res) => {
-    const payment = mockDatabase.getPaymentById(req.params.id);
+    const payment = payments[req.params.id];
     if (!payment) {
       return res.status(404).json({ error: "Payment not found" });
     }
@@ -82,11 +84,12 @@ async function startServer() {
   });
 
   app.put("/api/payments/:id", (req, res) => {
-    const payment = mockDatabase.updatePayment(req.params.id, req.body);
-    if (!payment) {
+    const id = req.params.id;
+    if (!payments[id]) {
       return res.status(404).json({ error: "Payment not found" });
     }
-    res.json(payment);
+    payments[id] = { ...payments[id], ...req.body };
+    res.json(payments[id]);
   });
 
   // --- Vite Middleware ---
