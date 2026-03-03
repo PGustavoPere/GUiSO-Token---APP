@@ -7,6 +7,7 @@ import ImpactTransactionPanel from '../../components/ImpactTransactionPanel';
 import ImpactHistory from '../../components/ImpactHistory';
 import CertificateHistory from '../impactCertificate/CertificateHistory';
 import InvestorPanel from '../../components/InvestorPanel';
+import IdentityPanel from '../identity/IdentityPanel';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { Card, Button } from '../../components/ui';
 
@@ -81,6 +82,11 @@ export default function DashboardPage() {
           <section id="dashboard-stats" className="space-y-4">
             <h2 className="text-2xl font-display font-bold px-2">Panel de Control</h2>
             <ImpactDashboard />
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-2xl font-display font-bold px-2">My Impact Identity</h2>
+            <IdentityPanel />
           </section>
 
           <section className="space-y-4">

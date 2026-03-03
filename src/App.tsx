@@ -24,6 +24,8 @@ import { ImpactExplorerProvider } from './features/impactExplorer/ImpactExplorer
 import { FiatBridgeProvider } from './features/fiatBridge/FiatBridgeStore';
 import { TrustProvider } from './features/trust/TrustStore';
 import { AutoTrustUpdater } from './features/trust/AutoTrustUpdater';
+import { IdentityProvider } from './features/identity/IdentityStore';
+import { AutoIdentityUpdater } from './features/identity/AutoIdentityUpdater';
 import { Card, Button } from './components/ui';
 
 // Placeholder for Community until implemented
@@ -57,25 +59,28 @@ export default function App() {
             <TrustProvider>
               <FiatBridgeProvider>
                 <ImpactExplorerProvider>
-                  <BrowserRouter>
-                    <AutoCertificateGenerator />
-                    <AutoTrustUpdater />
-                    <Routes>
-                      <Route path="/" element={<Layout />}>
-                        <Route index element={<DashboardPage />} />
-                        <Route path="impacto" element={<ImpactPage />} />
-                        <Route path="comunidad" element={<CommunityPage />} />
-                        <Route path="perfil" element={<ProfilePage />} />
-                        <Route path="vision" element={<VisionPage />} />
-                        <Route path="merchant" element={<MerchantDashboard />} />
-                        <Route path="impact-explorer" element={<ImpactExplorerPage />} />
-                      </Route>
-                      <Route path="/pay/:paymentId" element={<PaymentPage />} />
-                      <Route path="/impact/:certificateId" element={<ImpactCertificatePage />} />
-                    </Routes>
-                    <DemoWelcome />
-                    <DemoGuide />
-                  </BrowserRouter>
+                  <IdentityProvider>
+                    <BrowserRouter>
+                      <AutoCertificateGenerator />
+                      <AutoTrustUpdater />
+                      <AutoIdentityUpdater />
+                      <Routes>
+                        <Route path="/" element={<Layout />}>
+                          <Route index element={<DashboardPage />} />
+                          <Route path="impacto" element={<ImpactPage />} />
+                          <Route path="comunidad" element={<CommunityPage />} />
+                          <Route path="perfil" element={<ProfilePage />} />
+                          <Route path="vision" element={<VisionPage />} />
+                          <Route path="merchant" element={<MerchantDashboard />} />
+                          <Route path="impact-explorer" element={<ImpactExplorerPage />} />
+                        </Route>
+                        <Route path="/pay/:paymentId" element={<PaymentPage />} />
+                        <Route path="/impact/:certificateId" element={<ImpactCertificatePage />} />
+                      </Routes>
+                      <DemoWelcome />
+                      <DemoGuide />
+                    </BrowserRouter>
+                  </IdentityProvider>
                 </ImpactExplorerProvider>
               </FiatBridgeProvider>
             </TrustProvider>
