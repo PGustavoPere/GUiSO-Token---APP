@@ -9,42 +9,153 @@ import { web3Bridge } from '../../web3/web3Provider';
 import { Card, Button } from '../../components/ui';
 import TransactionStatusBadge, { TransactionStatus } from '../../components/TransactionStatusBadge';
 import FiatPaymentModal from '../fiatBridge/FiatPaymentModal';
+import { useTranslation } from '../../i18n';
+import LoadingMessages from '../../components/LoadingMessages';
 
 export default function PaymentPage() {
   const { paymentId } = useParams<{ paymentId: string }>();
   const navigate = useNavigate();
-  const { loadPaymentIntent, updateStatus, attachTransaction, markCompleted } = usePaymentStore();
-  const { token, recordSupportTransaction, user } = useGuisoCore();
+  const { recordSupportTransaction, user, token } = useGuisoCore();
   const { connect, isConnecting } = useWallet();
+  const { t } = useTranslation();
   
-  const [payment, setPayment] = useState(paymentId ? loadPaymentIntent(paymentId) : null);
+  const [payment, setPayment] = useState<any>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isFiatModalOpen, setIsFiatModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (paymentId) {
-      const p = loadPaymentIntent(paymentId);
-      setPayment(p);
+      let isSimulating = false;
       
-      const interval = setInterval(() => {
-        const updated = loadPaymentIntent(paymentId);
-        setPayment(updated);
-        if (updated?.status === 'expired' || updated?.status === 'completed') {
-          clearInterval(interval);
+      const fetchPayment = async () => {
+        try {
+          const res = await fetch(`/api/payments/${paymentId}`);
+          if (res.ok) {
+            const p = await res.json();
+            setPayment(p);
+            setIsLoading(false);
+            
+            // Iniciar simulación automática si está awaiting_payment
+            if (p.status === 'awaiting_payment' && !isSimulating) {
+              isSimulating = true;
+              
+              // Update to pending immediately to show processing
+              await fetch(`/api/payments/${paymentId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'pending' })
+              });
+              
+              setTimeout(async () => {
+                await fetch(`/api/payments/${paymentId}`, {
+                  method: 'PUT',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ 
+                    status: 'completed', 
+                    simulated: true, 
+                    completedAt: Date.now() 
+                  })
+                });
+              }, 4000);
+            }
+          } else {
+            setIsLoading(false);
+          }
+        } catch (error) {
+          console.error('Error fetching payment:', error);
+          setIsLoading(false);
+        }
+      };
+      
+      fetchPayment();
+      
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/payments/${paymentId}`);
+          if (res.ok) {
+            const updated = await res.json();
+            setPayment(updated);
+            if (updated.status === 'expired' || updated.status === 'completed') {
+              clearInterval(interval);
+            }
+          }
+        } catch (error) {
+          console.error('Error polling payment:', error);
         }
       }, 1000);
+      
       return () => clearInterval(interval);
     }
-  }, [paymentId, loadPaymentIntent]);
+  }, [paymentId]);
+
+  const updatePaymentStatus = async (id: string, status: string, txHash?: string) => {
+    try {
+      await fetch(`/api/payments/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, ...(txHash ? { txHash } : {}) })
+      });
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+    }
+  };
+
+  // Resume pending transaction on reload
+  useEffect(() => {
+    let isMounted = true;
+    const resumeTransaction = async () => {
+      if (payment?.status === 'confirming' && payment.txHash) {
+        try {
+          const transactionAdapter = web3Bridge.getTransaction();
+          const confirmed = await transactionAdapter.waitForTransaction(payment.txHash);
+          
+          if (!isMounted) return;
+
+          if (confirmed) {
+            await updatePaymentStatus(payment.id, 'completed');
+            recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, payment.txHash);
+          } else {
+            await updatePaymentStatus(payment.id, 'failed');
+            setErrorMsg(t('errors.unconfirmedTransaction'));
+            setTimeout(() => {
+              if (isMounted) updatePaymentStatus(payment.id, 'awaiting_payment');
+            }, 3000);
+          }
+        } catch (err: any) {
+          if (!isMounted) return;
+          await updatePaymentStatus(payment.id, 'failed');
+          setErrorMsg(err.message || t('errors.unexpectedError'));
+          setTimeout(() => {
+            if (isMounted) updatePaymentStatus(payment.id, 'awaiting_payment');
+          }, 3000);
+        }
+      }
+    };
+
+    resumeTransaction();
+    return () => { isMounted = false; };
+  }, [payment?.status, payment?.txHash, payment?.id]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
+        <Card variant="glass" padding="lg" className="text-center max-w-md w-full">
+          <div className="w-12 h-12 border-4 border-guiso-orange/30 border-t-guiso-orange rounded-full animate-spin mx-auto mb-4" />
+          <h2 className="text-xl font-bold mb-2">{t('common.loading')}</h2>
+        </Card>
+      </div>
+    );
+  }
 
   if (!payment) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
         <Card variant="glass" padding="lg" className="text-center max-w-md w-full">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-bold mb-2">Pago no encontrado</h2>
-          <p className="text-gray-500 mb-6">El enlace de pago es inválido o no existe.</p>
-          <Button onClick={() => navigate('/')}>Volver al inicio</Button>
+          <h2 className="text-xl font-bold mb-2">{t('payments.notFound')}</h2>
+          <p className="text-gray-500 mb-6">{t('payments.invalidLink')}</p>
+          <Button onClick={() => navigate('/')}>{t('certificates.backToHome')}</Button>
         </Card>
       </div>
     );
@@ -53,7 +164,7 @@ export default function PaymentPage() {
   const handlePayment = async () => {
     if (!user.isWalletConnected) return;
     if (token.gsoBalance < payment.tokenAmount) {
-      setErrorMsg('Balance insuficiente de GUISO Tokens');
+      setErrorMsg(t('errors.insufficientBalance'));
       return;
     }
     if (payment.status === 'completed' || payment.status === 'confirming' || payment.status === 'pending') {
@@ -61,35 +172,35 @@ export default function PaymentPage() {
     }
 
     setErrorMsg(null);
-    updateStatus(payment.id, 'pending');
+    await updatePaymentStatus(payment.id, 'pending');
     
     try {
       const transactionAdapter = web3Bridge.getTransaction();
       const result = await transactionAdapter.sendTransaction(payment.tokenAmount, `Payment to ${payment.merchantName}`);
       
       if (!result.success) {
-        updateStatus(payment.id, 'failed');
-        setErrorMsg(result.error || 'Transacción fallida');
-        setTimeout(() => updateStatus(payment.id, 'awaiting_payment'), 3000);
+        await updatePaymentStatus(payment.id, 'failed');
+        setErrorMsg(result.error || t('errors.transactionFailed'));
+        setTimeout(() => updatePaymentStatus(payment.id, 'awaiting_payment'), 3000);
         return;
       }
       
-      attachTransaction(payment.id, result.txHash);
+      await updatePaymentStatus(payment.id, 'confirming', result.txHash);
       
       const confirmed = await transactionAdapter.waitForTransaction(result.txHash);
       
       if (confirmed) {
-        markCompleted(payment.id);
+        await updatePaymentStatus(payment.id, 'completed');
         recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, result.txHash);
       } else {
-        updateStatus(payment.id, 'failed');
-        setErrorMsg('La transacción no pudo ser confirmada');
-        setTimeout(() => updateStatus(payment.id, 'awaiting_payment'), 3000);
+        await updatePaymentStatus(payment.id, 'failed');
+        setErrorMsg(t('errors.unconfirmedTransaction'));
+        setTimeout(() => updatePaymentStatus(payment.id, 'awaiting_payment'), 3000);
       }
     } catch (err: any) {
-      updateStatus(payment.id, 'failed');
-      setErrorMsg(err.message || 'Error inesperado');
-      setTimeout(() => updateStatus(payment.id, 'awaiting_payment'), 3000);
+      await updatePaymentStatus(payment.id, 'failed');
+      setErrorMsg(err.message || t('errors.unexpectedError'));
+      setTimeout(() => updatePaymentStatus(payment.id, 'awaiting_payment'), 3000);
     }
   };
 
@@ -125,12 +236,12 @@ export default function PaymentPage() {
 
           <div className="bg-white rounded-2xl p-6 mb-6 border border-gray-100 shadow-sm">
             <div className="flex justify-between items-center mb-4">
-              <span className="text-gray-500 font-medium">Total a pagar</span>
+              <span className="text-gray-500 font-medium">{t('payments.totalToPay')}</span>
               <span className="text-2xl font-bold text-guiso-dark">${payment.fiatAmount.toFixed(2)}</span>
             </div>
             <div className="h-px bg-gray-100 w-full my-4" />
             <div className="flex justify-between items-center">
-              <span className="text-sm font-bold text-guiso-orange">Monto en GUISO</span>
+              <span className="text-sm font-bold text-guiso-orange">{t('payments.amountInGuiso')}</span>
               <span className="text-lg font-bold text-guiso-orange">{payment.tokenAmount.toLocaleString()} GSO</span>
             </div>
           </div>
@@ -138,7 +249,7 @@ export default function PaymentPage() {
           {isExpired ? (
             <div className="text-center p-4 bg-red-50 rounded-xl text-red-600 font-medium flex items-center justify-center gap-2">
               <Clock size={20} />
-              El pago ha expirado
+              {t('payments.expired')}
             </div>
           ) : isCompleted ? (
             <motion.div 
@@ -147,9 +258,9 @@ export default function PaymentPage() {
               className="text-center p-6 bg-green-50 rounded-xl border border-green-100"
             >
               <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-3" />
-              <h3 className="text-lg font-bold text-green-700 mb-1">¡Pago Completado!</h3>
-              <p className="text-sm text-green-600">Tu impacto ha sido registrado.</p>
-              <Button onClick={() => navigate('/')} className="mt-4 w-full">Volver al inicio</Button>
+              <h3 className="text-lg font-bold text-green-700 mb-1">{t('payments.completed')}</h3>
+              <p className="text-sm text-green-600">{t('payments.impactRegistered')}</p>
+              <Button onClick={() => navigate('/')} className="mt-4 w-full">{t('certificates.backToHome')}</Button>
             </motion.div>
           ) : (
             <div className="space-y-4">
@@ -160,12 +271,12 @@ export default function PaymentPage() {
                   className="w-full py-4 text-lg"
                 >
                   <Wallet className="mr-2" />
-                  {isConnecting ? 'Conectando...' : 'Conectar Wallet para Pagar'}
+                  {isConnecting ? t('common.loading') : t('payments.connectToPay')}
                 </Button>
               ) : (
                 <>
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-gray-500">Tu balance:</span>
+                    <span className="text-gray-500">{t('payments.yourBalance')}:</span>
                     <span className={token.gsoBalance < payment.tokenAmount ? "text-red-500 font-bold" : "text-guiso-dark font-bold"}>
                       {token.gsoBalance.toLocaleString()} GSO
                     </span>
@@ -176,18 +287,23 @@ export default function PaymentPage() {
                     className="w-full py-4 text-lg relative overflow-hidden"
                   >
                     {isProcessing ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Procesando Pago...
-                      </span>
+                      <div className="flex flex-col items-center justify-center w-full">
+                        <span className="flex items-center justify-center gap-2 mb-1">
+                          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                          {t('payments.processing')}
+                        </span>
+                        <div className="text-white/80 w-full">
+                          <LoadingMessages />
+                        </div>
+                      </div>
                     ) : (
-                      'Pagar con GUISO'
+                      t('payments.payWithGuiso')
                     )}
                   </Button>
                   
                   <div className="relative flex items-center py-2">
                     <div className="flex-grow border-t border-gray-200"></div>
-                    <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">o</span>
+                    <span className="flex-shrink-0 mx-4 text-gray-400 text-sm">{t('common.or')}</span>
                     <div className="flex-grow border-t border-gray-200"></div>
                   </div>
 
@@ -198,7 +314,7 @@ export default function PaymentPage() {
                     className="w-full py-4 text-lg border-blue-200 text-blue-700 hover:bg-blue-50"
                   >
                     <CreditCard className="mr-2" />
-                    Pagar con dinero local (ARS)
+                    {t('payments.payWithFiat')}
                   </Button>
 
                   {errorMsg && (
@@ -215,7 +331,7 @@ export default function PaymentPage() {
           
           {!isCompleted && !isExpired && (
             <p className="text-center text-xs text-gray-400 mt-6">
-              Expira en {Math.max(0, Math.floor((payment.expiresAt - Date.now()) / 60000))} minutos
+              {t('payments.expiresIn')} {Math.max(0, Math.floor((payment.expiresAt - Date.now()) / 60000))} {t('common.minutes')}
             </p>
           )}
         </Card>

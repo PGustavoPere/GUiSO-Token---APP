@@ -128,22 +128,17 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Persistencia: Cargar estado inicial
   useEffect(() => {
     const savedStore = localStorage.getItem('guiso_core_store');
-    const demoStarted = localStorage.getItem('guiso_demo_started') === 'true';
     
-    console.log("Demo state from localStorage:", demoStarted);
-
     if (savedStore) {
       const parsed = JSON.parse(savedStore);
       // Merge with INITIAL_USER to ensure new properties exist
       setUser(prev => ({ 
         ...INITIAL_USER, 
         ...parsed.user, 
-        hasSeenWelcome: demoStarted || (parsed.user?.hasSeenWelcome ?? false)
+        hasSeenWelcome: true // Force true to avoid welcome screens if any logic remains
       }));
       setToken(parsed.token);
       setGlobal(parsed.global);
-    } else if (demoStarted) {
-      setUser(prev => ({ ...prev, hasSeenWelcome: true }));
     }
   }, []);
 
@@ -239,41 +234,19 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, []);
 
   const startDemo = useCallback(() => {
-    console.log("Starting Demo Experience...");
-    localStorage.setItem('guiso_demo_started', 'true');
-    setUser(prev => ({
-      ...prev,
-      isDemoModeActive: true,
-      demoStep: 1,
-      hasSeenWelcome: true
-    }));
+    // No-op
   }, []);
 
   const skipDemo = useCallback(() => {
-    console.log("Skipping Demo Experience...");
-    localStorage.setItem('guiso_demo_started', 'true');
-    setUser(prev => ({
-      ...prev,
-      isDemoModeActive: false,
-      hasSeenWelcome: true
-    }));
+    // No-op
   }, []);
 
   const nextDemoStep = useCallback(() => {
-    setUser(prev => ({
-      ...prev,
-      demoStep: prev.demoStep + 1
-    }));
+    // No-op
   }, []);
 
   const resetDemo = useCallback(() => {
-    console.log("Resetting Demo Experience...");
-    localStorage.removeItem('guiso_core_store');
-    localStorage.removeItem('guiso_demo_started');
-    setUser(INITIAL_USER);
-    setToken(INITIAL_TOKEN);
-    setGlobal(INITIAL_GLOBAL_STATS_ADAPTED);
-    window.location.reload();
+    // No-op
   }, []);
 
   return (

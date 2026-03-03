@@ -14,7 +14,6 @@ interface CreatePaymentModalProps {
 const GUISO_RATE_ARS = 100; // 1 GUISO = 100 ARS
 
 export default function CreatePaymentModal({ onClose }: CreatePaymentModalProps) {
-  const { createPaymentIntent, loadPaymentIntent } = usePaymentStore();
   const { merchant } = useMerchantStore();
   
   const [description, setDescription] = useState('');
@@ -24,36 +23,52 @@ export default function CreatePaymentModal({ onClose }: CreatePaymentModalProps)
 
   const tokenAmount = amountARS ? Math.ceil(Number(amountARS) / GUISO_RATE_ARS) : 0;
 
-  const handleCreate = () => {
+  const handleCreate = async () => {
     if (!merchant || !amountARS || !description) return;
     
-    const id = createPaymentIntent({
-      merchantName: merchant.name,
-      description,
-      fiatAmount: Number(amountARS),
-      tokenAmount,
-      walletAddress: merchant.walletAddress,
-    });
-    
-    setPaymentId(id);
-    setPaymentStatus('awaiting_payment');
+    try {
+      const response = await fetch('/api/payments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          merchantName: merchant.name,
+          description,
+          fiatAmount: Number(amountARS),
+          tokenAmount,
+          walletAddress: merchant.walletAddress,
+        })
+      });
+      
+      const data = await response.json();
+      if (data.id) {
+        setPaymentId(data.id);
+        setPaymentStatus('awaiting_payment');
+      }
+    } catch (error) {
+      console.error('Error creating payment:', error);
+    }
   };
 
   useEffect(() => {
     if (!paymentId) return;
 
-    const interval = setInterval(() => {
-      const payment = loadPaymentIntent(paymentId);
-      if (payment) {
-        setPaymentStatus(payment.status);
-        if (payment.status === 'completed' || payment.status === 'expired') {
-          clearInterval(interval);
+    const interval = setInterval(async () => {
+      try {
+        const response = await fetch(`/api/payments/${paymentId}`);
+        if (response.ok) {
+          const payment = await response.json();
+          setPaymentStatus(payment.status);
+          if (payment.status === 'completed' || payment.status === 'expired') {
+            clearInterval(interval);
+          }
         }
+      } catch (error) {
+        console.error('Error fetching payment status:', error);
       }
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [paymentId, loadPaymentIntent]);
+  }, [paymentId]);
 
   const paymentUrl = paymentId ? generatePaymentQRUrl(paymentId) : '';
 

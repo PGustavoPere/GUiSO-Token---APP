@@ -1,6 +1,7 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
+import { mockDatabase } from "./src/server/mockDatabase";
 
 async function startServer() {
   const app = express();
@@ -59,6 +60,33 @@ async function startServer() {
         { id: "h2", type: "donation", amount: 500, date: "2024-02-15" },
       ]
     });
+  });
+
+  // --- Payments Mock API ---
+  app.get("/api/payments", (req, res) => {
+    res.json(mockDatabase.getPayments());
+  });
+
+  app.post("/api/payments", (req, res) => {
+    const data = req.body;
+    const paymentId = mockDatabase.createPayment(data);
+    res.json({ id: paymentId });
+  });
+
+  app.get("/api/payments/:id", (req, res) => {
+    const payment = mockDatabase.getPaymentById(req.params.id);
+    if (!payment) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+    res.json(payment);
+  });
+
+  app.put("/api/payments/:id", (req, res) => {
+    const payment = mockDatabase.updatePayment(req.params.id, req.body);
+    if (!payment) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
+    res.json(payment);
   });
 
   // --- Vite Middleware ---

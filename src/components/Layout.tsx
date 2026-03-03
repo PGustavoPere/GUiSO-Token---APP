@@ -8,7 +8,7 @@ import { useGuisoCore } from '../core/GuisoCoreStore';
 import { useWallet } from '../core/WalletProvider';
 import LevelUpNotification from './LevelUpNotification';
 import ImpactMoment from './ImpactMoment';
-import { Globe, RotateCcw, Cpu, Store, Activity } from 'lucide-react';
+import { Globe, Cpu, Store, Activity } from 'lucide-react';
 import { web3Bridge } from '../web3/web3Provider';
 import { Button } from './ui';
 
@@ -18,7 +18,7 @@ function cn(...inputs: ClassValue[]) {
 
 export default function Layout() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const { token, user, resetDemo } = useGuisoCore();
+  const { token, user } = useGuisoCore();
   const { address, isConnected, connect, isConnecting } = useWallet();
 
   const navItems = [
@@ -107,14 +107,6 @@ export default function Layout() {
               {web3Bridge.getMode()}
             </button>
           </div>
-
-          <button
-            onClick={resetDemo}
-            className="w-full flex items-center justify-center gap-2 py-2 text-[10px] font-bold text-gray-400 hover:text-guiso-orange transition-colors uppercase tracking-widest"
-          >
-            <RotateCcw size={12} />
-            Reiniciar Demo
-          </button>
 
           <div className="bg-guiso-cream rounded-2xl p-4 border border-guiso-orange/10">
             <p className="text-xs text-gray-500 mb-2">Tu Wallet</p>

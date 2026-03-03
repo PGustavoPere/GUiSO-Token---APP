@@ -11,7 +11,7 @@ interface TrustContextType {
 
 const TrustContext = createContext<TrustContextType | undefined>(undefined);
 
-const calculateTrustScore = (profile: MerchantTrustProfile): number => {
+export const calculateTrustScore = (profile: MerchantTrustProfile): number => {
   if (profile.totalPayments === 0) return 50; // Default starting score
 
   const successRate = profile.successfulPayments / profile.totalPayments;
@@ -27,15 +27,14 @@ const calculateTrustScore = (profile: MerchantTrustProfile): number => {
 };
 
 export const TrustProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [profiles, setProfiles] = useState<Record<string, MerchantTrustProfile>>({});
-  const { payments } = usePaymentStore();
-
-  useEffect(() => {
+  const [profiles, setProfiles] = useState<Record<string, MerchantTrustProfile>>(() => {
     const saved = localStorage.getItem('guiso_trust_profiles');
     if (saved) {
-      setProfiles(JSON.parse(saved));
+      return JSON.parse(saved);
     }
-  }, []);
+    return {};
+  });
+  const { payments } = usePaymentStore();
 
   useEffect(() => {
     localStorage.setItem('guiso_trust_profiles', JSON.stringify(profiles));

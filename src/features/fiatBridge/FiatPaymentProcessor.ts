@@ -7,11 +7,22 @@ import { FiatPaymentStatus } from './fiatTypes';
 
 export const useFiatPaymentProcessor = () => {
   const { createFiatPayment, updateStatus, markCompleted } = useFiatBridgeStore();
-  const { loadPaymentIntent, updateStatus: updatePaymentStatus, attachTransaction, markCompleted: markPaymentCompleted } = usePaymentStore();
   const { recordSupportTransaction, user } = useGuisoCore();
   
   const [currentStatus, setCurrentStatus] = useState<FiatPaymentStatus>('created');
   const [error, setError] = useState<string | null>(null);
+
+  const updatePaymentStatus = async (id: string, status: string, txHash?: string) => {
+    try {
+      await fetch(`/api/payments/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status, ...(txHash ? { txHash } : {}) })
+      });
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+    }
+  };
 
   const processPayment = async (paymentIntentId: string, arsAmount: number) => {
     setError(null);
@@ -22,11 +33,11 @@ export const useFiatPaymentProcessor = () => {
         throw new Error('Por favor conecta tu wallet primero para registrar el impacto en la blockchain');
       }
 
-      const paymentIntent = loadPaymentIntent(paymentIntentId);
-      
-      if (!paymentIntent) {
+      const res = await fetch(`/api/payments/${paymentIntentId}`);
+      if (!res.ok) {
         throw new Error('Payment intent not found');
       }
+      const paymentIntent = await res.json();
 
       if (paymentIntent.status === 'expired') {
         throw new Error('El enlace de pago ha expirado');
@@ -50,7 +61,7 @@ export const useFiatPaymentProcessor = () => {
       // Step 3: Sending tokens
       setCurrentStatus('sending_tokens');
       updateStatus(fiatPaymentId, 'sending_tokens');
-      updatePaymentStatus(paymentIntentId, 'pending');
+      await updatePaymentStatus(paymentIntentId, 'pending');
 
       const transactionAdapter = web3Bridge.getTransaction();
       const result = await transactionAdapter.sendTransaction(
@@ -62,7 +73,7 @@ export const useFiatPaymentProcessor = () => {
         throw new Error(result.error || 'Transaction failed');
       }
 
-      attachTransaction(paymentIntentId, result.txHash);
+      await updatePaymentStatus(paymentIntentId, 'confirming', result.txHash);
 
       // Step 4: Wait for confirmation with timeout simulation
       const confirmationPromise = transactionAdapter.waitForTransaction(result.txHash);
@@ -78,7 +89,7 @@ export const useFiatPaymentProcessor = () => {
         updateStatus(fiatPaymentId, 'completed');
         markCompleted(fiatPaymentId);
         
-        markPaymentCompleted(paymentIntentId);
+        await updatePaymentStatus(paymentIntentId, 'completed');
         recordSupportTransaction(
           paymentIntentId, 
           `Pago: ${paymentIntent.merchantName}`, 

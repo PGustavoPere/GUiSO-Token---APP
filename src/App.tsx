@@ -13,19 +13,14 @@ import DashboardPage from './features/dashboard/DashboardPage';
 import ImpactPage from './features/impact/ImpactPage';
 import ProfilePage from './features/profile/ProfilePage';
 import VisionPage from './features/vision/VisionPage';
-import DemoWelcome from './components/DemoWelcome';
-import DemoGuide from './components/DemoGuide';
 import PaymentPage from './features/payments/PaymentPage';
 import MerchantDashboard from './features/merchant/MerchantDashboard';
 import ImpactCertificatePage from './features/impactCertificate/ImpactCertificatePage';
 import ImpactExplorerPage from './features/impactExplorer/ImpactExplorerPage';
-import { AutoCertificateGenerator } from './features/impactCertificate/AutoCertificateGenerator';
 import { ImpactExplorerProvider } from './features/impactExplorer/ImpactExplorerStore';
 import { FiatBridgeProvider } from './features/fiatBridge/FiatBridgeStore';
 import { TrustProvider } from './features/trust/TrustStore';
-import { AutoTrustUpdater } from './features/trust/AutoTrustUpdater';
 import { IdentityProvider } from './features/identity/IdentityStore';
-import { AutoIdentityUpdater } from './features/identity/AutoIdentityUpdater';
 import { Card, Button } from './components/ui';
 
 // Placeholder for Community until implemented
@@ -61,9 +56,6 @@ export default function App() {
                 <ImpactExplorerProvider>
                   <IdentityProvider>
                     <BrowserRouter>
-                      <AutoCertificateGenerator />
-                      <AutoTrustUpdater />
-                      <AutoIdentityUpdater />
                       <Routes>
                         <Route path="/" element={<Layout />}>
                           <Route index element={<DashboardPage />} />
@@ -77,8 +69,6 @@ export default function App() {
                         <Route path="/pay/:paymentId" element={<PaymentPage />} />
                         <Route path="/impact/:certificateId" element={<ImpactCertificatePage />} />
                       </Routes>
-                      <DemoWelcome />
-                      <DemoGuide />
                     </BrowserRouter>
                   </IdentityProvider>
                 </ImpactExplorerProvider>

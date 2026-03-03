@@ -48,8 +48,8 @@ export default function ImpactTransactionPanel() {
       recordSupportTransaction(selectedCause.id, selectedCause.title, amount, result.txHash);
       setIsSuccess(true);
       
-      // Show story after success if in demo mode
-      if (user.isDemoModeActive) {
+      // Show story after success (Disabled Demo Mode)
+      if (false) {
         setTimeout(() => setShowStory(true), 1000);
       }
       
