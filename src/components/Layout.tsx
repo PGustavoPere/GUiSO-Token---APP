@@ -11,7 +11,6 @@ import ImpactMoment from './ImpactMoment';
 import { Globe, RotateCcw, Cpu, Store, Activity } from 'lucide-react';
 import { web3Bridge } from '../web3/web3Provider';
 import { Button } from './ui';
-import { useTranslation } from '../i18n';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -21,16 +20,15 @@ export default function Layout() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { token, user, resetDemo } = useGuisoCore();
   const { address, isConnected, connect, isConnecting } = useWallet();
-  const { t } = useTranslation();
 
   const navItems = [
-    { to: '/', icon: LayoutDashboard, label: t('navigation.dashboard') },
-    { to: '/impacto', icon: Heart, label: t('navigation.impact') },
-    { to: '/comunidad', icon: Users, label: t('navigation.community') },
-    { to: '/vision', icon: Globe, label: t('navigation.vision') },
-    { to: '/perfil', icon: User, label: t('navigation.profile') },
-    { to: '/merchant', icon: Store, label: t('navigation.merchant') },
-    { to: '/impact-explorer', icon: Activity, label: t('navigation.explorer') },
+    { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/impacto', icon: Heart, label: 'Impacto Social' },
+    { to: '/comunidad', icon: Users, label: 'Comunidad' },
+    { to: '/vision', icon: Globe, label: 'Visión' },
+    { to: '/perfil', icon: User, label: 'Mi Perfil' },
+    { to: '/merchant', icon: Store, label: 'Comercios' },
+    { to: '/impact-explorer', icon: Activity, label: 'Impact Explorer' },
   ];
 
   return (
@@ -54,7 +52,7 @@ export default function Layout() {
               size="sm"
               className="text-[10px] px-3 py-1"
             >
-              {isConnecting ? '...' : t('buttons.connect')}
+              {isConnecting ? '...' : 'Connect'}
             </Button>
           )}
           <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="p-2">
@@ -119,24 +117,24 @@ export default function Layout() {
           </button>
 
           <div className="bg-guiso-cream rounded-2xl p-4 border border-guiso-orange/10">
-            <p className="text-xs text-gray-500 mb-2">{t('common.wallet')}</p>
+            <p className="text-xs text-gray-500 mb-2">Tu Wallet</p>
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[10px] text-gray-400 truncate">
-                {isConnected ? address : t('errors.walletNotConnected')}
+                {isConnected ? address : 'No conectada'}
               </span>
               <div className="flex justify-between items-end mt-1">
                 <span className="font-display font-bold text-lg">
                   {isConnected ? `${token.gsoBalance.toLocaleString()} GSO` : '---'}
                 </span>
                 {isConnected ? (
-                  <span className="text-[10px] text-green-500 font-bold uppercase">{t('common.status')}</span>
+                  <span className="text-[10px] text-green-500 font-bold uppercase">Activo</span>
                 ) : (
                   <button 
                     onClick={connect}
                     disabled={isConnecting}
                     className="text-[10px] text-guiso-orange font-bold uppercase hover:underline"
                   >
-                    {isConnecting ? t('common.loading') : t('buttons.connect')}
+                    {isConnecting ? 'Conectando...' : 'Conectar'}
                   </button>
                 )}
               </div>

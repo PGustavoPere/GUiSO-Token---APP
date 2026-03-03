@@ -11,7 +11,7 @@ interface TrustContextType {
 
 const TrustContext = createContext<TrustContextType | undefined>(undefined);
 
-export const calculateTrustScore = (profile: MerchantTrustProfile): number => {
+const calculateTrustScore = (profile: MerchantTrustProfile): number => {
   if (profile.totalPayments === 0) return 50; // Default starting score
 
   const successRate = profile.successfulPayments / profile.totalPayments;

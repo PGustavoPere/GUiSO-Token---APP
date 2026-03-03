@@ -4,7 +4,6 @@ import { Heart, ExternalLink, Clock, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ImpactEvent } from './types';
 import { useTrustStore } from '../trust/TrustStore';
-import { useTranslation } from '../../i18n';
 
 import { HTMLMotionProps } from 'motion/react';
 
@@ -12,22 +11,21 @@ interface ImpactEventCardProps extends HTMLMotionProps<"div"> {
   event: ImpactEvent;
 }
 
+const timeAgo = (timestamp: number) => {
+  const seconds = Math.floor((Date.now() - timestamp) / 1000);
+  if (seconds < 60) return `${seconds} seconds ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} minutes ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hours ago`;
+  const days = Math.floor(hours / 24);
+  return `${days} days ago`;
+};
+
 export default function ImpactEventCard({ event, ...props }: ImpactEventCardProps) {
   const { getTrustByTxHash } = useTrustStore();
   const trustProfile = getTrustByTxHash(event.txHash);
-  const { t } = useTranslation();
   
-  const timeAgo = (timestamp: number) => {
-    const seconds = Math.floor((Date.now() - timestamp) / 1000);
-    if (seconds < 60) return `${seconds} ${t('common.secondsAgo')}`;
-    const minutes = Math.floor(seconds / 60);
-    if (minutes < 60) return `${minutes} ${t('common.minutesAgo')}`;
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) return `${hours} ${t('common.hoursAgo')}`;
-    const days = Math.floor(hours / 24);
-    return `${days} ${t('common.daysAgo')}`;
-  };
-
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -65,13 +63,13 @@ export default function ImpactEventCard({ event, ...props }: ImpactEventCardProp
       
       <div className="flex items-center justify-between w-full sm:w-auto gap-6 sm:gap-4 mt-2 sm:mt-0">
         <div className="text-left sm:text-right">
-          <p className="text-xs text-green-600 font-bold uppercase tracking-wider">{t('navigation.impact')}</p>
-          <p className="text-xl font-display font-bold text-green-500">+{event.impactAmount} {t('common.pts')}</p>
+          <p className="text-xs text-green-600 font-bold uppercase tracking-wider">Impact</p>
+          <p className="text-xl font-display font-bold text-green-500">+{event.impactAmount} pts</p>
         </div>
         <Link 
           to={`/impact/${event.certificateId}`}
           className="p-2 bg-gray-50 hover:bg-guiso-orange/10 text-gray-400 hover:text-guiso-orange rounded-xl transition-colors"
-          title={t('impact.viewEvidence')}
+          title="View Certificate"
         >
           <ExternalLink size={20} />
         </Link>

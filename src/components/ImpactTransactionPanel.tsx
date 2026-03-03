@@ -8,8 +8,6 @@ import ImpactStoryCard from './ImpactStoryCard';
 import { Card, Button, Badge } from './ui';
 import { web3Bridge } from '../web3/web3Provider';
 import TransactionStatusBadge, { TransactionStatus } from './TransactionStatusBadge';
-import { useTranslation } from '../i18n';
-import LoadingMessages from './LoadingMessages';
 
 const CAUSES = [
   { id: 'kitchen', title: 'Comedor Comunitario', icon: Utensils, description: 'Provee comidas calientes a familias en riesgo.' },
@@ -20,7 +18,6 @@ const CAUSES = [
 export default function ImpactTransactionPanel() {
   const { token, recordSupportTransaction, user } = useGuisoCore();
   const { connect, isConnecting } = useWallet();
-  const { t } = useTranslation();
   const [selectedCause, setSelectedCause] = useState(CAUSES[0]);
   const [amount, setAmount] = useState(100);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -78,10 +75,10 @@ export default function ImpactTransactionPanel() {
             <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto">
               <Sparkles size={32} />
             </div>
-            <h3 className="text-xl font-display font-bold text-guiso-dark">{t('impact.impactGenerated')}</h3>
-            <p className="text-sm text-gray-500">{t('impact.youContributed', { amount: amount.toString() })}</p>
+            <h3 className="text-xl font-display font-bold text-guiso-dark">¡Impacto Generado!</h3>
+            <p className="text-sm text-gray-500">Has aportado {amount} GSO a {selectedCause.title}.</p>
             <Badge variant="success">
-              +{impactEngine.calculateImpactPoints(amount)} {t('impact.impactPoints')}
+              +{impactEngine.calculateImpactPoints(amount)} Impact Points
             </Badge>
             {txHash && (
               <div className="mt-4 p-3 bg-white/50 rounded-xl border border-green-200">
@@ -115,7 +112,7 @@ export default function ImpactTransactionPanel() {
           <Wallet size={32} className="md:w-10 md:h-10" />
         </div>
         <div className="max-w-xs mx-auto">
-          <h3 className="text-xl font-display font-bold mb-2">{t('navigation.connectWallet')}</h3>
+          <h3 className="text-xl font-display font-bold mb-2">Conecta tu Wallet</h3>
           <p className="text-gray-500 text-sm">Para empezar a generar impacto social, necesitas conectar tu billetera digital.</p>
         </div>
         <Button 
@@ -123,7 +120,7 @@ export default function ImpactTransactionPanel() {
           disabled={isConnecting}
           className="w-full sm:w-auto px-8 py-3"
         >
-          {isConnecting ? t('common.loading') : t('navigation.connectWallet')}
+          {isConnecting ? 'Conectando...' : 'Conectar Wallet'}
         </Button>
       </Card>
     );
@@ -132,7 +129,7 @@ export default function ImpactTransactionPanel() {
   return (
     <Card variant="glass" padding="md" className="space-y-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h3 className="text-xl font-display font-bold">{t('impact.quickAction')}</h3>
+        <h3 className="text-xl font-display font-bold">Generar Impacto</h3>
         <Badge variant="primary" className="w-full sm:w-auto justify-center gap-2">
           <Coins size={14} />
           <span>{token.gsoBalance.toLocaleString()} GSO Disponibles</span>
@@ -207,19 +204,14 @@ export default function ImpactTransactionPanel() {
         className="w-full flex items-center justify-center gap-3 shadow-xl shadow-guiso-orange/20 hover:shadow-2xl hover:-translate-y-1 transition-all disabled:opacity-50 disabled:translate-y-0 disabled:shadow-none"
       >
         {txStatus === 'pending' || txStatus === 'confirming' ? (
-          <div className="flex flex-col items-center justify-center w-full">
-            <span className="flex items-center justify-center gap-2 mb-1">
-              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              {t('common.processing')}
-            </span>
-            <div className="text-white/80 w-full">
-              <LoadingMessages />
-            </div>
-          </div>
+          <>
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            Procesando...
+          </>
         ) : (
           <>
             <Sparkles size={20} className="md:w-6 md:h-6" />
-            {t('impact.supportCause')}
+            Confirmar Impacto Social
           </>
         )}
       </Button>

@@ -2,10 +2,8 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Target, Users, ShieldCheck, ArrowRight, Zap, Globe, Heart, Layers, Cpu } from 'lucide-react';
 import { Card, Button, Badge } from '../../components/ui';
-import { useTranslation } from '../../i18n';
 
 export default function VisionPage() {
-  const { t } = useTranslation();
   const pillars = [
     {
       icon: Globe,
@@ -41,14 +39,14 @@ export default function VisionPage() {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-guiso-orange/10 text-guiso-orange text-xs font-bold uppercase tracking-widest"
         >
           <Layers size={14} />
-          {t('vision.ourVision')}
+          Nuestra Visión 2026
         </motion.div>
         <motion.h1
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="text-4xl md:text-7xl font-display font-bold tracking-tight max-w-4xl mx-auto"
         >
-          {t('vision.redefining')} <span className="text-guiso-orange">{t('vision.socialValue')}</span> {t('vision.inDigitalAge')}
+          Redefiniendo el <span className="text-guiso-orange">Valor Social</span> en la Era Digital.
         </motion.h1>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -56,7 +54,7 @@ export default function VisionPage() {
           transition={{ delay: 0.1 }}
           className="text-lg md:text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed"
         >
-          {t('vision.heroDesc')}
+          GUISO no es solo un token; es un protocolo de confianza diseñado para escalar la generosidad humana mediante tecnología inmutable.
         </motion.p>
       </section>
 
@@ -85,15 +83,15 @@ export default function VisionPage() {
         <div className="absolute top-0 right-0 w-1/2 h-full bg-guiso-orange/10 blur-[120px]" />
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
           <div className="space-y-8">
-            <h2 className="text-4xl font-display font-bold">{t('vision.impactLoop')}</h2>
+            <h2 className="text-4xl font-display font-bold">El Impact Loop</h2>
             <p className="text-white/60 leading-relaxed">
-              {t('vision.impactLoopDesc')}
+              Nuestro sistema crea un ciclo virtuoso donde la actividad económica alimenta directamente el bienestar social, y el bienestar social fortalece la legitimidad del protocolo.
             </p>
             <div className="space-y-4">
               {[
-                { icon: Cpu, text: t('vision.loopStep1') },
-                { icon: Users, text: t('vision.loopStep2') },
-                { icon: Heart, text: t('vision.loopStep3') }
+                { icon: Cpu, text: "Transacción genera señal de impacto." },
+                { icon: Users, text: "Comunidad valida el resultado." },
+                { icon: Heart, text: "Protocolo recompensa la participación." }
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-4">
                   <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-guiso-orange">
@@ -119,13 +117,13 @@ export default function VisionPage() {
 
       {/* Roadmap */}
       <section className="space-y-8">
-        <h2 className="text-3xl font-display font-bold text-center">{t('vision.roadmap')}</h2>
+        <h2 className="text-3xl font-display font-bold text-center">Hoja de Ruta</h2>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {roadmap.map((r, i) => (
             <Card key={r.phase} variant="glass" padding="sm" className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-guiso-orange">{r.phase}</span>
-                <Badge variant={r.status === t('vision.completed') ? 'success' : 'neutral'} size="sm">
+                <Badge variant={r.status === 'Completado' ? 'success' : 'neutral'} size="sm">
                   {r.status}
                 </Badge>
               </div>
@@ -137,10 +135,10 @@ export default function VisionPage() {
 
       {/* CTA */}
       <Card variant="cream" padding="xl" rounded="3xl" className="text-center space-y-6">
-        <h3 className="text-2xl md:text-3xl font-display font-bold">{t('vision.readyToJoin')}</h3>
-        <p className="text-gray-500 max-w-md mx-auto text-sm md:text-base">{t('vision.joinCommunity')}</p>
+        <h3 className="text-2xl md:text-3xl font-display font-bold">¿Listo para ser parte del cambio?</h3>
+        <p className="text-gray-500 max-w-md mx-auto text-sm md:text-base">Únete a nuestra comunidad de inversores y partners humanitarios.</p>
         <Button size="lg" className="w-full sm:w-auto flex items-center justify-center gap-2 mx-auto">
-          {t('vision.contactTeam')}
+          Contactar con el Equipo
           <ArrowRight size={20} />
         </Button>
       </Card>

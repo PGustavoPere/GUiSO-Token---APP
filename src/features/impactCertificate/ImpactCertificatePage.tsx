@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { ShieldCheck, ArrowLeft, Share2, CheckCircle2, ShieldAlert, Shield, Award, Heart } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, Share2, CheckCircle2, ShieldAlert, Shield } from 'lucide-react';
 import { impactCertificateService } from './impactCertificateService';
 import { ImpactCertificate } from './types';
 import ImpactShareCard from './ImpactShareCard';
 import { Button } from '../../components/ui';
 import { useTrustStore } from '../trust/TrustStore';
-import { useTrustSnapshotStore } from '../trust/TrustSnapshotStore';
-import { getTrustLevel, getTrustLevelMeta } from '../trust/trustLevelEngine';
-import { useTranslation } from '../../i18n';
 
 export default function ImpactCertificatePage() {
   const { certificateId } = useParams<{ certificateId: string }>();
@@ -17,8 +14,6 @@ export default function ImpactCertificatePage() {
   const [certificate, setCertificate] = useState<ImpactCertificate | null>(null);
   const [showToast, setShowToast] = useState(false);
   const { getTrustByTxHash } = useTrustStore();
-  const { getSnapshotByTxHash } = useTrustSnapshotStore();
-  const { t } = useTranslation();
 
   useEffect(() => {
     if (certificateId) {
@@ -39,9 +34,9 @@ export default function ImpactCertificatePage() {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gray-50">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">{t('certificates.notFound')}</h2>
-          <p className="text-gray-500 mb-6">{t('certificates.invalidId')}</p>
-          <Button onClick={() => navigate('/')}>{t('certificates.backToHome')}</Button>
+          <h2 className="text-2xl font-bold mb-2">Certificado no encontrado</h2>
+          <p className="text-gray-500 mb-6">El ID del certificado es inválido o no existe.</p>
+          <Button onClick={() => navigate('/')}>Volver al inicio</Button>
         </div>
       </div>
     );
@@ -55,7 +50,7 @@ export default function ImpactCertificatePage() {
           className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors mb-8"
         >
           <ArrowLeft size={20} />
-          {t('common.back')}
+          Volver
         </button>
 
         <motion.div 
@@ -66,112 +61,17 @@ export default function ImpactCertificatePage() {
           <div className="text-center space-y-4 mb-12">
             <div className="inline-flex items-center justify-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full font-bold text-sm mb-4">
               <CheckCircle2 size={18} />
-              {t('impact.verifiedImpact')} ✔
+              Verified Impact ✔
             </div>
             <h1 className="text-4xl md:text-5xl font-display font-bold text-guiso-dark">
-              {t('certificates.title')}
+              Certificado de Impacto
             </h1>
             <p className="text-gray-500 max-w-xl mx-auto">
-              {t('certificates.description')}
+              Este certificado verifica criptográficamente el impacto social generado a través de la red GUISO.
             </p>
           </div>
 
           <ImpactShareCard certificate={certificate} />
-
-          {/* Emotional Layer Section */}
-          <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mt-8">
-            <h3 className="text-lg font-bold text-guiso-dark mb-4 flex items-center gap-2">
-              <Heart size={20} className="text-guiso-orange" />
-              {t('certificates.whatDoesItMean')}
-            </h3>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-3">
-                <CheckCircle2 size={18} className="text-green-500 mt-0.5 shrink-0" />
-                <span className="text-gray-600 text-sm">{t('certificates.meaningVerified')}</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle2 size={18} className="text-green-500 mt-0.5 shrink-0" />
-                <span className="text-gray-600 text-sm">{t('certificates.meaningContribution')}</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle2 size={18} className="text-green-500 mt-0.5 shrink-0" />
-                <span className="text-gray-600 text-sm">{t('certificates.meaningTransparent')}</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Impact Status Section */}
-          {(() => {
-            const trustProfile = getTrustByTxHash(certificate.txHash);
-            if (!trustProfile) return null;
-
-            const trustLevel = getTrustLevel(trustProfile.trustScore);
-            const trustLevelMeta = getTrustLevelMeta(trustLevel);
-
-            return (
-              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mt-8">
-                <h3 className="text-lg font-bold text-guiso-dark mb-4 flex items-center gap-2">
-                  <Award size={20} className="text-guiso-orange" />
-                  {t('certificates.status')}
-                </h3>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-500 font-medium">{t('trust.merchantTrustLevel')}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <div className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-bold bg-gray-50 border border-gray-100 ${trustLevelMeta.color}`}>
-                        {trustLevelMeta.icon === 'ShieldAlert' && <ShieldAlert size={16} />}
-                        {trustLevelMeta.icon === 'Shield' && <Shield size={16} />}
-                        {trustLevelMeta.icon === 'ShieldCheck' && <ShieldCheck size={16} />}
-                        {trustLevelMeta.icon === 'Award' && <Award size={16} />}
-                        {t(`trust.${trustLevelMeta.level}` as any) || trustLevelMeta.label}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-gray-400">{t('trust.score')}</p>
-                    <p className={`text-xl font-display font-bold ${trustLevelMeta.color}`}>
-                      {trustProfile.trustScore}%
-                    </p>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Impact Proof Section */}
-          {(() => {
-            const snapshot = getSnapshotByTxHash(certificate.txHash);
-            if (!snapshot) return null;
-
-            return (
-              <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mt-8">
-                <h3 className="text-lg font-bold text-guiso-dark mb-4 flex items-center gap-2">
-                  <ShieldCheck size={20} className="text-purple-500" />
-                  {t('trust.proof')}
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center pb-2 border-b border-gray-100">
-                    <span className="text-sm text-gray-500 font-medium">{t('trust.proofHash')}</span>
-                    <span className="text-xs font-mono text-gray-900 bg-gray-50 px-2 py-1 rounded border border-gray-200">
-                      {snapshot.proofHash.slice(0, 16)}...{snapshot.proofHash.slice(-16)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center pb-2 border-b border-gray-100">
-                    <span className="text-sm text-gray-500 font-medium">{t('trust.timestamp')}</span>
-                    <span className="text-sm font-medium text-gray-900">
-                      {new Date(snapshot.timestamp).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500 font-medium">{t('trust.scoreAtIssuance')}</span>
-                    <span className="text-sm font-bold text-purple-600">
-                      {snapshot.trustScore}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
 
           {/* Impact Credibility Section */}
           {(() => {
@@ -185,11 +85,11 @@ export default function ImpactCertificatePage() {
               <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mt-8">
                 <h3 className="text-lg font-bold text-guiso-dark mb-4 flex items-center gap-2">
                   <Shield size={20} className="text-blue-500" />
-                  {t('certificates.credibility')}
+                  Impact Credibility
                 </h3>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">{t('trust.merchantTrustScore')}</p>
+                    <p className="text-sm text-gray-500 font-medium">Merchant Trust Score</p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={`text-3xl font-display font-bold ${
                         isVerified ? 'text-green-500' : isWarning ? 'text-red-500' : 'text-yellow-500'
@@ -199,22 +99,22 @@ export default function ImpactCertificatePage() {
                       {isVerified && (
                         <div className="flex items-center gap-1 bg-green-50 text-green-700 px-2 py-1 rounded-full text-xs font-bold">
                           <ShieldCheck size={14} />
-                          {t('trust.verifiedMerchant')}
+                          Verified Merchant
                         </div>
                       )}
                       {isWarning && (
                         <div className="flex items-center gap-1 bg-red-50 text-red-700 px-2 py-1 rounded-full text-xs font-bold">
                           <ShieldAlert size={14} />
-                          {t('trust.lowTrust')}
+                          Low Trust
                         </div>
                       )}
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-gray-400">{t('identity.totalPayments')}</p>
+                    <p className="text-xs text-gray-400">Total Payments</p>
                     <p className="text-sm font-bold text-gray-700">{trustProfile.totalPayments}</p>
-                    <p className="text-xs text-gray-400 mt-1">{t('trust.impactGenerated')}</p>
-                    <p className="text-sm font-bold text-guiso-orange">+{trustProfile.totalImpactGenerated} {t('common.pts')}</p>
+                    <p className="text-xs text-gray-400 mt-1">Impact Generated</p>
+                    <p className="text-sm font-bold text-guiso-orange">+{trustProfile.totalImpactGenerated} pts</p>
                   </div>
                 </div>
               </div>
@@ -227,13 +127,13 @@ export default function ImpactCertificatePage() {
               className="flex items-center gap-2"
             >
               <Share2 size={20} />
-              {t('certificates.share')}
+              Compartir Impacto
             </Button>
             <Button 
               variant="outline"
               onClick={() => window.open(`https://testnet.bscscan.com/tx/${certificate.txHash}`, '_blank')}
             >
-              {t('certificates.viewOnBscScan')}
+              Ver en BscScan
             </Button>
           </div>
         </motion.div>
@@ -248,7 +148,7 @@ export default function ImpactCertificatePage() {
             className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-2 z-50"
           >
             <CheckCircle2 size={18} className="text-green-400" />
-            <span className="font-medium text-sm">{t('certificates.linkCopied')}</span>
+            <span className="font-medium text-sm">Link de impacto copiado ✔</span>
           </motion.div>
         )}
       </AnimatePresence>
