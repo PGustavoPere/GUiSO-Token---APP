@@ -1,14 +1,53 @@
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
-// In-memory storage for payments
+import fs from "fs";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import cors from "cors";
+
+console.log("Starting GUISO Server initialization...");
 const payments: Record<string, any> = {};
 
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  // --- Security Middlewares ---
+  
+  // Basic security headers
+  app.use(helmet({
+    crossOriginEmbedderPolicy: false,
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginOpenerPolicy: false,
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "img-src": ["'self'", "data:", "https://images.unsplash.com", "https://picsum.photos", "https://assets.mixkit.co", "https://*.googleusercontent.com", "https://*.picsum.photos"],
+        "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"], 
+        "connect-src": ["'self'", "https://*.run.app", "wss://*.run.app", "https://api.google.com", "https://*.googleapis.com", "https://*.google.com", "wss://*.google.com"],
+        "font-src": ["'self'", "https://fonts.gstatic.com", "data:", "https://fonts.googleapis.com"],
+        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+        "frame-ancestors": ["'self'", "https://*.run.app", "https://*.google.com"],
+      },
+    },
+  }));
+
+  app.use(cors());
+
+  const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 1000, 
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  
+  app.use("/api/", limiter);
+
+  app.use(express.json({ limit: '10kb' })); // Limit body size
+
+  // Serve public directory
+  app.use(express.static(path.join(process.cwd(), "public")));
 
   // --- Mock API Routes ---
 
@@ -93,13 +132,18 @@ async function startServer() {
   });
 
   // --- Vite Middleware ---
-  if (process.env.NODE_ENV !== "production") {
+  const isProduction = process.env.NODE_ENV === "production";
+  const hasDist = fs.existsSync(path.join(process.cwd(), "dist"));
+
+  if (!isProduction || !hasDist) {
+    console.log("Using Vite middleware for development...");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
+    console.log("Serving production build from dist...");
     app.use(express.static(path.join(process.cwd(), "dist")));
     app.get("*", (req, res) => {
       res.sendFile(path.join(process.cwd(), "dist", "index.html"));
@@ -107,7 +151,8 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`GUISO Server running on http://localhost:${PORT}`);
+    console.log(`GUISO Server successfully started and listening on http://0.0.0.0:${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   });
 }
 

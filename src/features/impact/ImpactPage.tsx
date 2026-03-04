@@ -1,15 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { api, Project } from '../../services/api';
-import { Heart, CheckCircle2, Clock, MapPin, Share2, Sparkles } from 'lucide-react';
+import { Heart, CheckCircle2, Clock, MapPin, Share2, Sparkles, Shield, Info, ExternalLink, Vote, X } from 'lucide-react';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
+import { useImpactExplorerStore } from '../impactExplorer/ImpactExplorerStore';
 import SupportModal from './SupportModal';
 import { Card, Button, Badge } from '../../components/ui';
+import { motion, AnimatePresence } from 'motion/react';
 
 export default function ImpactPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [showLedger, setShowLedger] = useState(false);
+  const [showDAO, setShowDAO] = useState(false);
   const { user } = useGuisoCore();
+  const { getRecentEvents } = useImpactExplorerStore();
+
+  const recentEvents = getRecentEvents().slice(0, 5);
 
   useEffect(() => {
     api.getProjects().then(data => {
@@ -116,16 +123,155 @@ export default function ImpactPage() {
           <h2 className="text-2xl md:text-3xl font-display font-bold mb-4">Transparencia Radical</h2>
           <p className="text-white/80 text-sm md:text-base mb-6 md:mb-8">Cada token destinado a impacto es rastreable mediante tecnología blockchain. Demostramos la trazabilidad con datos inmutables y auditoría abierta.</p>
           <div className="flex flex-col sm:flex-row flex-wrap gap-3 md:gap-4">
-            <Button variant="secondary" className="w-full sm:w-auto bg-white text-guiso-terracotta hover:bg-guiso-cream">
+            <Button 
+              onClick={() => setShowLedger(true)}
+              variant="secondary" 
+              className="w-full sm:w-auto bg-white text-guiso-terracotta hover:bg-guiso-cream"
+            >
               Explorar Ledger de Impacto
             </Button>
-            <Button variant="outline" className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 hover:text-white">
+            <Button 
+              onClick={() => setShowDAO(true)}
+              variant="outline" 
+              className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 hover:text-white"
+            >
               Cómo funciona el DAO
             </Button>
           </div>
         </div>
         <Heart size={200} className="absolute -right-10 -bottom-10 md:-right-20 md:-bottom-20 text-white/5 rotate-12 md:w-[300px] md:h-[300px]" />
       </Card>
+
+      {/* Ledger Modal */}
+      <AnimatePresence>
+        {showLedger && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl"
+            >
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-guiso-cream/30">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-guiso-orange/10 rounded-xl text-guiso-orange">
+                    <Shield size={24} />
+                  </div>
+                  <h3 className="text-xl font-display font-bold">Ledger de Impacto</h3>
+                </div>
+                <button onClick={() => setShowLedger(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                <p className="text-sm text-gray-500 mb-4">
+                  Registro público de las últimas transacciones de impacto verificadas en la red GUISO. Cada entrada representa ayuda real entregada.
+                </p>
+                
+                {recentEvents.map((event) => (
+                  <div key={event.id} className="p-4 bg-gray-50 rounded-2xl border border-gray-100 flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                        <Heart size={18} fill="currentColor" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm">{event.title}</p>
+                        <p className="text-[10px] text-gray-400 font-mono">{event.txHash.slice(0, 16)}...</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-guiso-orange font-bold">+{event.impactAmount} IP</p>
+                      <p className="text-[10px] text-gray-400">Verificado</p>
+                    </div>
+                  </div>
+                ))}
+                
+                {recentEvents.length === 0 && (
+                  <div className="text-center py-12 text-gray-400">
+                    <p>No hay transacciones recientes en el ledger.</p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                <Button onClick={() => setShowLedger(false)}>Cerrar Ledger</Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* DAO Modal */}
+      <AnimatePresence>
+        {showDAO && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl max-w-2xl w-full max-h-[80vh] overflow-hidden flex flex-col shadow-2xl"
+            >
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-guiso-dark text-white">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-white/10 rounded-xl text-guiso-orange">
+                    <Vote size={24} />
+                  </div>
+                  <h3 className="text-xl font-display font-bold">Gobernanza DAO</h3>
+                </div>
+                <button onClick={() => setShowDAO(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                <section className="space-y-3">
+                  <h4 className="font-bold text-lg flex items-center gap-2">
+                    <Info size={18} className="text-guiso-orange" />
+                    ¿Qué es el DAO de GUISO?
+                  </h4>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    La Organización Autónoma Descentralizada (DAO) permite que la comunidad tome las decisiones importantes. No hay una entidad central que decida a dónde va el dinero; lo decides tú con tus tokens GSO.
+                  </p>
+                </section>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-guiso-cream/30 rounded-2xl border border-guiso-orange/10">
+                    <h5 className="font-bold text-sm mb-2">Impact Power (IP)</h5>
+                    <p className="text-xs text-gray-500">Tu poder de voto no solo depende de cuántos tokens tienes, sino de cuánto impacto has generado previamente.</p>
+                  </div>
+                  <div className="p-4 bg-guiso-cream/30 rounded-2xl border border-guiso-orange/10">
+                    <h5 className="font-bold text-sm mb-2">Propuestas Abiertas</h5>
+                    <p className="text-xs text-gray-500">Cualquier miembro con suficiente reputación puede proponer una nueva causa para ser financiada.</p>
+                  </div>
+                </div>
+
+                <section className="space-y-3">
+                  <h4 className="font-bold text-lg">El Proceso de Votación</h4>
+                  <ol className="space-y-4">
+                    <li className="flex gap-4">
+                      <div className="w-6 h-6 rounded-full bg-guiso-orange text-white flex items-center justify-center text-xs font-bold shrink-0">1</div>
+                      <p className="text-sm text-gray-600"><span className="font-bold text-guiso-dark">Propuesta:</span> Se presenta un proyecto con objetivos claros y presupuesto en GSO.</p>
+                    </li>
+                    <li className="flex gap-4">
+                      <div className="w-6 h-6 rounded-full bg-guiso-orange text-white flex items-center justify-center text-xs font-bold shrink-0">2</div>
+                      <p className="text-sm text-gray-600"><span className="font-bold text-guiso-dark">Votación:</span> Los holders usan su Impact Power para validar la viabilidad y prioridad.</p>
+                    </li>
+                    <li className="flex gap-4">
+                      <div className="w-6 h-6 rounded-full bg-guiso-orange text-white flex items-center justify-center text-xs font-bold shrink-0">3</div>
+                      <p className="text-sm text-gray-600"><span className="font-bold text-guiso-dark">Ejecución:</span> Si se aprueba, los fondos se liberan mediante smart contracts según hitos verificables.</p>
+                    </li>
+                  </ol>
+                </section>
+              </div>
+              
+              <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                <Button onClick={() => setShowDAO(false)}>Entendido</Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
