@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, ArrowRight, Heart, ShieldCheck, Zap } from 'lucide-react';
+import { Sparkles, ArrowRight, Heart, ShieldCheck, Zap, X, Info, Star, Award, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { AnimatePresence } from 'motion/react';
 import ImpactDashboard from '../../components/ImpactDashboard';
 import ImpactTransactionPanel from '../../components/ImpactTransactionPanel';
 import ImpactHistory from '../../components/ImpactHistory';
@@ -13,6 +14,15 @@ import { Card, Button } from '../../components/ui';
 
 export default function DashboardPage() {
   const { user } = useGuisoCore();
+  const [showLevelsModal, setShowLevelsModal] = React.useState(false);
+
+  const levels = [
+    { name: 'Semilla', minIp: 0, color: 'bg-gray-100 text-gray-500', icon: '🌱', desc: 'Tu inicio en el ecosistema. Empezás a sembrar impacto.' },
+    { name: 'Brote', minIp: 500, color: 'bg-green-100 text-green-600', icon: '🌿', desc: 'Tu compromiso crece. Ya sos un actor reconocido.' },
+    { name: 'Raíz', minIp: 2000, color: 'bg-amber-100 text-amber-700', icon: '🪵', desc: 'Impacto sólido. Tu voz tiene peso en la comunidad.' },
+    { name: 'Árbol', minIp: 5000, color: 'bg-emerald-100 text-emerald-700', icon: '🌳', desc: 'Liderazgo humanitario. Validás propuestas del DAO.' },
+    { name: 'Bosque', minIp: 15000, color: 'bg-guiso-orange/10 text-guiso-orange', icon: '🌲', desc: 'Leyenda del impacto. Máximo poder de gobernanza.' },
+  ];
 
   return (
     <div className="space-y-12 pb-20">
@@ -118,12 +128,109 @@ export default function DashboardPage() {
               Cada vez que aportas GSO, el sistema calcula el impacto humanitario generado. 
               Tus puntos de impacto (IP) determinan tu nivel de participación y tu poder de validación.
             </p>
-            <Link to="/comunidad" className="text-guiso-orange text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all">
+            <button 
+              onClick={() => setShowLevelsModal(true)}
+              className="text-guiso-orange text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all cursor-pointer"
+            >
               Saber más sobre niveles <ArrowRight size={14} />
-            </Link>
+            </button>
           </Card>
         </div>
       </div>
+
+      {/* Levels Info Modal */}
+      <AnimatePresence>
+        {showLevelsModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
+            >
+              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-guiso-cream/30">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-guiso-orange/10 rounded-xl text-guiso-orange">
+                    <TrendingUp size={24} />
+                  </div>
+                  <h3 className="text-xl font-display font-bold">Niveles de Reputación</h3>
+                </div>
+                <button onClick={() => setShowLevelsModal(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                <div className="bg-guiso-dark text-white p-6 rounded-2xl space-y-3">
+                  <h4 className="font-bold flex items-center gap-2">
+                    <Star size={18} className="text-guiso-orange" />
+                    ¿Para qué sirven los niveles?
+                  </h4>
+                  <p className="text-sm text-white/60 leading-relaxed">
+                    En GUISO, tu reputación no se compra, se construye. A medida que generas impacto real, acumulas <span className="text-guiso-orange font-bold">Impact Points (IP)</span> que desbloquean beneficios exclusivos:
+                  </p>
+                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                    <li className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
+                      <Award size={14} className="text-guiso-orange" />
+                      Mayor poder de voto en el DAO
+                    </li>
+                    <li className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
+                      <Award size={14} className="text-guiso-orange" />
+                      Certificados de impacto premium
+                    </li>
+                    <li className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
+                      <Award size={14} className="text-guiso-orange" />
+                      Acceso a preventas exclusivas
+                    </li>
+                    <li className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
+                      <Award size={14} className="text-guiso-orange" />
+                      Insignias de perfil verificadas
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-bold text-gray-900 px-2">Escala de Impacto</h4>
+                  <div className="space-y-2">
+                    {levels.map((lvl, idx) => (
+                      <div key={lvl.name} className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors">
+                        <div className="text-2xl w-12 h-12 flex items-center justify-center bg-gray-50 rounded-xl">
+                          {lvl.icon}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex justify-between items-center mb-1">
+                            <span className="font-bold text-sm">{lvl.name}</span>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${lvl.color}`}>
+                              {lvl.minIp}+ IP
+                            </span>
+                          </div>
+                          <p className="text-xs text-gray-500">{lvl.desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 flex gap-4">
+                  <div className="p-2 bg-blue-100 text-blue-600 rounded-xl shrink-0 h-fit">
+                    <Info size={20} />
+                  </div>
+                  <div>
+                    <h5 className="font-bold text-sm text-blue-900 mb-1">¿Cómo subo de nivel?</h5>
+                    <p className="text-xs text-blue-800/70">
+                      Cada vez que apoyas una causa desde el panel de "Acción Rápida", recibes IP proporcional a tu aporte. El sistema actualiza tu rango automáticamente en la red.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
+                <Button onClick={() => setShowLevelsModal(false)}>Entendido</Button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

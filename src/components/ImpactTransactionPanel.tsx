@@ -137,25 +137,25 @@ export default function ImpactTransactionPanel() {
       </div>
 
       {/* Cause Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-3">
         {CAUSES.map((cause) => (
           <button
             key={cause.id}
             onClick={() => setSelectedCause(cause)}
-            className={`p-4 rounded-2xl border-2 transition-all text-left space-y-3 ${
+            className={`p-3 rounded-2xl border-2 transition-all text-left flex items-center gap-4 ${
               selectedCause.id === cause.id 
                 ? 'border-guiso-orange bg-guiso-orange/5 shadow-md' 
                 : 'border-gray-100 hover:border-gray-200 bg-white'
             }`}
           >
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+            <div className={`w-12 h-12 shrink-0 rounded-xl flex items-center justify-center ${
               selectedCause.id === cause.id ? 'bg-guiso-orange text-white' : 'bg-gray-100 text-gray-400'
             }`}>
-              <cause.icon size={20} />
+              <cause.icon size={24} />
             </div>
-            <div>
-              <p className="font-bold text-sm">{cause.title}</p>
-              <p className="text-[10px] text-gray-400 line-clamp-2">{cause.description}</p>
+            <div className="min-w-0">
+              <p className="font-bold text-sm truncate">{cause.title}</p>
+              <p className="text-[10px] text-gray-400 line-clamp-1">{cause.description}</p>
             </div>
           </button>
         ))}
