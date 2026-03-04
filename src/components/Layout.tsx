@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { LayoutDashboard, Heart, Users, User, Settings, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Heart, Users, User, Settings, Menu, X, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -19,7 +19,7 @@ function cn(...inputs: ClassValue[]) {
 export default function Layout() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { token, user } = useGuisoCore();
-  const { address, isConnected, connect, isConnecting } = useWallet();
+  const { address, isConnected, connect, disconnect, isConnecting } = useWallet();
 
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -41,9 +41,18 @@ export default function Layout() {
         </div>
         <div className="flex items-center gap-4">
           {isConnected ? (
-            <div className="flex flex-col items-end">
-              <span className="text-[10px] font-bold text-guiso-orange uppercase tracking-tighter">{token.gsoBalance.toLocaleString()} GSO</span>
-              <span className="text-[8px] text-gray-400 font-mono">{address}</span>
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col items-end">
+                <span className="text-[10px] font-bold text-guiso-orange uppercase tracking-tighter">{token.gsoBalance.toLocaleString()} GSO</span>
+                <span className="text-[8px] text-gray-400 font-mono">{address?.slice(0, 6)}...{address?.slice(-4)}</span>
+              </div>
+              <button 
+                onClick={disconnect}
+                className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-red-50 hover:text-red-500 transition-colors"
+                title="Desconectar"
+              >
+                <LogOut size={16} />
+              </button>
             </div>
           ) : (
             <Button 
@@ -119,7 +128,12 @@ export default function Layout() {
                   {isConnected ? `${token.gsoBalance.toLocaleString()} GSO` : '---'}
                 </span>
                 {isConnected ? (
-                  <span className="text-[10px] text-green-500 font-bold uppercase">Activo</span>
+                  <button 
+                    onClick={disconnect}
+                    className="text-[10px] text-gray-400 font-bold uppercase hover:text-red-500 transition-colors"
+                  >
+                    Desconectar
+                  </button>
                 ) : (
                   <button 
                     onClick={connect}
