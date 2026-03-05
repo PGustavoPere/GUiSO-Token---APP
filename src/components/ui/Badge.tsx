@@ -1,7 +1,8 @@
 import React from 'react';
+import { motion, HTMLMotionProps } from 'motion/react';
 import { cn } from '../../utils/cn';
 
-interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
+interface BadgeProps extends HTMLMotionProps<'span'> {
   variant?: 'primary' | 'success' | 'warning' | 'neutral' | 'danger';
   size?: 'sm' | 'md';
   children?: React.ReactNode;
@@ -29,7 +30,7 @@ export function Badge({
   };
 
   return (
-    <span 
+    <motion.span 
       className={cn(
         'inline-flex items-center justify-center font-bold uppercase tracking-widest rounded-full border',
         variants[variant],
@@ -39,6 +40,6 @@ export function Badge({
       {...props}
     >
       {children}
-    </span>
+    </motion.span>
   );
 }

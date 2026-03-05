@@ -61,7 +61,7 @@ export default function TransactionStatusBadge({ status, txHash }: TransactionSt
       
       {txHash && (
         <div className="p-3 bg-white/50 rounded-xl border border-gray-100 w-full text-center">
-          <p className="text-xs text-gray-500 font-bold mb-1">Transaction Hash</p>
+          <p className="text-xs text-gray-500 font-bold mb-1">Hash de Transacción</p>
           <a 
             href={`https://testnet.bscscan.com/tx/${txHash}`}
             target="_blank"

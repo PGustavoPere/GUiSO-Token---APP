@@ -58,7 +58,7 @@ export default function ImpactHistory() {
                 <div className="flex md:flex-col justify-between md:items-end gap-2 shrink-0">
                   <div className="text-right">
                     <p className="text-lg font-display font-bold text-guiso-orange">-{tx.amount} GSO</p>
-                    <p className="text-[10px] text-green-500 font-bold">+{tx.impactPoints} Impact Points</p>
+                    <p className="text-[10px] text-green-500 font-bold">+{tx.impactPoints} Puntos de Impacto</p>
                   </div>
                   <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-400">
                     <ExternalLink size={16} />

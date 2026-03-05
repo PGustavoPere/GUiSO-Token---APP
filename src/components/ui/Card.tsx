@@ -1,13 +1,13 @@
 import React from 'react';
+import { motion, HTMLMotionProps } from 'motion/react';
 import { cn } from '../../utils/cn';
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+interface CardProps extends HTMLMotionProps<'div'> {
   variant?: 'glass' | 'dark' | 'terracotta' | 'cream';
   padding?: 'none' | 'sm' | 'md' | 'lg' | 'xl';
   rounded?: 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full';
   children?: React.ReactNode;
   className?: string;
-  key?: React.Key;
 }
 
 export function Card({ 
@@ -43,7 +43,7 @@ export function Card({
   };
 
   return (
-    <div 
+    <motion.div 
       className={cn(
         variants[variant],
         paddings[padding],
@@ -54,6 +54,6 @@ export function Card({
       {...props}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }

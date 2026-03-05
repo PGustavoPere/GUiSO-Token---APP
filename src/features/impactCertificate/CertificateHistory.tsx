@@ -35,7 +35,7 @@ export default function CertificateHistory() {
         <div className="w-10 h-10 bg-guiso-orange/10 rounded-xl flex items-center justify-center text-guiso-orange">
           <Award size={20} />
         </div>
-        <h3 className="text-xl font-display font-bold">My Impact Certificates</h3>
+        <h3 className="text-xl font-display font-bold">Mis Certificados de Impacto</h3>
       </div>
 
       {certificates.length === 0 ? (

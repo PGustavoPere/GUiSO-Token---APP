@@ -40,10 +40,10 @@ export default function ImpactEventCard({ event, ...props }: ImpactEventCardProp
           <h4 className="font-bold text-guiso-dark text-lg leading-tight flex items-center gap-2">
             {event.title}
             {trustProfile && trustProfile.trustScore >= 80 && (
-              <Shield size={16} className="text-green-500" title={`Trust Score: ${trustProfile.trustScore}%`} />
+              <Shield size={16} className="text-green-500" title={`Puntaje de Confianza: ${trustProfile.trustScore}%`} />
             )}
             {trustProfile && trustProfile.trustScore < 50 && (
-              <Shield size={16} className="text-red-500" title={`Trust Score: ${trustProfile.trustScore}%`} />
+              <Shield size={16} className="text-red-500" title={`Puntaje de Confianza: ${trustProfile.trustScore}%`} />
             )}
           </h4>
           <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">

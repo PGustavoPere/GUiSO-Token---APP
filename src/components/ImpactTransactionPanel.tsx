@@ -3,6 +3,8 @@ import { motion } from 'motion/react';
 import { Heart, Utensils, Home, Sparkles, Coins, Wallet } from 'lucide-react';
 import { useGuisoCore } from '../core/GuisoCoreStore';
 import { useWallet } from '../core/WalletProvider';
+import { useIdentityStore } from '../features/identity/IdentityStore';
+import { impactCertificateService } from '../features/impactCertificate/impactCertificateService';
 import { impactEngine } from '../system/impactEngine';
 import ImpactStoryCard from './ImpactStoryCard';
 import { Card, Button, Badge } from './ui';
@@ -17,7 +19,8 @@ const CAUSES = [
 
 export default function ImpactTransactionPanel() {
   const { token, recordSupportTransaction, user } = useGuisoCore();
-  const { connect, isConnecting } = useWallet();
+  const { connect, isConnecting, address } = useWallet();
+  const { updateAfterImpact } = useIdentityStore();
   const [selectedCause, setSelectedCause] = useState(CAUSES[0]);
   const [amount, setAmount] = useState(100);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -46,6 +49,24 @@ export default function ImpactTransactionPanel() {
     if (confirmed) {
       setTxStatus('confirmed');
       recordSupportTransaction(selectedCause.id, selectedCause.title, amount, result.txHash);
+      
+      // Sync with Identity Store
+      if (address) {
+        const impactPoints = impactEngine.calculateImpactPoints(amount);
+        updateAfterImpact(address, impactPoints, true);
+        
+        // Generate Certificate
+        impactCertificateService.generateCertificate(
+          result.txHash,
+          address,
+          `Impacto en ${selectedCause.title}`,
+          impactPoints
+        );
+        
+        // Notify components
+        window.dispatchEvent(new CustomEvent('certificates_updated'));
+      }
+      
       setIsSuccess(true);
       
       // Show story after success (Disabled Demo Mode)
@@ -78,11 +99,11 @@ export default function ImpactTransactionPanel() {
             <h3 className="text-xl font-display font-bold text-guiso-dark">¡Impacto Generado!</h3>
             <p className="text-sm text-gray-500">Has aportado {amount} GSO a {selectedCause.title}.</p>
             <Badge variant="success">
-              +{impactEngine.calculateImpactPoints(amount)} Impact Points
+              +{impactEngine.calculateImpactPoints(amount)} Puntos de Impacto
             </Badge>
             {txHash && (
               <div className="mt-4 p-3 bg-white/50 rounded-xl border border-green-200">
-                <p className="text-xs text-gray-500 font-bold mb-1">Transaction Hash</p>
+                <p className="text-xs text-gray-500 font-bold mb-1">Hash de Transacción</p>
                 <a 
                   href={`https://testnet.bscscan.com/tx/${txHash}`}
                   target="_blank"

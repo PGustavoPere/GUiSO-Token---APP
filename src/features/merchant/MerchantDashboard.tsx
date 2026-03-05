@@ -134,7 +134,7 @@ export default function MerchantDashboard() {
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-guiso-dark flex items-center gap-2">
               <Shield size={20} className={trustTextColor} />
-              Trust Score
+              Puntaje de Confianza
             </h3>
             <span className={`text-2xl font-display font-bold ${trustTextColor}`}>
               {trustScore}%

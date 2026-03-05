@@ -61,7 +61,7 @@ export default function ImpactCertificatePage() {
           <div className="text-center space-y-4 mb-12">
             <div className="inline-flex items-center justify-center gap-2 bg-green-100 text-green-700 px-4 py-2 rounded-full font-bold text-sm mb-4">
               <CheckCircle2 size={18} />
-              Verified Impact ✔
+              Impacto Verificado ✔
             </div>
             <h1 className="text-4xl md:text-5xl font-display font-bold text-guiso-dark">
               Certificado de Impacto
@@ -85,11 +85,11 @@ export default function ImpactCertificatePage() {
               <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm mt-8">
                 <h3 className="text-lg font-bold text-guiso-dark mb-4 flex items-center gap-2">
                   <Shield size={20} className="text-blue-500" />
-                  Impact Credibility
+                  Credibilidad de Impacto
                 </h3>
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">Merchant Trust Score</p>
+                    <p className="text-sm text-gray-500 font-medium">Puntaje de Confianza del Comercio</p>
                     <div className="flex items-center gap-2 mt-1">
                       <span className={`text-3xl font-display font-bold ${
                         isVerified ? 'text-green-500' : isWarning ? 'text-red-500' : 'text-yellow-500'
@@ -99,21 +99,21 @@ export default function ImpactCertificatePage() {
                       {isVerified && (
                         <div className="flex items-center gap-1 bg-green-50 text-green-700 px-2 py-1 rounded-full text-xs font-bold">
                           <ShieldCheck size={14} />
-                          Verified Merchant
+                          Comercio Verificado
                         </div>
                       )}
                       {isWarning && (
                         <div className="flex items-center gap-1 bg-red-50 text-red-700 px-2 py-1 rounded-full text-xs font-bold">
                           <ShieldAlert size={14} />
-                          Low Trust
+                          Confianza Baja
                         </div>
                       )}
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-gray-400">Total Payments</p>
+                    <p className="text-xs text-gray-400">Pagos Totales</p>
                     <p className="text-sm font-bold text-gray-700">{trustProfile.totalPayments}</p>
-                    <p className="text-xs text-gray-400 mt-1">Impact Generated</p>
+                    <p className="text-xs text-gray-400 mt-1">Impacto Generado</p>
                     <p className="text-sm font-bold text-guiso-orange">+{trustProfile.totalImpactGenerated} pts</p>
                   </div>
                 </div>

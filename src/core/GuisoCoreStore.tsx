@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { impactEngine, LevelThreshold } from '../system/impactEngine';
 import { useWallet } from './WalletProvider';
 
@@ -73,7 +73,7 @@ const GuisoCoreContext = createContext<GuisoCoreContextType | undefined>(undefin
  * Valores iniciales por defecto
  */
 const INITIAL_USER: UserState = {
-  username: "Guiso Explorer",
+  username: "Explorador Guiso",
   impactScore: 0,
   communityLevel: impactEngine.calculateLevel(0).level,
   isWalletConnected: false,
@@ -88,7 +88,7 @@ const INITIAL_TOKEN: TokenState = {
   gsoBalance: 10000,
   transactions: [],
   impactPower: 15000,
-  influenceBadge: 'Community Pillar',
+  influenceBadge: 'Pilar de la Comunidad',
 };
 
 const INITIAL_GLOBAL: GlobalImpactState = {
@@ -104,6 +104,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [global, setGlobal] = useState<GlobalImpactState>(INITIAL_GLOBAL_STATS_ADAPTED);
   const [levelUpNotification, setLevelUpNotification] = useState<LevelThreshold | null>(null);
   const [activeImpactMoment, setActiveImpactMoment] = useState<{ points: number; target: string } | null>(null);
+  const isLoaded = useRef(false);
 
   // Sync with WalletProvider
   useEffect(() => {
@@ -140,11 +141,14 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setToken(parsed.token);
       setGlobal(parsed.global);
     }
+    isLoaded.current = true;
   }, []);
 
   // Persistencia: Guardar cambios
   useEffect(() => {
-    localStorage.setItem('guiso_core_store', JSON.stringify({ user, token, global }));
+    if (isLoaded.current) {
+      localStorage.setItem('guiso_core_store', JSON.stringify({ user, token, global }));
+    }
   }, [user, token, global]);
 
   /**

@@ -39,7 +39,7 @@ export default function DashboardPage() {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[10px] md:text-xs font-bold uppercase tracking-widest"
           >
             <Zap size={14} className="text-guiso-orange" />
-            Impact Ecosystem MVP v1.0
+            Ecosistema de Impacto MVP v1.0
           </motion.div>
           
           <motion.h1 
@@ -95,7 +95,7 @@ export default function DashboardPage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-2xl font-display font-bold px-2">My Impact Identity</h2>
+            <h2 className="text-2xl font-display font-bold px-2">Mi Identidad de Impacto</h2>
             <IdentityPanel />
           </section>
 

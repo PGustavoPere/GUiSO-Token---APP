@@ -19,7 +19,7 @@ export default function InvestorPanel() {
           Métricas de Crecimiento (Simulación)
         </h3>
         <Badge variant="neutral" className="bg-guiso-dark text-white border-none">
-          Investor View
+          Vista Inversor
         </Badge>
       </div>
 

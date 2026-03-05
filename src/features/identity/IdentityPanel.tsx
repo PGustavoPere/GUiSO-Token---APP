@@ -8,11 +8,9 @@ export default function IdentityPanel() {
   const { user } = useGuisoCore();
   const { getIdentity } = useIdentityStore();
 
-  if (!user.walletAddress) {
-    return null;
-  }
-
-  const identity = getIdentity(user.walletAddress);
+  // Si no hay wallet, mostramos un estado simplificado o invitamos a conectar
+  const identity = getIdentity(user.walletAddress || '0x0000000000000000000000000000000000000000');
+  const isConnected = !!user.walletAddress;
 
   const getNextLevelThreshold = (currentTotal: number) => {
     if (currentTotal <= 100) return 101;
@@ -28,7 +26,15 @@ export default function IdentityPanel() {
     : (identity.totalImpact / nextThreshold) * 100;
 
   return (
-    <Card variant="glass" padding="lg" className="space-y-6">
+    <Card variant="glass" padding="lg" className="relative space-y-6 overflow-hidden">
+      {!isConnected && (
+        <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-sm flex items-center justify-center p-6 text-center">
+          <div className="space-y-3">
+            <Shield className="text-gray-300 mx-auto" size={40} />
+            <p className="text-sm font-bold text-gray-500">Conecta tu Wallet para ver tu Identidad de Impacto</p>
+          </div>
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-display font-bold text-guiso-dark flex items-center gap-2">
           <Shield className="text-guiso-orange" size={24} />

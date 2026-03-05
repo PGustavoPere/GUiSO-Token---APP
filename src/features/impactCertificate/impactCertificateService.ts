@@ -5,19 +5,15 @@ class ImpactCertificateService {
 
   private getStorage(): Record<string, ImpactCertificate> {
     const saved = localStorage.getItem('guiso_certificates');
-    return saved ? JSON.parse(saved) : {};
+    const demoSaved = localStorage.getItem('guiso_demo_certificates');
+    const storage = saved ? JSON.parse(saved) : {};
+    const demoStorage = demoSaved ? JSON.parse(demoSaved) : {};
+    return { ...storage, ...demoStorage };
   }
 
   private saveStorage(data: Record<string, ImpactCertificate>) {
+    // Separar demo de reales si es necesario, pero por ahora guardamos todo en guiso_certificates para asegurar persistencia
     localStorage.setItem('guiso_certificates', JSON.stringify(data));
-  }
-
-  private getDemoStorage(): Record<string, ImpactCertificate> {
-    return this.demoStorage;
-  }
-
-  private saveDemoStorage(data: Record<string, ImpactCertificate>) {
-    this.demoStorage = data;
   }
 
   public generateCertificate(
@@ -45,15 +41,9 @@ class ImpactCertificateService {
       meta
     };
 
-    if (meta?.demo) {
-      const storage = this.getDemoStorage();
-      storage[id] = certificate;
-      this.saveDemoStorage(storage);
-    } else {
-      const storage = this.getStorage();
-      storage[id] = certificate;
-      this.saveStorage(storage);
-    }
+    const storage = this.getStorage();
+    storage[id] = certificate;
+    this.saveStorage(storage);
 
     return certificate;
   }
@@ -63,29 +53,24 @@ class ImpactCertificateService {
   }
 
   public getDemoCertificates(): ImpactCertificate[] {
-    const demoStorage = this.getDemoStorage();
-    return Object.values(demoStorage);
+    return Object.values(this.demoStorage);
   }
 
   public getCertificate(id: string): ImpactCertificate | null {
     const storage = this.getStorage();
-    const demoStorage = this.getDemoStorage();
-    return storage[id] || demoStorage[id] || null;
+    return storage[id] || this.demoStorage[id] || null;
   }
 
   public getCertificatesByWallet(wallet: string): ImpactCertificate[] {
     const storage = this.getStorage();
-    const demoStorage = this.getDemoStorage();
-    const allCerts = [...Object.values(storage), ...Object.values(demoStorage)];
-    return allCerts
+    return Object.values(storage)
       .filter(cert => cert.wallet.toLowerCase() === wallet.toLowerCase())
       .sort((a, b) => b.createdAt - a.createdAt);
   }
   
   public getAllCertificates(): ImpactCertificate[] {
     const storage = this.getStorage();
-    const demoStorage = this.getDemoStorage();
-    return [...Object.values(storage), ...Object.values(demoStorage)];
+    return Object.values(storage);
   }
 }
 
