@@ -13,6 +13,19 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
+  // Trust proxy for express-rate-limit and other proxy-aware middlewares
+  app.set('trust proxy', 1);
+
+  app.use(cors());
+
+  // Request Logger - Move to the very top
+  app.use((req, res, next) => {
+    if (req.url.startsWith('/api/')) {
+      console.log(`[API Request] ${req.method} ${req.url}`);
+    }
+    next();
+  });
+
   // --- Security Middlewares ---
   
   // Basic security headers
@@ -33,24 +46,23 @@ async function startServer() {
     },
   }));
 
-  app.use(cors());
-
   const limiter = rateLimit({
     windowMs: 15 * 60 * 1000,
     max: 1000, 
     standardHeaders: true,
     legacyHeaders: false,
+    handler: (req, res, next, options) => {
+      res.status(options.statusCode).json({ error: options.message });
+    }
   });
   
-  app.use("/api/", limiter);
+  app.use("/api", limiter);
 
   app.use(express.json({ limit: '10kb' })); // Limit body size
 
-  // Serve public directory
-  app.use(express.static(path.join(process.cwd(), "public")));
-
   // --- Mock API Routes ---
-
+  // Define these BEFORE static files to ensure they take precedence
+  
   // Token Stats
   app.get("/api/token/stats", (req, res) => {
     res.json({
@@ -104,10 +116,11 @@ async function startServer() {
 
   // --- Payments Mock API ---
   app.get("/api/payments", (req, res) => {
+    console.log("[API] Serving GET /api/payments");
     res.json(Object.values(payments));
   });
 
-  app.post("/api/payments", (req, res) => {
+  app.post("/api/payments", express.json(), (req, res) => {
     const data = req.body;
     const id = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     payments[id] = { ...data, id, status: 'awaiting_payment', createdAt: Date.now() };
@@ -122,7 +135,7 @@ async function startServer() {
     res.json(payment);
   });
 
-  app.put("/api/payments/:id", (req, res) => {
+  app.put("/api/payments/:id", express.json(), (req, res) => {
     const id = req.params.id;
     if (!payments[id]) {
       return res.status(404).json({ error: "Payment not found" });
@@ -130,6 +143,14 @@ async function startServer() {
     payments[id] = { ...payments[id], ...req.body };
     res.json(payments[id]);
   });
+
+  // Catch-all for undefined API routes
+  app.all("/api/*", (req, res) => {
+    res.status(404).json({ error: `API route not found: ${req.method} ${req.url}` });
+  });
+
+  // Serve public directory
+  app.use(express.static(path.join(process.cwd(), "public")));
 
   // --- Vite Middleware ---
   const isProduction = process.env.NODE_ENV === "production";
@@ -149,6 +170,18 @@ async function startServer() {
       res.sendFile(path.join(process.cwd(), "dist", "index.html"));
     });
   }
+
+  // --- Error Handler ---
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error("Server Error:", err);
+    if (req.url.startsWith("/api/")) {
+      return res.status(err.status || 500).json({ 
+        error: err.message || "Internal Server Error",
+        details: process.env.NODE_ENV === "development" ? err.stack : undefined
+      });
+    }
+    next(err);
+  });
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`GUISO Server successfully started and listening on http://0.0.0.0:${PORT}`);

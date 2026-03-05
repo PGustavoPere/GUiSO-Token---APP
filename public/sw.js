@@ -1,4 +1,4 @@
-const CACHE_NAME = 'guiso-cache-v1';
+const CACHE_NAME = 'guiso-cache-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -34,8 +34,12 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - stale-while-revalidate strategy
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests and non-GET requests
-  if (!event.request.url.startsWith(self.location.origin) || event.request.method !== 'GET') {
+  // Skip cross-origin requests, non-GET requests, and API requests
+  if (
+    !event.request.url.startsWith(self.location.origin) || 
+    event.request.method !== 'GET' ||
+    event.request.url.includes('/api/')
+  ) {
     return;
   }
 
