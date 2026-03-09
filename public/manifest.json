@@ -11,13 +11,19 @@
       "src": "https://picsum.photos/seed/guiso/192/192",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "https://picsum.photos/seed/guiso/512/512",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "https://picsum.photos/seed/guiso/192/192",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
