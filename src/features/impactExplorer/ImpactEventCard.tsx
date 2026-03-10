@@ -62,7 +62,7 @@ export default function ImpactEventCard({ event, ...props }: ImpactEventCardProp
       <div className="flex items-center justify-between w-full sm:w-auto gap-6 sm:gap-4 mt-2 sm:mt-0">
         <div className="text-left sm:text-right">
           <p className="text-xs text-green-600 font-bold uppercase tracking-wider">Impacto</p>
-          <p className="text-xl font-display font-bold text-green-500">+{event.impactAmount} pts</p>
+          <p className="text-xl font-display font-bold text-green-500">+{event.impactAmount} IP</p>
         </div>
         <Link 
           to={`/impact/${event.certificateId}`}

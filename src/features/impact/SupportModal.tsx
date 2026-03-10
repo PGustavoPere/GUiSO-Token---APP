@@ -6,6 +6,10 @@ import { impactEngine } from '../../system/impactEngine';
 import { Button } from '../../components/ui';
 import { web3Bridge } from '../../web3/web3Provider';
 import TransactionStatusBadge, { TransactionStatus } from '../../components/TransactionStatusBadge';
+import { impactCertificateService } from '../impactCertificate/impactCertificateService';
+import { useIdentityStore } from '../identity/IdentityStore';
+import { useWallet } from '../../core/WalletProvider';
+
 interface SupportModalProps {
   project: { id: string; title: string };
   onClose: () => void;
@@ -13,6 +17,8 @@ interface SupportModalProps {
 
 export default function SupportModal({ project, onClose }: SupportModalProps) {
   const { token, recordSupportTransaction } = useGuisoCore();
+  const { updateAfterImpact } = useIdentityStore();
+  const { address } = useWallet();
   const [amount, setAmount] = useState(100);
   const [isSuccess, setIsSuccess] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -38,7 +44,24 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
     
     if (confirmed) {
       setTxStatus('confirmed');
+      const impactPoints = impactEngine.calculateImpactPoints(amount);
+      
+      // 1. Record in core store
       recordSupportTransaction(project.id, project.title, amount, result.txHash);
+      
+      // 2. Generate Certificate
+      if (address) {
+        impactCertificateService.generateCertificate(
+          result.txHash,
+          address,
+          project.title,
+          impactPoints
+        );
+        
+        // 3. Update Identity Store
+        updateAfterImpact(address, impactPoints, true);
+      }
+      
       setIsSuccess(true);
       setTimeout(() => {
         onClose();

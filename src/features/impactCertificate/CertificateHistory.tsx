@@ -61,7 +61,7 @@ export default function CertificateHistory() {
                 <div className="flex justify-between items-end mt-4">
                   <div>
                     <p className="text-xs text-gray-500">Impacto Generado</p>
-                    <p className="font-bold text-guiso-orange">{cert.impactAmount} pts</p>
+                    <p className="font-bold text-guiso-orange">{cert.impactAmount} IP</p>
                   </div>
                   <ExternalLink size={16} className="text-gray-400 group-hover:text-guiso-orange transition-colors" />
                 </div>

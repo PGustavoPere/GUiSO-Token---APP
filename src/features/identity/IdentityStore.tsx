@@ -11,18 +11,30 @@ interface IdentityContextType {
 const IdentityContext = createContext<IdentityContextType | undefined>(undefined);
 
 const calculateLevelAndTitle = (totalImpact: number): { level: number; title: string } => {
-  if (totalImpact <= 100) return { level: 1, title: 'Supporter' };
-  if (totalImpact <= 500) return { level: 2, title: 'Contributor' };
-  if (totalImpact <= 1500) return { level: 3, title: 'Impact Builder' };
-  if (totalImpact <= 5000) return { level: 4, title: 'Community Pillar' };
-  return { level: 5, title: 'Humanitarian Catalyst' };
+  if (totalImpact < 500) return { level: 1, title: 'Aspirante' };
+  if (totalImpact < 2000) return { level: 2, title: 'Agente GUISO' };
+  if (totalImpact < 5000) return { level: 3, title: 'Guardián' };
+  if (totalImpact < 10000) return { level: 4, title: 'Embajador' };
+  return { level: 5, title: 'Leyenda' };
 };
 
 export const IdentityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [identities, setIdentities] = useState<Record<string, ImpactIdentity>>(() => {
     const saved = localStorage.getItem('guiso_identities');
     if (saved) {
-      return JSON.parse(saved);
+      const parsed = JSON.parse(saved);
+      // Migration: Recalculate levels and titles for all existing identities
+      const migrated: Record<string, ImpactIdentity> = {};
+      Object.keys(parsed).forEach(wallet => {
+        const id = parsed[wallet];
+        const { level, title } = calculateLevelAndTitle(id.totalImpact);
+        migrated[wallet] = {
+          ...id,
+          impactLevel: level,
+          title: title
+        };
+      });
+      return migrated;
     }
     return {};
   });
@@ -42,7 +54,7 @@ export const IdentityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           totalPayments: 0,
           certificatesEarned: 0,
           impactLevel: 1,
-          title: 'Supporter',
+          title: 'Aspirante',
           createdAt: Date.now(),
           lastActive: Date.now()
         }
@@ -58,7 +70,7 @@ export const IdentityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         totalPayments: 0,
         certificatesEarned: 0,
         impactLevel: 1,
-        title: 'Supporter',
+        title: 'Aspirante',
         createdAt: Date.now(),
         lastActive: Date.now()
       };
@@ -88,7 +100,7 @@ export const IdentityProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       totalPayments: 0,
       certificatesEarned: 0,
       impactLevel: 1,
-      title: 'Supporter',
+      title: 'Aspirante',
       createdAt: Date.now(),
       lastActive: Date.now()
     };

@@ -114,7 +114,7 @@ export default function ImpactCertificatePage() {
                     <p className="text-xs text-gray-400">Pagos Totales</p>
                     <p className="text-sm font-bold text-gray-700">{trustProfile.totalPayments}</p>
                     <p className="text-xs text-gray-400 mt-1">Impacto Generado</p>
-                    <p className="text-sm font-bold text-guiso-orange">+{trustProfile.totalImpactGenerated} pts</p>
+                    <p className="text-sm font-bold text-guiso-orange">+{trustProfile.totalImpactGenerated} IP</p>
                   </div>
                 </div>
               </div>

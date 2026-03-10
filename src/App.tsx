@@ -9,6 +9,7 @@ import { WalletProvider } from './core/WalletProvider';
 import { PaymentProvider } from './features/payments/PaymentStore';
 import { MerchantProvider } from './features/merchant/MerchantStore';
 import Layout from './components/Layout';
+import ScrollToTop from './components/ScrollToTop';
 import DashboardPage from './features/dashboard/DashboardPage';
 import ImpactPage from './features/impact/ImpactPage';
 import ProfilePage from './features/profile/ProfilePage';
@@ -37,6 +38,7 @@ export default function App() {
                   <IdentityProvider>
                     <CommunityProvider>
                       <BrowserRouter>
+                        <ScrollToTop />
                         <Routes>
                           <Route path="/" element={<Layout />}>
                             <Route index element={<DashboardPage />} />

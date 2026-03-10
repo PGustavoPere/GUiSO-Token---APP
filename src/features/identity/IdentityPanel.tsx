@@ -13,15 +13,15 @@ export default function IdentityPanel() {
   const isConnected = !!user.walletAddress;
 
   const getNextLevelThreshold = (currentTotal: number) => {
-    if (currentTotal <= 100) return 101;
-    if (currentTotal <= 500) return 501;
-    if (currentTotal <= 1500) return 1501;
-    if (currentTotal <= 5000) return 5001;
+    if (currentTotal < 500) return 500;
+    if (currentTotal < 2000) return 2000;
+    if (currentTotal < 5000) return 5000;
+    if (currentTotal < 10000) return 10000;
     return currentTotal; // Max level
   };
 
   const nextThreshold = getNextLevelThreshold(identity.totalImpact);
-  const progress = identity.totalImpact >= 5000 
+  const progress = identity.totalImpact >= 10000 
     ? 100 
     : (identity.totalImpact / nextThreshold) * 100;
 
@@ -41,7 +41,7 @@ export default function IdentityPanel() {
           Mi Identidad de Impacto
         </h2>
         <div className="px-3 py-1 bg-guiso-orange/10 text-guiso-orange rounded-full text-xs font-bold uppercase tracking-wider">
-          Nivel {identity.impactLevel}
+          Nivel {identity.title}
         </div>
       </div>
 
@@ -56,11 +56,11 @@ export default function IdentityPanel() {
         <div className="flex justify-between items-end">
           <div>
             <p className="text-sm text-gray-500 font-medium">Impacto Total</p>
-            <p className="text-2xl font-bold text-guiso-orange">{identity.totalImpact} pts</p>
+            <p className="text-2xl font-bold text-guiso-orange">{identity.totalImpact} IP</p>
           </div>
           <div className="text-right">
             <p className="text-sm text-gray-500 font-medium">Próximo Nivel</p>
-            <p className="text-sm font-bold text-gray-400">{identity.totalImpact >= 5000 ? 'NIVEL MÁXIMO' : `${nextThreshold} pts`}</p>
+            <p className="text-sm font-bold text-gray-400">{identity.totalImpact >= 10000 ? 'NIVEL MÁXIMO' : `${nextThreshold} IP`}</p>
           </div>
         </div>
 

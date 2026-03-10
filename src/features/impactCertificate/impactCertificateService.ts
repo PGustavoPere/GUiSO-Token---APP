@@ -45,6 +45,9 @@ class ImpactCertificateService {
     storage[id] = certificate;
     this.saveStorage(storage);
 
+    // Dispatch event for UI updates
+    window.dispatchEvent(new CustomEvent('certificates_updated'));
+
     return certificate;
   }
 

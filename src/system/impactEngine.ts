@@ -4,10 +4,11 @@
  */
 
 export enum CommunityLevel {
-  LEVEL_1 = "Colaborador",
-  LEVEL_2 = "Impulsor",
-  LEVEL_3 = "Agente GUISO",
-  LEVEL_4 = "Constructor de Impacto",
+  LEVEL_1 = "Aspirante",
+  LEVEL_2 = "Agente GUISO",
+  LEVEL_3 = "Guardián",
+  LEVEL_4 = "Embajador",
+  LEVEL_5 = "Leyenda",
 }
 
 export interface LevelThreshold {
@@ -18,9 +19,10 @@ export interface LevelThreshold {
 
 export const LEVEL_THRESHOLDS: LevelThreshold[] = [
   { level: CommunityLevel.LEVEL_1, minPoints: 0, message: "¡Bienvenido al ecosistema de impacto!" },
-  { level: CommunityLevel.LEVEL_2, minPoints: 100, message: "Tu impacto está creciendo. ¡Sigue así!" },
-  { level: CommunityLevel.LEVEL_3, minPoints: 500, message: "Eres un pilar fundamental para GUISO." },
-  { level: CommunityLevel.LEVEL_4, minPoints: 1500, message: "Referente del ecosistema. Tu impacto es verificable y sólido." },
+  { level: CommunityLevel.LEVEL_2, minPoints: 500, message: "Tu impacto está creciendo. ¡Ya eres un Agente GUISO!" },
+  { level: CommunityLevel.LEVEL_3, minPoints: 2000, message: "Eres un pilar fundamental para GUISO. Guardián del ecosistema." },
+  { level: CommunityLevel.LEVEL_4, minPoints: 5000, message: "Embajador del impacto. Tu voz lidera la comunidad." },
+  { level: CommunityLevel.LEVEL_5, minPoints: 10000, message: "Leyenda viviente. Tu impacto es histórico y transformador." },
 ];
 
 export const MOTIVATIONAL_MESSAGES = [

@@ -43,10 +43,10 @@ export class TokenBalanceService {
   }
 
   getInfluenceBadge(balance: number): string {
-    if (balance >= 10000) return 'Community Pillar';
-    if (balance >= 5000) return 'Impact Builder';
-    if (balance >= 1000) return 'Contributor';
-    return 'Supporter';
+    if (balance >= 10000) return 'Pilar de la Comunidad';
+    if (balance >= 5000) return 'Embajador de Impacto';
+    if (balance >= 1000) return 'Agente Activo';
+    return 'Aspirante';
   }
 }
 

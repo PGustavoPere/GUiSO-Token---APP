@@ -133,11 +133,16 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (savedStore) {
       const parsed = JSON.parse(savedStore);
       // Merge with INITIAL_USER to ensure new properties exist
-      setUser(prev => ({ 
-        ...INITIAL_USER, 
-        ...parsed.user, 
-        hasSeenWelcome: true // Force true to avoid welcome screens if any logic remains
-      }));
+      setUser(prev => {
+        const userState = { 
+          ...INITIAL_USER, 
+          ...parsed.user, 
+          hasSeenWelcome: true 
+        };
+        // Migration: Recalculate community level
+        userState.communityLevel = impactEngine.calculateLevel(userState.impactScore).level;
+        return userState;
+      });
       setToken(parsed.token);
       setGlobal(parsed.global);
     }

@@ -17,11 +17,11 @@ export default function DashboardPage() {
   const [showLevelsModal, setShowLevelsModal] = React.useState(false);
 
   const levels = [
-    { name: 'Semilla', minIp: 0, color: 'bg-gray-100 text-gray-500', icon: '🌱', desc: 'Tu inicio en el ecosistema. Empezás a sembrar impacto.' },
-    { name: 'Brote', minIp: 500, color: 'bg-green-100 text-green-600', icon: '🌿', desc: 'Tu compromiso crece. Ya sos un actor reconocido.' },
-    { name: 'Raíz', minIp: 2000, color: 'bg-amber-100 text-amber-700', icon: '🪵', desc: 'Impacto sólido. Tu voz tiene peso en la comunidad.' },
-    { name: 'Árbol', minIp: 5000, color: 'bg-emerald-100 text-emerald-700', icon: '🌳', desc: 'Liderazgo humanitario. Validás propuestas del DAO.' },
-    { name: 'Bosque', minIp: 15000, color: 'bg-guiso-orange/10 text-guiso-orange', icon: '🌲', desc: 'Leyenda del impacto. Máximo poder de gobernanza.' },
+    { name: 'Aspirante', minIp: 0, color: 'bg-gray-100 text-gray-500', icon: '🌱', desc: 'Tu inicio en el ecosistema. Empezás a sembrar impacto.' },
+    { name: 'Agente GUISO', minIp: 500, color: 'bg-guiso-orange/10 text-guiso-orange', icon: '🕵️', desc: 'Tu compromiso crece. Ya eres un actor reconocido y activo.' },
+    { name: 'Guardián', minIp: 2000, color: 'bg-amber-100 text-amber-700', icon: '🛡️', desc: 'Impacto sólido. Proteges y fortaleces la comunidad.' },
+    { name: 'Embajador', minIp: 5000, color: 'bg-emerald-100 text-emerald-700', icon: '🌍', desc: 'Liderazgo humanitario. Representas los valores de GUISO.' },
+    { name: 'Leyenda', minIp: 10000, color: 'bg-purple-100 text-purple-700', icon: '👑', desc: 'Máximo nivel de impacto. Tu legado es eterno en la red.' },
   ];
 
   return (

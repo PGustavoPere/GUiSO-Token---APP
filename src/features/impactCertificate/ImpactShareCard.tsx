@@ -33,7 +33,7 @@ export default function ImpactShareCard({ certificate }: ImpactShareCardProps) {
         <div className="bg-orange-50 rounded-2xl p-4 mb-4 border border-orange-100">
           <p className="text-sm text-orange-600 font-bold mb-1">Impacto Generado</p>
           <p className="text-4xl font-display font-bold text-guiso-orange">
-            {certificate.impactAmount} <span className="text-lg">pts</span>
+            {certificate.impactAmount} <span className="text-lg">IP</span>
           </p>
         </div>
 

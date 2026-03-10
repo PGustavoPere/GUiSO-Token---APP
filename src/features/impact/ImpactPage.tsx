@@ -4,6 +4,7 @@ import { Heart, CheckCircle2, Clock, MapPin, Share2, Sparkles, Shield, Info, Ext
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { useImpactExplorerStore } from '../impactExplorer/ImpactExplorerStore';
 import SupportModal from './SupportModal';
+import CertificateHistory from '../impactCertificate/CertificateHistory';
 import { Card, Button, Badge } from '../../components/ui';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -141,6 +142,11 @@ export default function ImpactPage() {
         </div>
         <Heart size={200} className="absolute -right-10 -bottom-10 md:-right-20 md:-bottom-20 text-white/5 rotate-12 md:w-[300px] md:h-[300px]" />
       </Card>
+
+      {/* Certificates Section */}
+      <section className="space-y-4">
+        <CertificateHistory />
+      </section>
 
       {/* Ledger Modal */}
       <AnimatePresence>
