@@ -8,6 +8,7 @@ import { PaymentIntent } from '../payments/types';
 import { useWallet } from '../../core/WalletProvider';
 import { Card, Button, Badge } from '../../components/ui';
 import CreatePaymentModal from './CreatePaymentModal';
+import MerchantTrustChart from '../../components/MerchantTrustChart';
 
 export default function MerchantDashboard() {
   const { merchant, registerMerchant, isMerchant } = useMerchantStore();
@@ -143,6 +144,11 @@ export default function MerchantDashboard() {
           
           <div className="w-full bg-gray-200 rounded-full h-2.5">
             <div className={`h-2.5 rounded-full ${trustColor}`} style={{ width: `${trustScore}%` }}></div>
+          </div>
+
+          <div className="pt-2">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Evolución de Confianza</p>
+            <MerchantTrustChart currentScore={trustScore} />
           </div>
           
           <div className="grid grid-cols-3 gap-4 text-center pt-2">

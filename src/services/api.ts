@@ -16,6 +16,7 @@ export interface Project {
   goal: number;
   image: string;
   category: string;
+  walletAddress: string;
 }
 
 export interface UserProfile {

@@ -87,6 +87,7 @@ async function startServer() {
         goal: 200000,
         image: "https://images.unsplash.com/photo-1594708767771-a7502209ff51?q=80&w=1000&auto=format&fit=crop",
         category: "Alimentación",
+        walletAddress: "0xd823...a1a6"
       },
       {
         id: "2",
@@ -97,6 +98,7 @@ async function startServer() {
         goal: 50000,
         image: "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=1000&auto=format&fit=crop",
         category: "Educación",
+        walletAddress: "0x742d...4444"
       }
     ]);
   });
