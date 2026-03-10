@@ -11,8 +11,6 @@ import InvestorPanel from '../../components/InvestorPanel';
 import IdentityPanel from '../identity/IdentityPanel';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { Card, Button } from '../../components/ui';
-import ImpactDistributionChart from '../../components/ImpactDistributionChart';
-import ImpactAdvisor from '../../components/ImpactAdvisor';
 
 export default function DashboardPage() {
   const { user } = useGuisoCore();
@@ -116,19 +114,6 @@ export default function DashboardPage() {
           <section id="transaction-panel" className="space-y-4">
             <h2 className="text-2xl font-display font-bold px-2">Acción Rápida</h2>
             <ImpactTransactionPanel />
-          </section>
-
-          {/* AI Advisor */}
-          <section className="space-y-4">
-            <ImpactAdvisor />
-          </section>
-
-          {/* Distribution Chart */}
-          <section className="space-y-4">
-            <h2 className="text-2xl font-display font-bold px-2">Distribución Global</h2>
-            <Card variant="glass" padding="md" rounded="2xl">
-              <ImpactDistributionChart />
-            </Card>
           </section>
 
           {/* Education Card */}

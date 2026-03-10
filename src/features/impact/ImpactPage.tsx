@@ -3,7 +3,6 @@ import { api, Project } from '../../services/api';
 import { Heart, CheckCircle2, Clock, MapPin, Share2, Sparkles, Shield, Info, ExternalLink, Vote, X } from 'lucide-react';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { useImpactExplorerStore } from '../impactExplorer/ImpactExplorerStore';
-import { useTrustStore } from '../trust/TrustStore';
 import SupportModal from './SupportModal';
 import CertificateHistory from '../impactCertificate/CertificateHistory';
 import { Card, Button, Badge } from '../../components/ui';
@@ -17,7 +16,6 @@ export default function ImpactPage() {
   const [showDAO, setShowDAO] = useState(false);
   const { user } = useGuisoCore();
   const { getRecentEvents } = useImpactExplorerStore();
-  const { getMerchantTrust } = useTrustStore();
 
   const recentEvents = getRecentEvents().slice(0, 5);
 
@@ -72,20 +70,9 @@ export default function ImpactPage() {
             </div>
 
             <div className="p-6 md:p-8">
-              <div className="flex justify-between items-start mb-3">
-                <div className="flex items-center gap-2 text-[10px] md:text-xs text-guiso-orange font-bold uppercase tracking-widest">
-                  <MapPin size={14} />
-                  {project.category}
-                </div>
-                {(() => {
-                  const trust = getMerchantTrust(project.walletAddress);
-                  return (
-                    <div className="flex items-center gap-1 text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">
-                      <Shield size={12} />
-                      {trust.trustScore}% Confianza
-                    </div>
-                  );
-                })()}
+              <div className="flex items-center gap-2 text-[10px] md:text-xs text-guiso-orange font-bold uppercase tracking-widest mb-3">
+                <MapPin size={14} />
+                {project.category}
               </div>
               <h3 className="text-xl md:text-2xl font-display font-bold mb-3">{project.title}</h3>
               <p className="text-gray-500 text-xs md:text-sm mb-6 line-clamp-2">{project.description}</p>

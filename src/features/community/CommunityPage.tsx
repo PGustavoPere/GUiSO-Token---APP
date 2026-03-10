@@ -2,9 +2,8 @@ import React from 'react';
 import { useCommunity } from './CommunityStore';
 import { useWallet } from '../../core/WalletProvider';
 import { Card, Button, Badge } from '../../components/ui';
-import { Vote, Users, Info, Award } from 'lucide-react';
+import { Vote, Users, Info } from 'lucide-react';
 import { motion } from 'motion/react';
-import Leaderboard from '../../components/Leaderboard';
 
 export default function CommunityPage() {
   const { proposals, vote, hasVoted } = useCommunity();
@@ -23,67 +22,55 @@ export default function CommunityPage() {
         </Badge>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Proposals Column */}
-        <div className="lg:col-span-2 space-y-6">
-          <h2 className="text-2xl font-display font-bold px-2">Propuestas Activas</h2>
-          <div className="grid grid-cols-1 gap-6">
-            {proposals.map((proposal) => {
-              const voted = address ? hasVoted(proposal.id, address) : false;
-              const progress = Math.min((proposal.votes / proposal.impactGoal) * 100, 100);
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {proposals.map((proposal) => {
+          const voted = address ? hasVoted(proposal.id, address) : false;
+          const progress = Math.min((proposal.votes / proposal.impactGoal) * 100, 100);
 
-              return (
-                <Card key={proposal.id} variant="glass" padding="lg" className="flex flex-col h-full">
-                  <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-display font-bold text-guiso-dark">{proposal.title}</h3>
-                    <Badge variant={voted ? "success" : "neutral"}>
-                      {voted ? "Votado" : "Pendiente"}
-                    </Badge>
-                  </div>
-                  
-                  <p className="text-gray-600 text-sm mb-6 flex-1">{proposal.description}</p>
+          return (
+            <Card key={proposal.id} variant="glass" padding="lg" className="flex flex-col h-full">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-xl font-display font-bold text-guiso-dark">{proposal.title}</h3>
+                <Badge variant={voted ? "success" : "neutral"}>
+                  {voted ? "Votado" : "Pendiente"}
+                </Badge>
+              </div>
+              
+              <p className="text-gray-600 text-sm mb-6 flex-1">{proposal.description}</p>
 
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-end text-sm">
-                      <span className="text-gray-400 font-medium">Progreso de Votación</span>
-                      <span className="font-bold text-guiso-orange">{proposal.votes} / {proposal.impactGoal} Votos</span>
-                    </div>
-                    
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progress}%` }}
-                        className="h-full bg-guiso-orange transition-all duration-500"
-                      />
-                    </div>
+              <div className="space-y-4">
+                <div className="flex justify-between items-end text-sm">
+                  <span className="text-gray-400 font-medium">Progreso de Votación</span>
+                  <span className="font-bold text-guiso-orange">{proposal.votes} / {proposal.impactGoal} Votos</span>
+                </div>
+                
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    className="h-full bg-guiso-orange transition-all duration-500"
+                  />
+                </div>
 
-                    {!isConnected ? (
-                      <Button variant="outline" className="w-full gap-2" onClick={connect}>
-                        Conectar Wallet para Votar
-                      </Button>
-                    ) : (
-                      <Button 
-                        className="w-full gap-2" 
-                        disabled={voted}
-                        whileTap={{ scale: 0.97 }}
-                        onClick={() => vote(proposal.id, address!)}
-                      >
-                        <Vote size={18} />
-                        {voted ? "Voto Registrado" : "Votar Propuesta"}
-                      </Button>
-                    )}
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Leaderboard Column */}
-        <div className="space-y-6">
-          <h2 className="text-2xl font-display font-bold px-2">Líderes de Impacto</h2>
-          <Leaderboard />
-        </div>
+                {!isConnected ? (
+                  <Button variant="outline" className="w-full gap-2" onClick={connect}>
+                    Conectar Wallet para Votar
+                  </Button>
+                ) : (
+                  <Button 
+                    className="w-full gap-2" 
+                    disabled={voted}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => vote(proposal.id, address!)}
+                  >
+                    <Vote size={18} />
+                    {voted ? "Voto Registrado" : "Votar Propuesta"}
+                  </Button>
+                )}
+              </div>
+            </Card>
+          );
+        })}
       </div>
 
       <Card variant="glass" padding="md" className="bg-guiso-orange/5 border-guiso-orange/10 flex gap-4 items-start">

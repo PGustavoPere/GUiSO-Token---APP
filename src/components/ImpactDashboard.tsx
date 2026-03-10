@@ -5,8 +5,6 @@ import { useGuisoCore } from '../core/GuisoCoreStore';
 import { Card, Badge } from './ui';
 import { Link } from 'react-router-dom';
 
-import ImpactChart from './ImpactChart';
-
 export default function ImpactDashboard() {
   const { global, user, token } = useGuisoCore();
 
@@ -55,15 +53,6 @@ export default function ImpactDashboard() {
           </motion.div>
         ))}
       </div>
-
-      {/* Evolution Chart */}
-      <Card variant="glass" padding="md" rounded="2xl">
-        <div className="flex items-center justify-between mb-2">
-          <h4 className="text-sm font-display font-bold text-guiso-dark">Evolución de Impacto (IP)</h4>
-          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Últimos 7 días</span>
-        </div>
-        <ImpactChart />
-      </Card>
 
       {/* Minimal Personal Impact Summary */}
       <Link to="/perfil">
