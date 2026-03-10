@@ -16,49 +16,34 @@ async function startServer() {
   // Trust proxy for express-rate-limit and other proxy-aware middlewares
   app.set('trust proxy', 1);
 
-  app.use(cors());
-
-  // Request Logger - Move to the very top
+  // Manual CORS implementation for maximum compatibility
   app.use((req, res, next) => {
-    if (req.url.startsWith('/api/')) {
-      console.log(`[API Request] ${req.method} ${req.url}`);
+    const origin = req.headers.origin;
+    res.setHeader('Access-Control-Allow-Origin', origin || '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end();
     }
     next();
   });
 
-  // --- Security Middlewares ---
-  
-  // Basic security headers
-  app.use(helmet({
-    crossOriginEmbedderPolicy: false,
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-    crossOriginOpenerPolicy: false,
-    contentSecurityPolicy: {
-      directives: {
-        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        "img-src": ["'self'", "data:", "https://images.unsplash.com", "https://picsum.photos", "https://assets.mixkit.co", "https://*.googleusercontent.com", "https://*.picsum.photos"],
-        "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"], 
-        "connect-src": ["'self'", "https://*.run.app", "wss://*.run.app", "https://api.google.com", "https://*.googleapis.com", "https://*.google.com", "wss://*.google.com"],
-        "font-src": ["'self'", "https://fonts.gstatic.com", "data:", "https://fonts.googleapis.com"],
-        "style-src": ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        "frame-ancestors": ["'self'", "https://*.run.app", "https://*.google.com"],
-      },
-    },
-  }));
+  // Helper for SSE Errors
+  const sseError = (res: express.Response, message: string) => {
+    res.write(`event: error\ndata: ${JSON.stringify({ message })}\n\n`);
+  };
 
-  const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 1000, 
-    standardHeaders: true,
-    legacyHeaders: false,
-    handler: (req, res, next, options) => {
-      res.status(options.statusCode).json({ error: options.message });
+  // Request Logger - Move to the very top
+  app.use((req, res, next) => {
+    if (req.url.startsWith('/api/')) {
+      console.log(`[API Request] ${req.method} ${req.url} - Origin: ${req.headers.origin || 'none'}`);
     }
+    next();
   });
-  
-  app.use("/api", limiter);
 
-  app.use(express.json({ limit: '10kb' })); // Limit body size
+  app.use(express.json({ limit: '10mb' })); // Limit body size
 
   // --- Mock API Routes ---
   // Define these BEFORE static files to ensure they take precedence
@@ -143,8 +128,47 @@ async function startServer() {
       return res.status(404).json({ error: "Payment not found" });
     }
     payments[id] = { ...payments[id], ...req.body };
+    
+    // Notify SSE clients
+    notifyPaymentUpdate(id);
+    
     res.json(payments[id]);
   });
+
+  // --- SSE for Real-time Payment Updates ---
+  const sseClients = new Set<express.Response>();
+
+  const notifyPaymentUpdate = (paymentId: string) => {
+    const payment = payments[paymentId];
+    if (!payment) return;
+    
+    const data = JSON.stringify(payment);
+    sseClients.forEach(client => {
+      client.write(`data: ${data}\n\n`);
+    });
+  };
+
+    app.get("/api/payments/stream", (req, res) => {
+      try {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+        res.flushHeaders();
+
+        sseClients.add(res);
+
+        req.on('close', () => {
+          sseClients.delete(res);
+        });
+
+        // Send initial heartbeat
+        res.write(': heartbeat\n\n');
+      } catch (err: any) {
+        console.error("SSE Connection Error:", err);
+        sseError(res, "Failed to establish SSE connection");
+        res.end();
+      }
+    });
 
   // Catch-all for undefined API routes
   app.all("/api/*", (req, res) => {

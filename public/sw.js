@@ -1,4 +1,4 @@
-const CACHE_NAME = 'guiso-cache-v2';
+const CACHE_NAME = 'guiso-cache-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -32,49 +32,60 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch event - stale-while-revalidate strategy
+// Fetch event - Optimized for SPA
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests, non-GET requests, and API requests
-  if (
-    !event.request.url.startsWith(self.location.origin) || 
-    event.request.method !== 'GET' ||
-    event.request.url.includes('/api/')
-  ) {
+  const { request } = event;
+  const url = new URL(request.url);
+
+  // Skip cross-origin requests and non-GET requests
+  if (!url.origin.includes(self.location.origin) || request.method !== 'GET') {
     return;
   }
 
+  // API requests: Network Only (don't cache sensitive data by default)
+  if (url.pathname.includes('/api/')) {
+    return;
+  }
+
+  // Navigation requests (HTML pages): Network First, fallback to cached index.html
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((networkResponse) => {
+          // Update the cache with the latest index.html
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put('/', responseClone);
+          });
+          return networkResponse;
+        })
+        .catch(() => {
+          // Offline or network error: return cached index.html
+          return caches.match('/');
+        })
+    );
+    return;
+  }
+
+  // Static assets (JS, CSS, Images, Fonts): Cache First, then Network
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
+    caches.match(request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Return cached response immediately, but fetch update in background
-        fetch(event.request).then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, networkResponse);
-            });
-          }
-        }).catch(() => {
-          // Ignore network errors for background update
-        });
         return cachedResponse;
       }
 
-      return fetch(event.request).then((networkResponse) => {
+      return fetch(request).then((networkResponse) => {
+        // Only cache valid responses
         if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
           return networkResponse;
         }
 
         const responseToCache = networkResponse.clone();
         caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
+          cache.put(request, responseToCache);
         });
 
         return networkResponse;
-      }).catch(() => {
-        // If both fail and it's a navigation request, show offline page or index
-        if (event.request.mode === 'navigate') {
-          return caches.match('/');
-        }
       });
     })
   );

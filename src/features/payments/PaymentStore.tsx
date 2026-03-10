@@ -21,9 +21,13 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({ child
             return acc;
           }, {});
           setPayments(paymentsMap);
+        } else {
+          console.error(`Error fetching payments: ${res.status} ${res.statusText}`);
+          const text = await res.text();
+          console.error('Response body:', text);
         }
       } catch (error) {
-        console.error('Error fetching payments:', error);
+        console.error('Network error fetching payments:', error);
       }
     };
 

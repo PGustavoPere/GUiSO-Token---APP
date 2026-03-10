@@ -1,5 +1,6 @@
 # GUISO: Tecnología con Propósito Humano 🍲
 
+![GUISO Banner](https://picsum.photos/seed/guiso-banner/1200/400)
 
 ## ¿Qué es GUISO?
 GUISO es una plataforma creada para demostrar que la tecnología **blockchain** puede ser una herramienta poderosa para ayudar a quienes más lo necesitan. No se trata solo de código o finanzas; se trata de construir un puente transparente entre personas que quieren ayudar y comunidades que necesitan apoyo.
