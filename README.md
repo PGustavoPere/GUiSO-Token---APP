@@ -1,6 +1,6 @@
 # GUISO: Tecnología con Propósito Humano 🍲
 
-(https://github.com/user-attachments/assets/736f8ff4-5250-461e-b938-6632854b6955)
+!(https://github.com/user-attachments/assets/736f8ff4-5250-461e-b938-6632854b6955)
 
 
 ## ¿Qué es GUISO?
