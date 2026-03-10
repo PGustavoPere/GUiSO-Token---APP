@@ -96,10 +96,10 @@ export default function ImpactTransactionPanel() {
             <div className="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto">
               <Sparkles size={32} />
             </div>
-            <h3 className="text-xl font-display font-bold text-guiso-dark">¡Impacto Generado!</h3>
-            <p className="text-sm text-gray-500">Has aportado {amount} GSO a {selectedCause.title}.</p>
+            <h3 className="text-xl font-display font-bold text-guiso-dark">¡Gracias por tu ayuda!</h3>
+            <p className="text-sm text-gray-500">Tu aporte de {amount} GSO ya está en camino a {selectedCause.title}.</p>
             <Badge variant="success">
-              +{impactEngine.calculateImpactPoints(amount)} Puntos de Impacto
+              +{impactEngine.calculateImpactPoints(amount)} Puntos de Compromiso
             </Badge>
             {txHash && (
               <div className="mt-4 p-3 bg-white/50 rounded-xl border border-green-200">
@@ -133,8 +133,8 @@ export default function ImpactTransactionPanel() {
           <Wallet size={32} className="md:w-10 md:h-10" />
         </div>
         <div className="max-w-xs mx-auto">
-          <h3 className="text-xl font-display font-bold mb-2">Conecta tu Wallet</h3>
-          <p className="text-gray-500 text-sm">Para empezar a generar impacto verificable, necesitas conectar tu billetera digital.</p>
+          <h3 className="text-xl font-display font-bold mb-2">Comienza a Ayudar</h3>
+          <p className="text-gray-500 text-sm">Para poder apoyar las causas y generar un cambio real, necesitas conectar tu billetera digital.</p>
         </div>
         <Button 
           onClick={connect}
@@ -150,7 +150,7 @@ export default function ImpactTransactionPanel() {
   return (
     <Card variant="glass" padding="md" className="space-y-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h3 className="text-xl font-display font-bold">Generar Impacto</h3>
+        <h3 className="text-xl font-display font-bold">Enviar Ayuda</h3>
         <Badge variant="primary" className="w-full sm:w-auto justify-center gap-2">
           <Coins size={14} />
           <span>{token.gsoBalance.toLocaleString()} GSO Disponibles</span>
@@ -227,12 +227,12 @@ export default function ImpactTransactionPanel() {
         {txStatus === 'pending' || txStatus === 'confirming' ? (
           <>
             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-            Procesando...
+            Enviando ayuda...
           </>
         ) : (
           <>
             <Sparkles size={20} className="md:w-6 md:h-6" />
-            Confirmar Registro de Impacto
+            Confirmar Ayuda Directa
           </>
         )}
       </Button>
@@ -240,7 +240,7 @@ export default function ImpactTransactionPanel() {
       <TransactionStatusBadge status={txStatus} txHash={txHash} />
       
       <p className="text-center text-[10px] text-gray-400">
-        Al confirmar, tus tokens se enviarán directamente a la causa seleccionada y recibirás puntos de impacto instantáneos.
+        Al confirmar, tu aporte llegará directamente a la causa seleccionada y verás reflejado tu compromiso de forma inmediata.
       </p>
     </Card>
   );

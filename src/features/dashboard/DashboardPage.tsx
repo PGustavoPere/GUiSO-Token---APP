@@ -48,7 +48,7 @@ export default function DashboardPage() {
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-7xl font-display font-bold leading-[1.1] md:leading-[0.9] tracking-tight"
           >
-            Tus Acciones, <br />
+            Pequeñas Acciones, <br />
             <span className="text-guiso-orange">Impacto Real.</span>
           </motion.h1>
           
@@ -58,8 +58,8 @@ export default function DashboardPage() {
             transition={{ delay: 0.2 }}
             className="text-base md:text-lg text-white/60 leading-relaxed"
           >
-            GUISO transforma cada transacción en una oportunidad de impacto verificable. 
-            Conecta tu wallet y empieza a generar trazabilidad humanitaria hoy mismo.
+            GUISO es una herramienta para que tu ayuda llegue de forma directa y transparente. 
+            Conecta tu billetera y sé parte de una red que transforma la tecnología en bienestar para la comunidad.
           </motion.p>
 
           <motion.div 
@@ -76,7 +76,7 @@ export default function DashboardPage() {
             </Link>
             <div className="flex items-center justify-center gap-3 px-6 py-4 rounded-full border border-white/20 text-sm font-bold w-full sm:w-auto">
               <ShieldCheck size={20} className="text-green-400" />
-              Impacto Verificado
+              Ayuda Verificada
             </div>
           </motion.div>
         </div>
@@ -112,7 +112,7 @@ export default function DashboardPage() {
         {/* Sidebar Column */}
         <div className="space-y-8">
           <section id="transaction-panel" className="space-y-4">
-            <h2 className="text-2xl font-display font-bold px-2">Acción Rápida</h2>
+            <h2 className="text-2xl font-display font-bold px-2">Apoyar una Causa</h2>
             <ImpactTransactionPanel />
           </section>
 
@@ -125,8 +125,8 @@ export default function DashboardPage() {
               <h4 className="font-display font-bold">¿Cómo funciona?</h4>
             </div>
             <p className="text-sm text-gray-500 leading-relaxed mb-4">
-              Cada vez que aportas GSO, el sistema calcula el impacto humanitario generado. 
-              Tus puntos de impacto (IP) determinan tu nivel de participación y tu poder de validación.
+              Cada vez que aportas GSO, estás ayudando directamente a una causa real. 
+              Tus "Puntos de Impacto" (IP) reflejan tu compromiso y te permiten participar activamente en las decisiones de la comunidad.
             </p>
             <button 
               onClick={() => setShowLevelsModal(true)}
@@ -164,33 +164,33 @@ export default function DashboardPage() {
                 <div className="bg-guiso-dark text-white p-6 rounded-2xl space-y-3">
                   <h4 className="font-bold flex items-center gap-2">
                     <Star size={18} className="text-guiso-orange" />
-                    ¿Para qué sirven los niveles?
+                    ¿Para qué sirve el compromiso?
                   </h4>
                   <p className="text-sm text-white/60 leading-relaxed">
-                    En GUISO, tu reputación no se compra, se construye. A medida que generas impacto real, acumulas <span className="text-guiso-orange font-bold">Impact Points (IP)</span> que desbloquean beneficios exclusivos:
+                    En GUISO, tu lugar en la comunidad no se compra, se construye ayudando. A medida que apoyas causas reales, acumulas <span className="text-guiso-orange font-bold">Impact Points (IP)</span> que reflejan tu compromiso y desbloquean nuevas formas de participar:
                   </p>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                     <li className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
                       <Award size={14} className="text-guiso-orange" />
-                      Mayor poder de voto en el DAO
+                      Mayor voz en las decisiones de la comunidad
                     </li>
                     <li className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
                       <Award size={14} className="text-guiso-orange" />
-                      Certificados de impacto premium
+                      Certificados de ayuda especiales
                     </li>
                     <li className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
                       <Award size={14} className="text-guiso-orange" />
-                      Acceso a preventas exclusivas
+                      Reconocimiento en eventos solidarios
                     </li>
                     <li className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
                       <Award size={14} className="text-guiso-orange" />
-                      Insignias de perfil verificadas
+                      Insignias de compromiso verificado
                     </li>
                   </ul>
                 </div>
 
                 <div className="space-y-3">
-                  <h4 className="font-bold text-gray-900 px-2">Escala de Impacto</h4>
+                  <h4 className="font-bold text-gray-900 px-2">Tu Camino de Compromiso</h4>
                   <div className="space-y-2">
                     {levels.map((lvl, idx) => (
                       <div key={lvl.name} className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors">
@@ -218,7 +218,7 @@ export default function DashboardPage() {
                   <div>
                     <h5 className="font-bold text-sm text-blue-900 mb-1">¿Cómo subo de nivel?</h5>
                     <p className="text-xs text-blue-800/70">
-                      Cada vez que apoyas una causa desde el panel de "Acción Rápida", recibes IP proporcional a tu aporte. El sistema actualiza tu rango automáticamente en la red.
+                      Cada vez que apoyas una causa desde el panel de "Apoyar una Causa", recibes IP proporcional a tu ayuda. El sistema actualiza tu reconocimiento automáticamente.
                     </p>
                   </div>
                 </div>

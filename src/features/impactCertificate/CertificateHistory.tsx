@@ -35,14 +35,14 @@ export default function CertificateHistory() {
         <div className="w-10 h-10 bg-guiso-orange/10 rounded-xl flex items-center justify-center text-guiso-orange">
           <Award size={20} />
         </div>
-        <h3 className="text-xl font-display font-bold">Mis Certificados de Impacto</h3>
+        <h3 className="text-xl font-display font-bold">Mis Certificados de Ayuda</h3>
       </div>
 
       {certificates.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
           <ShieldCheck size={48} className="mx-auto mb-4 opacity-20" />
-          <p>Aún no tienes certificados de impacto.</p>
-          <p className="text-sm mt-2">Realiza un pago o apoyo para generar tu primer certificado.</p>
+          <p>Aún no tienes certificados de ayuda.</p>
+          <p className="text-sm mt-2">Apoya una causa para generar tu primer comprobante de impacto.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -60,7 +60,7 @@ export default function CertificateHistory() {
                 <h4 className="font-bold text-guiso-dark mb-1">{cert.title}</h4>
                 <div className="flex justify-between items-end mt-4">
                   <div>
-                    <p className="text-xs text-gray-500">Impacto Generado</p>
+                    <p className="text-xs text-gray-500">Ayuda Entregada</p>
                     <p className="font-bold text-guiso-orange">{cert.impactAmount} IP</p>
                   </div>
                   <ExternalLink size={16} className="text-gray-400 group-hover:text-guiso-orange transition-colors" />

@@ -48,8 +48,8 @@ export default function MerchantDashboard() {
             <Wallet size={32} />
           </div>
           <div>
-            <h3 className="text-xl font-display font-bold mb-2">Conecta tu Wallet</h3>
-            <p className="text-gray-500 max-w-md mx-auto">Para acceder al portal de comercios y empezar a cobrar con GUISO, necesitas conectar tu billetera.</p>
+            <h3 className="text-xl font-display font-bold mb-2">Súmate como Comercio</h3>
+            <p className="text-gray-500 max-w-md mx-auto">Para empezar a recibir ayuda y colaborar con GUISO, necesitas conectar tu billetera digital.</p>
           </div>
           <Button onClick={connect} className="px-8 py-3">Conectar Wallet</Button>
         </Card>
@@ -66,13 +66,13 @@ export default function MerchantDashboard() {
             <div className="w-16 h-16 bg-guiso-orange/10 rounded-full flex items-center justify-center mx-auto text-guiso-orange mb-4">
               <Store size={24} />
             </div>
-            <h3 className="text-xl font-display font-bold mb-2">Registra tu Comercio</h3>
-            <p className="text-gray-500 text-sm">Empieza a aceptar pagos con impacto verificable.</p>
+            <h3 className="text-xl font-display font-bold mb-2">Registra tu Negocio</h3>
+            <p className="text-gray-500 text-sm">Comienza a recibir aportes con transparencia verificable.</p>
           </div>
           
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-bold text-gray-600 mb-1">Nombre del Comercio</label>
+              <label className="block text-sm font-bold text-gray-600 mb-1">Nombre del Negocio</label>
               <input 
                 type="text" 
                 value={regName}
@@ -134,7 +134,7 @@ export default function MerchantDashboard() {
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-guiso-dark flex items-center gap-2">
               <Shield size={20} className={trustTextColor} />
-              Puntaje de Confianza
+              Nivel de Confianza
             </h3>
             <span className={`text-2xl font-display font-bold ${trustTextColor}`}>
               {trustScore}%

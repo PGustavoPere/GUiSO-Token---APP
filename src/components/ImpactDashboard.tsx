@@ -13,18 +13,18 @@ export default function ImpactDashboard() {
 
   const stats = [
     { 
-      label: 'Balance GUISO', 
+      label: 'Tu Balance', 
       value: token.gsoBalance, 
       icon: Coins, 
       color: 'bg-yellow-50 text-yellow-500',
       suffix: ' GSO'
     },
     { 
-      label: 'Comidas Generadas', 
+      label: 'Ayuda Entregada', 
       value: meals, 
       icon: Utensils, 
       color: 'bg-guiso-terracotta/10 text-guiso-terracotta',
-      suffix: ''
+      suffix: ' Comidas'
     },
   ];
 
@@ -63,10 +63,10 @@ export default function ImpactDashboard() {
                 <Shield size={20} />
               </div>
               <div>
-                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Tu Reputación</p>
+                <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Tu Compromiso</p>
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-guiso-dark">{user.impactScore} Puntos de Impacto</span>
-                  <Badge variant="primary" size="sm">Nivel {user.communityLevel}</Badge>
+                  <span className="font-bold text-guiso-dark">{user.impactScore} Puntos de Ayuda</span>
+                  <Badge variant="primary" size="sm">{user.communityLevel}</Badge>
                 </div>
               </div>
             </div>

@@ -13,12 +13,12 @@ export default function CommunityPage() {
     <div className="space-y-8">
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-display font-bold text-guiso-dark">Ecosistema</h1>
-          <p className="text-gray-500">Tu participación valida el próximo paso del ecosistema GUISO.</p>
+          <h1 className="text-4xl font-display font-bold text-guiso-dark">Comunidad</h1>
+          <p className="text-gray-500">Tu voz ayuda a decidir el próximo paso de GUISO.</p>
         </div>
         <Badge variant="primary" className="w-fit py-2 px-4 gap-2">
           <Users size={16} />
-          <span>Validación Comunitaria</span>
+          <span>Participación Ciudadana</span>
         </Badge>
       </header>
 
@@ -78,10 +78,9 @@ export default function CommunityPage() {
           <Info size={20} />
         </div>
         <div>
-          <h4 className="font-bold text-guiso-dark">Sobre la Validación</h4>
+          <h4 className="font-bold text-guiso-dark">Sobre tu Participación</h4>
           <p className="text-xs text-gray-500 leading-relaxed">
-            Este sistema de votación es una simulación funcional. En la versión final, cada voto será una transacción on-chain 
-            basada en Impact Power derivado de la actividad en el ecosistema.
+            Este sistema de votación permite que todos seamos parte de la solución. En GUISO, cada voto es una forma de asegurar que los recursos se utilicen donde más se necesitan, basándonos en el compromiso real de cada miembro.
           </p>
         </div>
       </Card>

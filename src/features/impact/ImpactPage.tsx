@@ -41,13 +41,13 @@ export default function ImpactPage() {
     <div className="space-y-10">
       <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">Impacto Verificable</h1>
-          <p className="text-gray-500 text-sm md:text-base">Proyectos financiados y validados por el ecosistema GUISO.</p>
+          <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">Ayuda Verificable</h1>
+          <p className="text-gray-500 text-sm md:text-base">Causas apoyadas y validadas por personas como vos en la comunidad GUISO.</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <div className="px-4 py-2 bg-white rounded-full text-xs md:text-sm font-bold border border-gray-100 shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto">
             <Sparkles size={16} className="text-guiso-orange" />
-            Tu Impacto: <span className="text-guiso-orange">{user.impactScore} IP</span>
+            Tu Compromiso: <span className="text-guiso-orange">{user.impactScore} IP</span>
           </div>
         </div>
       </header>
@@ -121,22 +121,22 @@ export default function ImpactPage() {
       {/* Transparency Section */}
       <Card variant="terracotta" padding="xl" rounded="3xl">
         <div className="relative z-10 max-w-2xl">
-          <h2 className="text-2xl md:text-3xl font-display font-bold mb-4">Transparencia Radical</h2>
-          <p className="text-white/80 text-sm md:text-base mb-6 md:mb-8">Cada token destinado a impacto es rastreable mediante tecnología blockchain. Demostramos la trazabilidad con datos inmutables y auditoría abierta.</p>
+          <h2 className="text-2xl md:text-3xl font-display font-bold mb-4">Transparencia para Confiar</h2>
+          <p className="text-white/80 text-sm md:text-base mb-6 md:mb-8">Cada aporte que realizas es rastreable. Utilizamos tecnología para asegurar que la ayuda llegue a su destino, permitiendo que cualquiera pueda verificar la trazabilidad de forma abierta.</p>
           <div className="flex flex-col sm:flex-row flex-wrap gap-3 md:gap-4">
             <Button 
               onClick={() => setShowLedger(true)}
               variant="secondary" 
               className="w-full sm:w-auto bg-white text-guiso-terracotta hover:bg-guiso-cream"
             >
-              Explorar Ledger de Impacto
+              Ver Registro de Ayuda
             </Button>
             <Button 
               onClick={() => setShowDAO(true)}
               variant="outline" 
               className="w-full sm:w-auto border-white/30 text-white hover:bg-white/10 hover:text-white"
             >
-              Cómo funciona el DAO
+              Cómo participamos todos
             </Button>
           </div>
         </div>

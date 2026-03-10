@@ -38,7 +38,7 @@ export default function IdentityPanel() {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-display font-bold text-guiso-dark flex items-center gap-2">
           <Shield className="text-guiso-orange" size={24} />
-          Mi Identidad de Impacto
+          Tu Identidad Solidaria
         </h2>
         <div className="px-3 py-1 bg-guiso-orange/10 text-guiso-orange rounded-full text-xs font-bold uppercase tracking-wider">
           Nivel {identity.title}
