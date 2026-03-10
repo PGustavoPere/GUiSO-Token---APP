@@ -1,7 +1,7 @@
 # GUISO: Tecnología con Propósito Humano 🍲
 
-![GUISO Banner](![Modal GUISO Token readme](https://github.com/user-attachments/assets/736f8ff4-5250-461e-b938-6632854b6955)
-)
+(https://github.com/user-attachments/assets/736f8ff4-5250-461e-b938-6632854b6955)
+
 
 ## ¿Qué es GUISO?
 GUISO es una plataforma creada para demostrar que la tecnología **blockchain** puede ser una herramienta poderosa para ayudar a quienes más lo necesitan. No se trata solo de código o finanzas; se trata de construir un puente transparente entre personas que quieren ayudar y comunidades que necesitan apoyo.
