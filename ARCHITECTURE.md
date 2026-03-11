@@ -1,46 +1,46 @@
-# Technical Architecture: GUISO Token App
+# Arquitectura Técnica: Aplicación GUISO Token
 
-## 🏗️ High-Level Overview
-The GUISO platform is built as a **Single Page Application (SPA)** with a **Mock Backend** layer, designed to be easily swapped for a real Web3/API infrastructure.
+## 🏗️ Visión General de Alto Nivel
+La plataforma GUISO está construida como una **Aplicación de Página Única (SPA)** con una capa de **Backend Simulado (Mock)**, diseñada para ser fácilmente intercambiada por una infraestructura real de Web3/API.
 
-## 🎨 Frontend Structure
-We use a **Feature-Based Architecture** to ensure that as the app grows, modules remain decoupled.
+## 🎨 Estructura del Frontend
+Utilizamos una **Arquitectura Basada en Características (Features)** para asegurar que, a medida que la aplicación crezca, los módulos permanezcan desacoplados.
 
 ```text
 src/
-├── components/     # Shared UI (Layout, Buttons, Modals)
-├── context/        # Global State (GuisoContext)
-├── features/       # Business Logic Modules
-│   ├── dashboard/  # Analytics & Stats
-│   ├── impact/     # Social Projects & Support Logic
-│   └── profile/    # User Data & History
-├── services/       # API & Blockchain Communication
-└── types/          # TypeScript Definitions
+├── components/     # UI Compartida (Layout, Botones, Modales)
+├── context/        # Estado Global (GuisoContext)
+├── features/       # Módulos de Lógica de Negocio
+│   ├── dashboard/  # Analíticas y Estadísticas
+│   ├── impact/     # Proyectos Sociales y Lógica de Apoyo
+│   └── profile/    # Datos del Usuario e Historial
+├── services/       # Comunicación con API y Blockchain
+└── types/          # Definiciones de TypeScript
 ```
 
-## 🧠 State Management (SocialFi Engine)
-The core of the "SocialFi" experience is managed via the `GuisoProvider` (React Context).
+## 🧠 Gestión de Estado (Motor SocialFi)
+El núcleo de la experiencia "SocialFi" se gestiona a través del `GuisoProvider` (React Context).
 
-### State Variables:
-- `balance`: Current GSO tokens available for the user.
-- `impactScore`: Accumulated points from social actions.
-- `history`: Array of all previous social interactions.
+### Variables de Estado:
+- `balance`: Tokens GSO actuales disponibles para el usuario.
+- `impactScore`: Puntos acumulados de acciones sociales.
+- `history`: Array de todas las interacciones sociales previas.
 
-### Logic Flow:
-1. User triggers `supportProject(amount)`.
-2. Context validates `amount <= balance`.
-3. Context updates `balance` and calculates `impactScore` (10% of amount).
-4. Action is added to `history` and persisted to `localStorage`.
+### Flujo de Lógica:
+1. El usuario activa `supportProject(amount)`.
+2. El contexto valida `amount <= balance`.
+3. El contexto actualiza el `balance` y calcula el `impactScore` (10% del monto).
+4. La acción se añade al `history` y se persiste en `localStorage`.
 
-## 📡 Backend & Scalability
-Currently, the app uses an **Express.js** server to serve the frontend and provide mock JSON data via `/api` routes.
+## 📡 Backend y Escalabilidad
+Actualmente, la aplicación utiliza un servidor **Express.js** para servir el frontend y proporcionar datos JSON simulados a través de rutas `/api`.
 
-### Scaling Strategy:
-1. **Database:** Replace mock arrays with **PostgreSQL** for persistent user data.
-2. **Web3 Indexer:** Implement a service (like Subgraph or a custom Node.js listener) to track on-chain GSO transactions.
-3. **Authentication:** Transition from simulated connection to **SIWE (Sign-In with Ethereum)**.
+### Estrategia de Escalamiento:
+1. **Base de Datos:** Reemplazar los arrays simulados con **PostgreSQL** para datos de usuario persistentes.
+2. **Indexador Web3:** Implementar un servicio (como Subgraph o un oyente personalizado de Node.js) para rastrear transacciones GSO on-chain.
+3. **Autenticación:** Transición de conexión simulada a **SIWE (Sign-In with Ethereum)**.
 
-## 💅 Styling & UI
-- **Tailwind CSS 4:** Used for utility-first styling with a custom theme defined in `index.css`.
-- **Motion:** Handles all transitions and modal animations to provide a premium "App-like" feel.
-- **Glassmorphism:** A consistent design language using `backdrop-blur` and semi-transparent backgrounds to evoke a modern Web3 aesthetic.
+## 💅 Estilo e Interfaz de Usuario
+- **Tailwind CSS 4:** Utilizado para estilos basados en utilidades con un tema personalizado definido en `index.css`.
+- **Motion:** Maneja todas las transiciones y animaciones de modales para proporcionar una sensación de "App nativa" premium.
+- **Glassmorphism:** Un lenguaje de diseño consistente que utiliza `backdrop-blur` y fondos semitransparentes para evocar una estética moderna de Web3.
