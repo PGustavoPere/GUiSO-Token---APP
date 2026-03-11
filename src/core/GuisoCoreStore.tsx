@@ -1,3 +1,10 @@
+/**
+ * GuisoCoreStore - El "Cerebro" de GUISO.
+ * Este módulo gestiona la verdad única sobre el impacto del usuario.
+ * Aquí es donde los tokens GSO se transforman en Puntos de Impacto (IP)
+ * y se registra cada acción social para garantizar la transparencia.
+ */
+
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { impactEngine, LevelThreshold } from '../system/impactEngine';
 import { useWallet } from './WalletProvider';

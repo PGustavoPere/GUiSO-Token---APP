@@ -1,3 +1,9 @@
+/**
+ * TransactionAdapter - El puente hacia la transparencia Blockchain.
+ * Este módulo se encarga de que cada acción de impacto deje una huella
+ * inmutable en la red (BSC). Permite que la ayuda sea auditable por cualquiera.
+ */
+
 import { TransactionAdapter, TransactionResult } from './types';
 import { ethers } from 'ethers';
 import { GUISO_CONTRACT_ADDRESS, GUISO_ABI } from './contracts/guisoContract';

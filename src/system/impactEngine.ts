@@ -1,6 +1,8 @@
 /**
- * Impact Engine - GUISO SocialFi System
- * Handles level calculations, impact logic, and motivational feedback.
+ * Impact Engine - El motor de gamificación social de GUISO.
+ * Este módulo define la lógica matemática que convierte la ayuda financiera (GSO)
+ * en reconocimiento social (IP, Niveles y Mensajes Motivacionales).
+ * Es el corazón de la neutralidad del sistema: reglas claras para todos.
  */
 
 export enum CommunityLevel {

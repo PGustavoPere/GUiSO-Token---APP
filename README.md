@@ -2,67 +2,69 @@
 
 ![GUISO Banner](https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=1200&h=400&auto=format&fit=crop)
 
-## ¿Qué es GUISO?
-GUISO es una plataforma creada para demostrar que la tecnología **blockchain** puede ser una herramienta poderosa para ayudar a quienes más lo necesitan. No se trata solo de código o finanzas; se trata de construir un puente transparente entre personas que quieren ayudar y comunidades que necesitan apoyo.
+## 🌟 Nuestra Misión
+GUISO es una plataforma diseñada para demostrar que la tecnología **blockchain** puede ser una herramienta poderosa para la cooperación humana. Nuestra misión es construir un puente transparente y directo entre quienes desean ayudar y las comunidades que necesitan apoyo, eliminando intermediarios innecesarios y devolviendo la confianza a la acción social.
 
-Nuestra misión es simple: **que cada ayuda llegue a su destino de forma verificable y sin intermediarios innecesarios.**
+**En GUISO, cada gramo de ayuda llega a su destino de forma verificable.**
 
 ---
 
-## 💡 ¿Por qué existe este proyecto?
+## 💡 ¿Por qué GUISO?
 
 ### El Problema
-Hoy en día, muchas personas quieren ayudar pero tienen dudas: *¿A dónde va mi dinero? ¿Realmente llega a quien lo necesita? ¿Cómo puedo estar seguro?* La falta de transparencia y los procesos complejos alejan a los colaboradores de las causas sociales.
+La ayuda social tradicional a menudo carece de transparencia. Los colaboradores se preguntan: *¿A dónde va mi aporte? ¿Realmente generó un cambio?* Esta incertidumbre crea una barrera que impide que la ayuda fluya hacia donde más se necesita.
 
-### Nuestra Propuesta
-GUISO utiliza la tecnología para devolver la confianza a la ayuda social:
-- **Transparencia Real:** Cada acción genera un registro inmutable. No hay "cajas negras".
-- **Participación Cercana:** La comunidad decide qué proyectos necesitan prioridad.
-- **Impacto Directo:** Conectamos el aporte con la acción (como una comida caliente o un kit escolar) de forma inmediata.
-
----
-
-## 🚀 ¿Cómo funciona? (En palabras simples)
-
-1. **Conectas tu billetera:** Es tu identidad digital en el ecosistema.
-2. **Eliges una causa:** Puede ser un comedor comunitario, apoyo escolar o ayuda a personas sin hogar.
-3. **Aportas GSO:** El token **BEP-20** que mueve la ayuda, diseñado para correr sobre la **Binance Smart Chain (BSC)**.
-4. **Generas Impacto:** Tu aporte se transforma en "Puntos de Impacto" (IP) y recibes un certificado digital que prueba tu acción.
-5. **Ves el resultado:** El historial muestra exactamente qué se logró con tu ayuda.
+### Nuestra Solución
+Utilizamos la tecnología para hacer que el impacto sea tangible:
+- **Transparencia Radical:** Cada acción genera un registro inmutable en la red.
+- **Impacto Verificable:** Traducimos transacciones digitales en resultados humanos reales (comidas, kits, apoyo).
+- **Comunidad Activa:** Un ecosistema donde usuarios y comercios colaboran directamente.
 
 ---
 
-## 🗺️ El Camino de GUISO (Roadmap)
-
-Nuestro camino no se mide solo en versiones de software, sino en el alcance de nuestra ayuda:
-
-- **FASE 1: Demostrar el Impacto (MVP)** - Construir la tecnología base y demostrar que el mecanismo de ayuda transparente funciona sobre **BSC Testnet**.
-- **FASE 2: Construir Comunidad** - Sumar a más personas, ONGs y comercios que compartan nuestra visión.
-- **FASE 3: Escalar la Ayuda** - Lanzamiento en **BSC Mainnet** y expansión a más ciudades y países, multiplicando el impacto real en el mundo físico.
+## 🚀 El MVP Actual
+Nuestra versión actual permite experimentar el flujo completo del ecosistema de impacto:
+1. **Conexión de Billetera:** Identidad digital segura.
+2. **Exploración de Causas:** Proyectos sociales reales esperando apoyo.
+3. **Aporte de GSO:** Uso del token **BEP-20** (simulado en Testnet) para activar la ayuda.
+4. **Generación de Impacto:** Obtención de **Puntos de Impacto (IP)** y certificados digitales.
+5. **Historial Transparente:** Seguimiento de cada acción realizada.
 
 ---
 
-## 🛠️ Detalles para Colaboradores
+## 🛠️ Para Desarrolladores y Colaboradores
 
-Si eres desarrollador o diseñador y quieres sumarte a este propósito:
+Si crees que la tecnología debe servir para mejorar la vida de los demás, este es tu lugar.
 
-### Tecnologías que usamos:
-- **Frontend:** React & Tailwind CSS (para una interfaz limpia y simple).
-- **Red Blockchain:** **Binance Smart Chain (BSC)**.
-- **Estándar de Token:** **BEP-20** (GSO Token).
-- **Lógica de Impacto:** Un sistema que traduce transacciones en métricas humanas.
+### Stack Tecnológico
+- **Frontend:** React + Tailwind CSS + Motion.
+- **Blockchain:** Binance Smart Chain (BSC).
+- **Lógica:** Motor de impacto personalizado para gamificación social.
 
-### Cómo empezar:
-1. Instala las dependencias: `npm install`
-2. Inicia el proyecto: `npm run dev`
-3. Explora el código: Todo está organizado para ser legible y mantenible.
+### Inicio Rápido
+```bash
+# Instalar dependencias
+npm install
+
+# Iniciar entorno de desarrollo
+npm run dev
+```
+
+---
+
+## 📂 Estructura del Proyecto
+- [Visión del Proyecto](./VISION.md) - El "por qué" detrás de GUISO.
+- [Documentación Técnica](./docs/architecture.md) - Cómo está construido el sistema.
+- [Modelo de Impacto](./docs/impact-model.md) - La lógica detrás de los puntos y niveles.
+- [Ecosistema](./docs/ecosystem.md) - El rol de usuarios, comercios y el token GSO.
+- [Guía de Contribución](./CONTRIBUTING.md) - Cómo sumarte al equipo.
 
 ---
 
 ## 🤝 Unirse al Propósito
-Buscamos personas, no solo perfiles técnicos. Si crees que la tecnología debe servir para mejorar la vida de los demás, eres bienvenido en GUISO.
+Buscamos personas apasionadas por la tecnología y el impacto social. No importa si eres dev, diseñador o simplemente alguien que quiere ayudar; la transparencia y la empatía son los únicos requisitos.
 
 ---
 
 ## 📄 Licencia
-Este proyecto es de código abierto bajo la licencia Apache-2.0, porque la transparencia empieza desde el código.
+Este proyecto es de código abierto bajo la licencia **Apache-2.0**. Creemos que la transparencia debe empezar desde el código mismo.

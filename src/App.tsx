@@ -3,6 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * App.tsx - Punto de entrada principal de la aplicación GUISO.
+ * Aquí se orquestan los proveedores de estado que dan vida al ecosistema:
+ * - WalletProvider: Conexión con el mundo Web3.
+ * - GuisoCoreProvider: El motor central de impacto y balance.
+ * - Otros proveedores específicos para cada característica social.
+ */
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { GuisoCoreProvider } from './core/GuisoCoreStore';
 import { WalletProvider } from './core/WalletProvider';
