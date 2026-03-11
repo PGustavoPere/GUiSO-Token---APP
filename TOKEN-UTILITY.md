@@ -6,7 +6,8 @@ This document defines the utility and economic model of the **GUISO Token (GSO)*
 - **Name:** GUISO Token
 - **Symbol:** GSO
 - **Total Supply:** 100,000,000
-- **Network:** (Planned) Base / Polygon
+- **Network:** Binance Smart Chain (BSC)
+- **Standard:** BEP-20
 
 ## 🛠️ Current Utility (MVP)
 In the current MVP phase, the token economy is **simulated** to demonstrate the user flow.

@@ -1,6 +1,6 @@
 # GUISO: Tecnología con Propósito Humano 🍲
 
-![GUISO Banner](https://picsum.photos/seed/guiso-banner/1200/400)
+![GUISO Banner](https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=1200&h=400&auto=format&fit=crop)
 
 ## ¿Qué es GUISO?
 GUISO es una plataforma creada para demostrar que la tecnología **blockchain** puede ser una herramienta poderosa para ayudar a quienes más lo necesitan. No se trata solo de código o finanzas; se trata de construir un puente transparente entre personas que quieren ayudar y comunidades que necesitan apoyo.
@@ -26,7 +26,7 @@ GUISO utiliza la tecnología para devolver la confianza a la ayuda social:
 
 1. **Conectas tu billetera:** Es tu identidad digital en el ecosistema.
 2. **Eliges una causa:** Puede ser un comedor comunitario, apoyo escolar o ayuda a personas sin hogar.
-3. **Aportas GSO:** El token que mueve la ayuda.
+3. **Aportas GSO:** El token **BEP-20** que mueve la ayuda, diseñado para correr sobre la **Binance Smart Chain (BSC)**.
 4. **Generas Impacto:** Tu aporte se transforma en "Puntos de Impacto" (IP) y recibes un certificado digital que prueba tu acción.
 5. **Ves el resultado:** El historial muestra exactamente qué se logró con tu ayuda.
 
@@ -36,9 +36,9 @@ GUISO utiliza la tecnología para devolver la confianza a la ayuda social:
 
 Nuestro camino no se mide solo en versiones de software, sino en el alcance de nuestra ayuda:
 
-- **FASE 1: Demostrar el Impacto (MVP)** - Construir la tecnología base y demostrar que el mecanismo de ayuda transparente funciona.
+- **FASE 1: Demostrar el Impacto (MVP)** - Construir la tecnología base y demostrar que el mecanismo de ayuda transparente funciona sobre **BSC Testnet**.
 - **FASE 2: Construir Comunidad** - Sumar a más personas, ONGs y comercios que compartan nuestra visión.
-- **FASE 3: Escalar la Ayuda** - Llevar GUISO a más ciudades y países, multiplicando el impacto real en el mundo físico.
+- **FASE 3: Escalar la Ayuda** - Lanzamiento en **BSC Mainnet** y expansión a más ciudades y países, multiplicando el impacto real en el mundo físico.
 
 ---
 
@@ -48,8 +48,9 @@ Si eres desarrollador o diseñador y quieres sumarte a este propósito:
 
 ### Tecnologías que usamos:
 - **Frontend:** React & Tailwind CSS (para una interfaz limpia y simple).
+- **Red Blockchain:** **Binance Smart Chain (BSC)**.
+- **Estándar de Token:** **BEP-20** (GSO Token).
 - **Lógica de Impacto:** Un sistema que traduce transacciones en métricas humanas.
-- **Simulación Web3:** Actualmente operamos en una red de prueba para garantizar seguridad mientras crecemos.
 
 ### Cómo empezar:
 1. Instala las dependencias: `npm install`
