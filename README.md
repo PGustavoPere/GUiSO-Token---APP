@@ -22,6 +22,22 @@ Utilizamos la tecnología para hacer que el impacto sea tangible:
 
 ---
 
+## 🔄 El Ciclo de Impacto GUISO
+Entiende cómo funciona nuestro ecosistema en 10 segundos:
+
+![Ecosistema GUISO](./public/ecosystem-flow.svg)
+
+```mermaid
+graph LR
+    A[Usuario] -->|Apoya Causa| B[Impacto Registrado]
+    B -->|Blockchain| C[Certificado Generado]
+    C -->|Reconocimiento| D[Reputación IP]
+    D -->|Gobernanza| E[Participación Comunitaria]
+    E -->|Nuevas Causas| A
+```
+
+---
+
 ## 🚀 El MVP Actual
 Nuestra versión actual permite experimentar el flujo completo del ecosistema de impacto:
 1. **Conexión de Billetera:** Identidad digital segura.

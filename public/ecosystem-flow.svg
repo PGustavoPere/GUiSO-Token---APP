@@ -1,0 +1,62 @@
+<svg width="800" height="200" viewBox="0 0 800 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="200" rx="16" fill="#F8FAFC"/>
+  
+  <!-- Nodes -->
+  <!-- 1. Usuario -->
+  <circle cx="80" cy="100" r="35" fill="#10B981" fill-opacity="0.1"/>
+  <circle cx="80" cy="100" r="30" fill="#10B981"/>
+  <path d="M80 95C82.7614 95 85 92.7614 85 90C85 87.2386 82.7614 85 80 85C77.2386 85 75 87.2386 75 90C75 92.7614 77.2386 95 80 95ZM80 97.5C75.8333 97.5 67.5 99.5833 67.5 103.75V107.5H92.5V103.75C92.5 99.5833 84.1667 97.5 80 97.5Z" fill="white"/>
+  <text x="80" y="155" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="600" fill="#1E293B">Usuario</text>
+
+  <!-- Arrow 1 -->
+  <path d="M120 100H160" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M160 100L152 96V104L160 100Z" fill="#CBD5E1"/>
+
+  <!-- 2. Apoya Causa -->
+  <circle cx="210" cy="100" r="35" fill="#EF4444" fill-opacity="0.1"/>
+  <circle cx="210" cy="100" r="30" fill="#EF4444"/>
+  <path d="M210 108L208.55 106.68C203.4 102.01 200 98.93 200 95.15C200 92.08 202.41 89.66 205.48 89.66C207.21 89.66 208.88 90.47 210 91.74C211.12 90.47 212.79 89.66 214.52 89.66C217.59 89.66 220 92.08 220 95.15C220 98.93 216.6 102.01 211.45 106.69L210 108Z" fill="white"/>
+  <text x="210" y="155" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="600" fill="#1E293B">Apoya Causa</text>
+
+  <!-- Arrow 2 -->
+  <path d="M250 100H290" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M290 100L282 96V104L290 100Z" fill="#CBD5E1"/>
+
+  <!-- 3. Registro (Blockchain) -->
+  <circle cx="340" cy="100" r="35" fill="#6366F1" fill-opacity="0.1"/>
+  <circle cx="340" cy="100" r="30" fill="#6366F1"/>
+  <path d="M347.5 92.5H332.5V107.5H347.5V92.5ZM345 105H335V95H345V105Z" fill="white"/>
+  <circle cx="340" cy="100" r="3" fill="white"/>
+  <text x="340" y="155" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="600" fill="#1E293B">Impacto Registrado</text>
+
+  <!-- Arrow 3 -->
+  <path d="M380 100H420" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M420 100L412 96V104L420 100Z" fill="#CBD5E1"/>
+
+  <!-- 4. Certificado -->
+  <circle cx="470" cy="100" r="35" fill="#F59E0B" fill-opacity="0.1"/>
+  <circle cx="470" cy="100" r="30" fill="#F59E0B"/>
+  <path d="M477.5 90H462.5V110H477.5V90ZM475 107.5H465V92.5H475V107.5ZM467.5 95H472.5V97.5H467.5V95ZM467.5 100H472.5V102.5H467.5V100Z" fill="white"/>
+  <text x="470" y="155" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="600" fill="#1E293B">Certificado</text>
+
+  <!-- Arrow 4 -->
+  <path d="M510 100H550" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M550 100L542 96V104L550 100Z" fill="#CBD5E1"/>
+
+  <!-- 5. Reputación (IP) -->
+  <circle cx="600" cy="100" r="35" fill="#8B5CF6" fill-opacity="0.1"/>
+  <circle cx="600" cy="100" r="30" fill="#8B5CF6"/>
+  <path d="M600 90L603.09 96.26L610 97.27L605 102.14L606.18 109L600 105.77L593.82 109L595 102.14L590 97.27L596.91 96.26L600 90Z" fill="white"/>
+  <text x="600" y="155" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="600" fill="#1E293B">Reputación (IP)</text>
+
+  <!-- Arrow 5 -->
+  <path d="M640 100H680" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="4 4"/>
+  <path d="M680 100L672 96V104L680 100Z" fill="#CBD5E1"/>
+
+  <!-- 6. Comunidad -->
+  <circle cx="730" cy="100" r="35" fill="#06B6D4" fill-opacity="0.1"/>
+  <circle cx="730" cy="100" r="30" fill="#06B6D4"/>
+  <path d="M730 95C732.76 95 735 92.76 735 90C735 87.24 732.76 85 730 85C727.24 85 725 87.24 725 90C725 92.76 727.24 95 730 95ZM722.5 95C725.26 95 727.5 92.76 727.5 90C727.5 87.24 725.26 85 722.5 85C719.74 85 717.5 87.24 717.5 90C717.5 92.76 719.74 95 722.5 95ZM737.5 95C740.26 95 742.5 92.76 742.5 90C742.5 87.24 740.26 85 737.5 85C734.74 85 732.5 87.24 732.5 90C732.5 92.76 734.74 95 737.5 95ZM730 97.5C725.83 97.5 717.5 99.58 717.5 103.75V107.5H742.5V103.75C742.5 99.58 734.17 97.5 730 97.5Z" fill="white"/>
+  <text x="730" y="155" text-anchor="middle" font-family="sans-serif" font-size="12" font-weight="600" fill="#1E293B">Participación</text>
+</svg>
