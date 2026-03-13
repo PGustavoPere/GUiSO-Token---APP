@@ -14,17 +14,20 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const fetchPayments = async () => {
       try {
         const res = await fetch('/api/payments');
-        if (res.ok) {
+        const contentType = res.headers.get('content-type');
+        
+        if (res.ok && contentType && contentType.includes('application/json')) {
           const data = await res.json();
           const paymentsMap = data.reduce((acc: Record<string, PaymentIntent>, p: PaymentIntent) => {
             acc[p.id] = p;
             return acc;
           }, {});
           setPayments(paymentsMap);
-        } else {
+        } else if (!res.ok) {
           console.error(`Error fetching payments: ${res.status} ${res.statusText}`);
-          const text = await res.text();
-          console.error('Response body:', text);
+        } else {
+          // res.ok but not JSON (likely HTML fallback)
+          console.warn('Received non-JSON response from /api/payments');
         }
       } catch (error) {
         console.error('Network error fetching payments:', error);

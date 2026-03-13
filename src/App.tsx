@@ -17,6 +17,7 @@ import { WalletProvider } from './core/WalletProvider';
 import { PaymentProvider } from './features/payments/PaymentStore';
 import { MerchantProvider } from './features/merchant/MerchantStore';
 import Layout from './components/Layout';
+import WelcomeModal from './components/WelcomeModal';
 import ScrollToTop from './components/ScrollToTop';
 import DashboardPage from './features/dashboard/DashboardPage';
 import ImpactPage from './features/impact/ImpactPage';
@@ -46,6 +47,7 @@ export default function App() {
                   <IdentityProvider>
                     <CommunityProvider>
                       <BrowserRouter>
+                        <WelcomeModal />
                         <ScrollToTop />
                         <Routes>
                           <Route path="/" element={<Layout />}>

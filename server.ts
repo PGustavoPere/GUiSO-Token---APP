@@ -13,37 +13,27 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // Trust proxy for express-rate-limit and other proxy-aware middlewares
-  app.set('trust proxy', 1);
+  // Standard middlewares
+  app.use(cors());
+  app.use(express.json({ limit: '10mb' }));
 
-  // Manual CORS implementation for maximum compatibility
+  // Request Logger
   app.use((req, res, next) => {
-    const origin = req.headers.origin;
-    res.setHeader('Access-Control-Allow-Origin', origin || '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    
-    if (req.method === 'OPTIONS') {
-      return res.status(200).end();
+    if (req.url.startsWith('/api/')) {
+      console.log(`[API Request] ${req.method} ${req.url}`);
     }
     next();
+  });
+
+  // --- Health Check ---
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", timestamp: Date.now(), env: process.env.NODE_ENV });
   });
 
   // Helper for SSE Errors
   const sseError = (res: express.Response, message: string) => {
     res.write(`event: error\ndata: ${JSON.stringify({ message })}\n\n`);
   };
-
-  // Request Logger - Move to the very top
-  app.use((req, res, next) => {
-    if (req.url.startsWith('/api/')) {
-      console.log(`[API Request] ${req.method} ${req.url} - Origin: ${req.headers.origin || 'none'}`);
-    }
-    next();
-  });
-
-  app.use(express.json({ limit: '10mb' })); // Limit body size
 
   // --- Mock API Routes ---
   // Define these BEFORE static files to ensure they take precedence
