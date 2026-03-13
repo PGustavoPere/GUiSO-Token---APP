@@ -5,6 +5,7 @@ import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { useImpactExplorerStore } from '../impactExplorer/ImpactExplorerStore';
 import SupportModal from './SupportModal';
 import CertificateHistory from '../impactCertificate/CertificateHistory';
+import EcosystemActivityFeed from '../../components/EcosystemActivityFeed';
 import { Card, Button, Badge } from '../../components/ui';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -51,6 +52,11 @@ export default function ImpactPage() {
           </div>
         </div>
       </header>
+
+      {/* Ecosystem Activity Feed */}
+      <section className="max-w-3xl mx-auto w-full">
+        <EcosystemActivityFeed />
+      </section>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {projects.map((project) => (
