@@ -55,7 +55,50 @@ export const ImpactExplorerProvider: React.FC<{ children: React.ReactNode }> = (
     return loadedEvents;
   });
 
-  // Simulate real-time refresh every 10 seconds
+  const syncWithCertificates = useCallback(() => {
+    const saved = localStorage.getItem('guiso_impact_events');
+    let loadedEvents: ImpactEvent[] = saved ? JSON.parse(saved) : [];
+    const certs = impactCertificateService.getAllCertificates();
+    const eventCertIds = new Set(loadedEvents.map(e => e.certificateId));
+    let updated = false;
+
+    certs.forEach(cert => {
+      if (!eventCertIds.has(cert.id)) {
+        loadedEvents.push({
+          id: `EVT-${cert.id}`,
+          certificateId: cert.id,
+          title: cert.title,
+          impactAmount: cert.impactAmount,
+          timestamp: cert.createdAt,
+          walletShort: `${cert.wallet.slice(0, 6)}...${cert.wallet.slice(-4)}`,
+          txHash: cert.txHash,
+          meta: cert.meta
+        });
+        updated = true;
+      }
+    });
+
+    if (updated) {
+      loadedEvents.sort((a, b) => b.timestamp - a.timestamp);
+      localStorage.setItem('guiso_impact_events', JSON.stringify(loadedEvents));
+      setEvents(loadedEvents);
+    }
+  }, []);
+
+  // Sync on mount and listen for updates
+  useEffect(() => {
+    syncWithCertificates();
+    
+    const handleUpdate = () => {
+      console.log("ImpactExplorerStore: Syncing with certificates...");
+      syncWithCertificates();
+    };
+
+    window.addEventListener('certificates_updated', handleUpdate);
+    return () => window.removeEventListener('certificates_updated', handleUpdate);
+  }, [syncWithCertificates]);
+
+  // Simulate real-time refresh every 5 seconds (reduced from 10)
   useEffect(() => {
     const interval = setInterval(() => {
       const saved = localStorage.getItem('guiso_impact_events');
@@ -65,7 +108,7 @@ export const ImpactExplorerProvider: React.FC<{ children: React.ReactNode }> = (
           setEvents(parsed);
         }
       }
-    }, 10000);
+    }, 5000);
     return () => clearInterval(interval);
   }, [events.length]);
 

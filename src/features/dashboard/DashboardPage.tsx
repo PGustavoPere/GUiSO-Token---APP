@@ -6,6 +6,7 @@ import { AnimatePresence } from 'motion/react';
 import ImpactDashboard from '../../components/ImpactDashboard';
 import ImpactTransactionPanel from '../../components/ImpactTransactionPanel';
 import ImpactHistory from '../../components/ImpactHistory';
+import GlobalImpactStats from '../../components/GlobalImpactStats';
 import CertificateHistory from '../impactCertificate/CertificateHistory';
 import InvestorPanel from '../../components/InvestorPanel';
 import IdentityPanel from '../identity/IdentityPanel';
@@ -81,6 +82,9 @@ export default function DashboardPage() {
           </motion.div>
         </div>
       </section>
+
+      {/* Global Impact Stats */}
+      <GlobalImpactStats />
 
       {/* Investor Metrics (Simulated) */}
       <InvestorPanel />
