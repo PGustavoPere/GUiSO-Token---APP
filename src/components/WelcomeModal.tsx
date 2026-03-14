@@ -18,7 +18,7 @@ export default function WelcomeModal() {
   };
 
   const steps = [
-    { icon: <User className="w-5 h-5 text-emerald-500" />, text: "1️⃣ Usuario: Conectas tu identidad digital" },
+    { icon: <User className="w-5 h-5 text-orange-500" />, text: "1️⃣ Usuario: Conectas tu identidad digital" },
     { icon: <Heart className="w-5 h-5 text-rose-500" />, text: "2️⃣ Contribución: Apoyas una iniciativa social" },
     { icon: <LinkIcon className="w-5 h-5 text-indigo-500" />, text: "3️⃣ Impacto verificado: Se registra en la blockchain" },
     { icon: <FileCheck className="w-5 h-5 text-amber-500" />, text: "4️⃣ Certificado: Recibes un comprobante inmutable" },
@@ -70,7 +70,7 @@ export default function WelcomeModal() {
               </p>
               <button
                 onClick={handleClose}
-                className="w-full py-3.5 text-sm font-bold text-white transition-all shadow-lg rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] shadow-emerald-200"
+                className="w-full py-3.5 text-sm font-bold text-white transition-all shadow-lg rounded-xl bg-orange-600 hover:bg-orange-700 active:scale-[0.98] shadow-orange-200"
               >
                 Comenzar
               </button>
