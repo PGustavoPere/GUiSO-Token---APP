@@ -60,7 +60,7 @@ export default function ImpactMoment() {
                   transition={{ delay: 0.5 }}
                   className="text-white/60 text-lg max-w-sm mx-auto leading-relaxed"
                 >
-                  Has comenzado algo grande. Tu apoyo a <span className="text-white font-semibold">{activeImpactMoment.target}</span> acaba de cambiar el mundo.
+                  Has comenzado algo grande. Tu apoyo a <span className="text-white font-semibold">{activeImpactMoment.target}</span> acaba de mejorar la vida de alguien.
                 </motion.p>
               </div>
 

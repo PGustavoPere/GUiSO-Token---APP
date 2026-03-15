@@ -97,7 +97,7 @@ export default function ImpactCounter() {
       {/* Live Indicator */}
       <div className="absolute top-6 right-6 flex items-center gap-2">
         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-        <span className="text-[10px] font-bold uppercase tracking-tighter text-white/30">Live Stats</span>
+        <span className="text-[10px] font-bold uppercase tracking-tighter text-white/30">Estadisticas</span>
       </div>
     </div>
   );
