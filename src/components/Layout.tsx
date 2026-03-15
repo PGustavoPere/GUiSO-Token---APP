@@ -102,7 +102,7 @@ export default function Layout() {
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-2">
               <Cpu size={12} className="text-guiso-orange" />
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Estado del Puente</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Estado del Proyecto</span>
             </div>
             <button 
               onClick={() => {

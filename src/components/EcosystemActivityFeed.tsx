@@ -48,7 +48,7 @@ const ACTIVITIES: ActivityEvent[] = [
   {
     id: '5',
     type: 'support',
-    text: 'María apoyó "Olla Comunitaria Norte" (+15 IP)',
+    text: 'María apoyó "Sala comunitaria Norte" (+15 IP)',
     time: 'hace 12 horas',
     icon: Heart,
     color: 'text-red-500 bg-red-50',
