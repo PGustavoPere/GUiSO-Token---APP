@@ -14,7 +14,10 @@ async function startServer() {
   const PORT = 3000;
 
   // Standard middlewares
-  app.use(cors());
+  app.use(cors({
+    origin: true, // Allow all origins
+    credentials: true
+  }));
   app.use(express.json({ limit: '10mb' }));
 
   // Request Logger
@@ -175,7 +178,10 @@ async function startServer() {
   if (!isProduction || !hasDist) {
     console.log("Using Vite middleware for development...");
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { 
+        middlewareMode: true,
+        allowedHosts: true // Allow all hosts in Vite 6
+      },
       appType: "spa",
     });
     app.use(vite.middlewares);

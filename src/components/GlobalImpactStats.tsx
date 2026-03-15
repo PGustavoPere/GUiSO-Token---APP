@@ -53,7 +53,7 @@ export default function GlobalImpactStats() {
     <section className="space-y-4">
       <div className="flex items-center justify-between px-2">
         <h2 className="text-2xl font-display font-bold text-guiso-dark">Impacto del Ecosistema GUISO</h2>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-1 rounded-full">MVP Datos simulados en VIVO</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-1 rounded-full">MVP Live Data</span>
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

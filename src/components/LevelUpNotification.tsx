@@ -56,7 +56,7 @@ export default function LevelUpNotification() {
                 </Button>
                 <div className="flex items-center justify-center gap-2 text-xs text-guiso-orange font-bold">
                   <Sparkles size={14} />
-                  <span>Tu apoyo esta ayudando a las personas que mas necesitan</span>
+                  <span>Tu impacto es imparable</span>
                 </div>
               </div>
             </div>
