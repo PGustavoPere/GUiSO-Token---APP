@@ -76,7 +76,7 @@ export default function Layout() {
           <div className="w-10 h-10 bg-guiso-orange rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-guiso-orange/20">G</div>
           <div className="flex flex-col">
             <span className="font-display font-bold text-xl leading-none">GUISO</span>
-            <span className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Proyecto Token</span>
+            <span className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Token</span>
           </div>
         </div>
 
@@ -102,7 +102,7 @@ export default function Layout() {
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-2">
               <Cpu size={12} className="text-guiso-orange" />
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Estado del Proyecto</span>
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Estado del proyecto</span>
             </div>
             <button 
               onClick={() => {

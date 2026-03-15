@@ -58,7 +58,7 @@ export default function ProfilePage() {
             </>
           )}
         </Button>
-        <p className="text-xs text-gray-400">Soportamos MetaMask, WalletConnect, Coinbase Wallet y Binance Wallet.</p>
+        <p className="text-xs text-gray-400">Soportamos MetaMask, WalletConnect, Coinbase Wallet y Binance.</p>
       </div>
     );
   }
