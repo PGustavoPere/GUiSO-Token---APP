@@ -128,7 +128,7 @@ export default function ImpactPage() {
       <Card variant="terracotta" padding="xl" rounded="3xl">
         <div className="relative z-10 max-w-2xl">
           <h2 className="text-2xl md:text-3xl font-display font-bold mb-4">Transparencia para Confiar</h2>
-          <p className="text-white/80 text-sm md:text-base mb-6 md:mb-8">Cada aporte que realizas es rastreable. Utilizamos tecnología para asegurar que la ayuda llegue a su destino, permitiendo que cualquiera pueda verificar la trazabilidad de forma abierta.</p>
+          <p className="text-white/80 text-sm md:text-base mb-6 md:mb-8">Cada aporte que realizas es rastreable e Inmutable. Utilizamos tecnología para asegurar que la ayuda llegue a su destino, permitiendo que cualquiera pueda verificar la trazabilidad de forma abierta.</p>
           <div className="flex flex-col sm:flex-row flex-wrap gap-3 md:gap-4">
             <Button 
               onClick={() => setShowLedger(true)}
@@ -243,13 +243,13 @@ export default function ImpactPage() {
                     ¿Qué es el DAO de GUISO?
                   </h4>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    La Organización Autónoma Descentralizada (DAO) permite que la comunidad tome las decisiones importantes. No hay una entidad central que decida a dónde va el dinero; lo decides tú con tus tokens GSO.
+                    La Organización Autónoma Descentralizada (DAO) permite que la comunidad tome las decisiones importantes. No hay una entidad central que decida a dónde va el dinero; lo decides tú con tus tokens GSO, junto a los demas integrantes de la comunidad.
                   </p>
                 </section>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 bg-guiso-cream/30 rounded-2xl border border-guiso-orange/10">
-                    <h5 className="font-bold text-sm mb-2">Impact Power (IP)</h5>
+                    <h5 className="font-bold text-sm mb-2">Puntos de Impacto (IP)</h5>
                     <p className="text-xs text-gray-500">Tu poder de voto no solo depende de cuántos tokens tienes, sino de cuánto impacto has generado previamente.</p>
                   </div>
                   <div className="p-4 bg-guiso-cream/30 rounded-2xl border border-guiso-orange/10">
@@ -267,7 +267,7 @@ export default function ImpactPage() {
                     </li>
                     <li className="flex gap-4">
                       <div className="w-6 h-6 rounded-full bg-guiso-orange text-white flex items-center justify-center text-xs font-bold shrink-0">2</div>
-                      <p className="text-sm text-gray-600"><span className="font-bold text-guiso-dark">Votación:</span> Los holders usan su Impact Power para validar la viabilidad y prioridad.</p>
+                      <p className="text-sm text-gray-600"><span className="font-bold text-guiso-dark">Votación:</span> Los usuarios usan sus Puntos de Impacto para validar la viabilidad y prioridad de las causas a financiar.</p>
                     </li>
                     <li className="flex gap-4">
                       <div className="w-6 h-6 rounded-full bg-guiso-orange text-white flex items-center justify-center text-xs font-bold shrink-0">3</div>
