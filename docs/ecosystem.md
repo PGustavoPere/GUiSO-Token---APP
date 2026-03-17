@@ -20,6 +20,10 @@ Es el conjunto de todos los participantes que velan por la salud del sistema.
 - **Motivación:** Asegurar que GUISO siga siendo una herramienta neutral y eficiente para el bien común.
 
 ## 2. El Ciclo de Interacción
+Entiende cómo fluye la ayuda a través del ecosistema:
+
+![Flujo Estructural GUISO](../public/guiso-flow.png)
+
 1. **El Colaborador** elige una causa y envía tokens GSO.
 2. **El Sistema** registra la acción y otorga Puntos de Impacto al colaborador.
 3. **El Comercio** recibe la notificación y entrega el bien (ej. un guiso caliente) a la persona que lo necesita.
