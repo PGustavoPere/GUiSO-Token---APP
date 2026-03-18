@@ -63,9 +63,6 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
       }
       
       setIsSuccess(true);
-      setTimeout(() => {
-        onClose();
-      }, 5000);
     } else {
       setTxStatus('failed');
       setTimeout(() => setTxStatus('idle'), 3000);
@@ -190,6 +187,14 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
                   </div>
                 )}
               </div>
+
+              <Button 
+                onClick={onClose}
+                variant="outline"
+                className="w-full mt-6"
+              >
+                Cerrar
+              </Button>
             </motion.div>
           )}
         </AnimatePresence>

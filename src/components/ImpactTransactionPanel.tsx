@@ -73,16 +73,16 @@ export default function ImpactTransactionPanel() {
       if (false) {
         setTimeout(() => setShowStory(true), 1000);
       }
-      
-      setTimeout(() => {
-        setIsSuccess(false);
-        setTxHash(null);
-        setTxStatus('idle');
-      }, 5000);
     } else {
       setTxStatus('failed');
       setTimeout(() => setTxStatus('idle'), 3000);
     }
+  };
+
+  const handleCloseSuccess = () => {
+    setIsSuccess(false);
+    setTxHash(null);
+    setTxStatus('idle');
   };
 
   if (isSuccess) {
@@ -114,6 +114,13 @@ export default function ImpactTransactionPanel() {
                 </a>
               </div>
             )}
+            <Button 
+              onClick={handleCloseSuccess}
+              variant="outline"
+              className="w-full mt-4"
+            >
+              Cerrar
+            </Button>
           </Card>
         </motion.div>
         

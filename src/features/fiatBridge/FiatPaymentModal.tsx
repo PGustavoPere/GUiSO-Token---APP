@@ -16,16 +16,6 @@ export default function FiatPaymentModal({ payment, onClose }: FiatPaymentModalP
     processPayment(payment.id, payment.fiatAmount);
   };
 
-  // Auto close on success after a delay
-  useEffect(() => {
-    if (currentStatus === 'completed') {
-      const timer = setTimeout(() => {
-        onClose();
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [currentStatus, onClose]);
-
   const renderContent = () => {
     if (currentStatus === 'created') {
       return (
@@ -89,6 +79,9 @@ export default function FiatPaymentModal({ payment, onClose }: FiatPaymentModalP
             <h3 className="text-2xl font-bold text-gray-900 mb-2">¡Pago Exitoso!</h3>
             <p className="text-gray-500">Tu impacto ha sido verificado en la blockchain.</p>
           </div>
+          <Button onClick={onClose} variant="outline" className="w-full">
+            Cerrar
+          </Button>
         </div>
       );
     }
