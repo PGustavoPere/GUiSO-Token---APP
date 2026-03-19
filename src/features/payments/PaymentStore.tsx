@@ -14,7 +14,8 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({ child
     let errorCount = 0;
     const fetchPayments = async () => {
       try {
-        const res = await fetch('/api/payments', {
+        const url = `${window.location.origin}/api/payments`;
+        const res = await fetch(url, {
           headers: {
             'Accept': 'application/json',
             'Cache-Control': 'no-cache'
@@ -33,28 +34,32 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({ child
           errorCount = 0; // Reset on success
         } else if (!res.ok) {
           if (errorCount < 3) {
-            console.error(`Error fetching payments: ${res.status} ${res.statusText}`);
+            console.error(`Error fetching payments from ${url}: ${res.status} ${res.statusText}`);
             errorCount++;
           }
         } else {
           // res.ok but not JSON (likely HTML fallback)
           if (errorCount < 3) {
-            console.warn('Received non-JSON response from /api/payments');
+            console.warn(`Received non-JSON response from ${url}`);
             errorCount++;
           }
         }
       } catch (error: any) {
         if (errorCount < 3) {
-          console.error('Network error fetching payments:', error.message || error);
+          console.error(`Network error fetching payments from /api/payments:`, error.message || error);
           errorCount++;
         }
       }
     };
 
-    fetchPayments();
+    // Initial delay to ensure server is ready
+    const timeout = setTimeout(fetchPayments, 1000);
     
-    const interval = setInterval(fetchPayments, 2000);
-    return () => clearInterval(interval);
+    const interval = setInterval(fetchPayments, 5000);
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, []);
 
   return (

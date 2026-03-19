@@ -24,7 +24,8 @@ export default function PaymentPage() {
     if (paymentId) {
       const fetchPayment = async () => {
         try {
-          const res = await fetch(`/api/payments/${paymentId}`);
+          const url = `${window.location.origin}/api/payments/${paymentId}`;
+          const res = await fetch(url);
           if (res.ok) {
             const p = await res.json();
             setPayment(p);
@@ -42,7 +43,8 @@ export default function PaymentPage() {
       
       const interval = setInterval(async () => {
         try {
-          const res = await fetch(`/api/payments/${paymentId}`);
+          const url = `${window.location.origin}/api/payments/${paymentId}`;
+          const res = await fetch(url);
           if (res.ok) {
             const updated = await res.json();
             setPayment(updated);

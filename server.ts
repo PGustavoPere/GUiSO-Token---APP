@@ -121,8 +121,14 @@ async function startServer() {
 
   // --- Payments Mock API ---
   app.get("/api/payments", (req, res) => {
-    console.log("[API] Serving GET /api/payments");
-    res.json(Object.values(payments));
+    try {
+      console.log(`[API] Serving GET /api/payments - Found ${Object.keys(payments).length} payments`);
+      res.setHeader('Content-Type', 'application/json');
+      res.json(Object.values(payments));
+    } catch (err: any) {
+      console.error("Error in GET /api/payments:", err);
+      res.status(500).json({ error: "Internal Server Error", message: err.message });
+    }
   });
 
   app.post("/api/payments", express.json(), (req, res) => {
