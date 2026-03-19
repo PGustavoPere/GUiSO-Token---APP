@@ -87,5 +87,10 @@ Buscamos personas apasionadas por la tecnología y el impacto social. No importa
 
 ---
 
+## 👨‍💻 Desarrollado por
+Este proyecto fue concebido y desarrollado por **Gustavo Pere**, con la visión de que la tecnología debe ser una herramienta para la empatía y la acción social real.
+
+---
+
 ## 📄 Licencia
 Este proyecto es de código abierto bajo la licencia **Apache-2.0**. Creemos que la transparencia debe empezar desde el código mismo.
