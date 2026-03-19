@@ -80,38 +80,56 @@ export default function VisionPage() {
       </section>
 
       {/* SECCIÓN 3 — LA SOLUCIÓN GUISO */}
-      <section className="space-y-12">
+      <section className="space-y-16">
         <div className="text-center space-y-4">
-          <h2 className="text-3xl font-display font-bold">La Solución GUISO</h2>
-          <p className="text-gray-500 max-w-2xl mx-auto">Un modelo de economía circular donde cada acción fortalece el tejido social.</p>
+          <h2 className="text-3xl font-display font-bold">Ecosistema y Flujo de Trabajo</h2>
+          <p className="text-gray-500 max-w-2xl mx-auto">
+            Un modelo de economía circular donde la tecnología asegura que cada acción fortalezca el tejido social de forma transparente.
+          </p>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            {
-              icon: Zap,
-              title: "Pagos con Impacto",
-              desc: "Cada transacción genera impacto social medible de forma automática."
-            },
-            {
-              icon: Users,
-              title: "Gobernanza Comunitaria",
-              desc: "La comunidad vota qué proyectos apoyar mediante un sistema democrático."
-            },
-            {
-              icon: ShieldCheck,
-              title: "Reputación Social",
-              desc: "El impacto crea confianza digital verificable para todos los participantes."
-            }
-          ].map((item, i) => (
-            <Card key={i} variant="glass" padding="lg" className="space-y-4 hover:border-guiso-orange/30 transition-all">
-              <div className="w-12 h-12 bg-guiso-orange/10 rounded-2xl flex items-center justify-center text-guiso-orange">
-                <item.icon size={24} />
+
+        {/* DIAGRAMA DEL ECOSISTEMA */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="relative max-w-5xl mx-auto bg-white rounded-[2.5rem] p-8 md:p-12 border border-gray-100 shadow-sm overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-guiso-orange/5 blur-[100px] -z-10" />
+          <img 
+            src="/ecosystem-flow.svg" 
+            alt="Ecosistema y Flujo de Trabajo GUISO" 
+            className="w-full h-auto"
+            referrerPolicy="no-referrer"
+          />
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-gray-50 pt-12">
+            {[
+              {
+                icon: Zap,
+                title: "Pagos con Propósito",
+                desc: "Cada transacción en comercios adheridos genera un aporte automático a causas sociales validadas."
+              },
+              {
+                icon: Users,
+                title: "Validación Colectiva",
+                desc: "La comunidad participa activamente en la auditoría y votación de los proyectos que reciben fondos."
+              },
+              {
+                icon: ShieldCheck,
+                title: "Trazabilidad Absoluta",
+                desc: "Mediante blockchain, cada movimiento de valor es público, inmutable y verificable por cualquier persona."
+              }
+            ].map((item, i) => (
+              <div key={i} className="space-y-3">
+                <div className="w-10 h-10 bg-guiso-orange/10 rounded-xl flex items-center justify-center text-guiso-orange">
+                  <item.icon size={20} />
+                </div>
+                <h3 className="font-bold text-lg">{item.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
               </div>
-              <h3 className="text-xl font-display font-bold">{item.title}</h3>
-              <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
-            </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+        </motion.div>
       </section>
 
       {/* SECCIÓN 4 — CÓMO FUNCIONA */}
