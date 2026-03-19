@@ -1,10 +1,9 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { Sparkles, ArrowRight, Heart, ShieldCheck, Zap, X, Info, Star, Award, TrendingUp } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import ImpactDashboard from '../../components/ImpactDashboard';
-import ImpactTransactionPanel from '../../components/ImpactTransactionPanel';
 import ImpactHistory from '../../components/ImpactHistory';
 import GlobalImpactStats from '../../components/GlobalImpactStats';
 import CertificateHistory from '../impactCertificate/CertificateHistory';
@@ -15,6 +14,7 @@ import { Card, Button } from '../../components/ui';
 
 export default function DashboardPage() {
   const { user } = useGuisoCore();
+  const navigate = useNavigate();
   const [showLevelsModal, setShowLevelsModal] = React.useState(false);
 
   const levels = [
@@ -115,11 +115,6 @@ export default function DashboardPage() {
 
         {/* Sidebar Column */}
         <div className="space-y-8">
-          <section id="transaction-panel" className="space-y-4">
-            <h2 className="text-2xl font-display font-bold px-2">Apoyar una Causa</h2>
-            <ImpactTransactionPanel />
-          </section>
-
           {/* Education Card */}
           <Card variant="cream" padding="md" rounded="2xl">
             <div className="flex items-center gap-3 mb-4">

@@ -11,7 +11,7 @@ import { useIdentityStore } from '../identity/IdentityStore';
 import { useWallet } from '../../core/WalletProvider';
 
 interface SupportModalProps {
-  project: { id: string; title: string };
+  project: { id: string; title: string; category: string };
   onClose: () => void;
 }
 
@@ -47,7 +47,7 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
       const impactPoints = impactEngine.calculateImpactPoints(amount);
       
       // 1. Record in core store
-      recordSupportTransaction(project.id, project.title, amount, result.txHash);
+      recordSupportTransaction(project.id, project.title, amount, result.txHash, project.category);
       
       // 2. Generate Certificate
       if (address) {

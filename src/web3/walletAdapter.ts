@@ -32,7 +32,7 @@ export class MetaMaskAdapter implements WalletAdapter {
 
   async connect(): Promise<string> {
     if (!(window as any).ethereum) {
-      throw new Error('MetaMask is not installed');
+      throw new Error('MetaMask no está instalado');
     }
 
     try {
@@ -48,7 +48,7 @@ export class MetaMaskAdapter implements WalletAdapter {
       this.address = accounts[0];
       return this.address!;
     } catch (error) {
-      console.error('Failed to connect to MetaMask', error);
+      console.error('Error al conectar con MetaMask', error);
       throw error;
     }
   }

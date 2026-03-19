@@ -36,7 +36,7 @@ export class MockTransactionAdapter implements TransactionAdapter {
 export class Web3TransactionAdapter implements TransactionAdapter {
   async sendTransaction(amount: number, cause: string): Promise<TransactionResult> {
     if (!(window as any).ethereum) {
-      return { success: false, txHash: '', error: 'MetaMask not installed' };
+      return { success: false, txHash: '', error: 'MetaMask no está instalado' };
     }
 
     try {
@@ -44,7 +44,7 @@ export class Web3TransactionAdapter implements TransactionAdapter {
       const network = await provider.getNetwork();
       
       if (network.chainId !== BigInt(97)) {
-        return { success: false, txHash: '', error: 'Please switch to BSC Testnet' };
+        return { success: false, txHash: '', error: 'Por favor, cambia a la red BSC Testnet' };
       }
 
       const signer = await provider.getSigner();
@@ -56,7 +56,7 @@ export class Web3TransactionAdapter implements TransactionAdapter {
       const tx = await signer.sendTransaction({
         to: GUISO_CONTRACT_ADDRESS,
         value: 0,
-        data: ethers.hexlify(ethers.toUtf8Bytes(`Support: ${cause} - ${amount} GSO`)) // Add some data to the tx
+        data: ethers.hexlify(ethers.toUtf8Bytes(`Soporte: ${cause} - ${amount} GSO`)) // Add some data to the tx
       });
 
       console.log('Transaction sent:', tx.hash);
@@ -70,7 +70,7 @@ export class Web3TransactionAdapter implements TransactionAdapter {
       return {
         success: false,
         txHash: '',
-        error: error.message || 'Transaction failed'
+        error: error.message || 'La transacción falló'
       };
     }
   }

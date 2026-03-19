@@ -84,7 +84,7 @@ export default function PaymentPage() {
 
           if (confirmed) {
             await updatePaymentStatus(payment.id, 'completed');
-            recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, payment.txHash);
+            recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, payment.txHash, 'Comercio');
           } else {
             await updatePaymentStatus(payment.id, 'failed');
             setErrorMsg('La transacción no pudo ser confirmada.');
@@ -146,7 +146,7 @@ export default function PaymentPage() {
     
     try {
       const transactionAdapter = web3Bridge.getTransaction();
-      const result = await transactionAdapter.sendTransaction(payment.tokenAmount, `Payment to ${payment.merchantName}`);
+      const result = await transactionAdapter.sendTransaction(payment.tokenAmount, `Pago a ${payment.merchantName}`);
       
       if (!result.success) {
         await updatePaymentStatus(payment.id, 'failed');
@@ -161,7 +161,7 @@ export default function PaymentPage() {
       
       if (confirmed) {
         await updatePaymentStatus(payment.id, 'completed');
-        recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, result.txHash);
+        recordSupportTransaction(payment.id, `Pago: ${payment.merchantName}`, payment.tokenAmount, result.txHash, 'Comercio');
       } else {
         await updatePaymentStatus(payment.id, 'failed');
         setErrorMsg('La transacción no pudo ser confirmada.');

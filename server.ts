@@ -110,7 +110,7 @@ async function startServer() {
   app.get("/api/payments/:id", (req, res) => {
     const payment = payments[req.params.id];
     if (!payment) {
-      return res.status(404).json({ error: "Payment not found" });
+      return res.status(404).json({ error: "Pago no encontrado" });
     }
     res.json(payment);
   });
@@ -118,7 +118,7 @@ async function startServer() {
   app.put("/api/payments/:id", express.json(), (req, res) => {
     const id = req.params.id;
     if (!payments[id]) {
-      return res.status(404).json({ error: "Payment not found" });
+      return res.status(404).json({ error: "Pago no encontrado" });
     }
     payments[id] = { ...payments[id], ...req.body };
     
@@ -165,7 +165,7 @@ async function startServer() {
 
   // Catch-all for undefined API routes
   app.all("/api/*", (req, res) => {
-    res.status(404).json({ error: `API route not found: ${req.method} ${req.url}` });
+    res.status(404).json({ error: `Ruta de API no encontrada: ${req.method} ${req.url}` });
   });
 
   // Serve public directory

@@ -22,10 +22,19 @@ export interface Transaction {
   type: ActivityType;
   amount: number;
   target: string;
+  category?: string;
   description?: string;
   date: string;
   impactPoints: number;
   txHash?: string;
+}
+
+export interface Badge {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  dateEarned: string;
 }
 
 export interface UserState {
@@ -34,6 +43,7 @@ export interface UserState {
   avatar?: string;
   impactScore: number;
   communityLevel: string;
+  badges: Badge[];
   isWalletConnected: boolean;
   walletAddress: string | null;
   hasExperiencedImpactMoment: boolean;
@@ -66,9 +76,10 @@ interface GuisoCoreContextType {
   activeImpactMoment: { points: number; target: string } | null;
 
   // Actions
-  recordSupportTransaction: (projectId: string, projectTitle: string, amount: number, txHash: string) => void;
+  recordSupportTransaction: (projectId: string, projectTitle: string, amount: number, txHash: string, category?: string) => void;
   addActivity: (activity: Omit<Transaction, 'id' | 'date'>) => void;
   updateProfile: (data: Partial<Pick<UserState, 'username' | 'bio' | 'avatar'>>) => void;
+  addBadge: (badge: Omit<Badge, 'dateEarned'>) => void;
   earnImpact: (points: number) => void;
   updateGlobalImpact: (impact: number, meals?: number) => void;
   dismissNotification: () => void;
@@ -92,6 +103,7 @@ const INITIAL_USER: UserState = {
   avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Guiso",
   impactScore: 0,
   communityLevel: impactEngine.calculateLevel(0).level,
+  badges: [],
   isWalletConnected: false,
   walletAddress: null,
   hasExperiencedImpactMoment: false,
@@ -214,7 +226,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   /**
    * Acción: Registrar una transacción de apoyo confirmada
    */
-  const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string) => {
+  const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string, category: string = 'General') => {
     if (amount > token.gsoBalance) return;
 
     const impactGenerated = impactEngine.calculateImpactPoints(amount);
@@ -225,6 +237,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       type: 'support',
       amount,
       target: projectTitle,
+      category,
       description: `Apoyo al proyecto: ${projectTitle}`,
       date: new Date().toISOString(),
       impactPoints: impactGenerated,
@@ -272,6 +285,16 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   /**
    * Acción: Ganar impacto (por otras acciones como votar)
    */
+  const addBadge = useCallback((badge: Omit<Badge, 'dateEarned'>) => {
+    setUser(prev => {
+      if (prev.badges.some(b => b.id === badge.id)) return prev;
+      return {
+        ...prev,
+        badges: [...prev.badges, { ...badge, dateEarned: new Date().toISOString() }]
+      };
+    });
+  }, []);
+
   const earnImpact = useCallback((points: number) => {
     setUser(prev => ({
       ...prev,
@@ -314,6 +337,44 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // No-op
   }, []);
 
+  // Badges Unlocking Logic
+  useEffect(() => {
+    if (!isLoaded.current) return;
+
+    const currentBadges = user.badges.map(b => b.id);
+    
+    // 1. Primer Aporte
+    if (token.transactions.length > 0 && !currentBadges.includes('first_contribution')) {
+      addBadge({
+        id: 'first_contribution',
+        name: 'Primer Aporte',
+        icon: '🌱',
+        description: 'Tu primer paso para cambiar el mundo.'
+      });
+    }
+
+    // 2. Donante Constante
+    const supportCount = token.transactions.filter(t => t.type === 'support').length;
+    if (supportCount >= 5 && !currentBadges.includes('constant_donor')) {
+      addBadge({
+        id: 'constant_donor',
+        name: 'Donante Constante',
+        icon: '🔥',
+        description: 'Has apoyado 5 causas o más. ¡Increíble!'
+      });
+    }
+
+    // 3. Embajador de la Comunidad
+    if (user.impactScore >= 5000 && !currentBadges.includes('community_ambassador')) {
+      addBadge({
+        id: 'community_ambassador',
+        name: 'Embajador',
+        icon: '👑',
+        description: 'Tu impacto es legendario en la comunidad.'
+      });
+    }
+  }, [token.transactions.length, user.impactScore, addBadge, user.badges]);
+
   return (
     <GuisoCoreContext.Provider value={{
       user,
@@ -324,6 +385,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       recordSupportTransaction,
       addActivity,
       updateProfile,
+      addBadge,
       earnImpact,
       updateGlobalImpact,
       dismissNotification,

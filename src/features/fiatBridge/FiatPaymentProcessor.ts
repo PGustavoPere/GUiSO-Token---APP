@@ -35,7 +35,7 @@ export const useFiatPaymentProcessor = () => {
 
       const res = await fetch(`/api/payments/${paymentIntentId}`);
       if (!res.ok) {
-        throw new Error('Payment intent not found');
+        throw new Error('Intento de pago no encontrado');
       }
       const paymentIntent = await res.json();
 
@@ -66,11 +66,11 @@ export const useFiatPaymentProcessor = () => {
       const transactionAdapter = web3Bridge.getTransaction();
       const result = await transactionAdapter.sendTransaction(
         paymentIntent.tokenAmount, 
-        `Fiat Payment to ${paymentIntent.merchantName}`
+        `Pago Fiat a ${paymentIntent.merchantName}`
       );
 
       if (!result.success) {
-        throw new Error(result.error || 'Transaction failed');
+        throw new Error(result.error || 'La transacción falló');
       }
 
       await updatePaymentStatus(paymentIntentId, 'confirming', result.txHash);
@@ -97,11 +97,11 @@ export const useFiatPaymentProcessor = () => {
           result.txHash
         );
       } else {
-        throw new Error('Transaction could not be confirmed');
+        throw new Error('La transacción no pudo ser confirmada');
       }
     } catch (err: any) {
       setCurrentStatus('failed');
-      setError(err.message || 'An unexpected error occurred');
+      setError(err.message || 'Ocurrió un error inesperado');
     }
   };
 
