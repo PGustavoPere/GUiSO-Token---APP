@@ -22,7 +22,7 @@ Es el conjunto de todos los participantes que velan por la salud del sistema.
 ## 2. El Ciclo de Interacción
 Entiende cómo fluye la ayuda a través del ecosistema:
 
-![Flujo Estructural GUISO](/guiso-flow.png)
+![Flujo Estructural GUISO](/public/ecosystem-flow.svg)
 
 1. **El Colaborador** elige una causa y envía tokens GSO.
 2. **El Sistema** registra la acción y otorga Puntos de Impacto al colaborador.
