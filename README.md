@@ -23,7 +23,7 @@ Utilizamos la tecnología para hacer que el impacto sea tangible:
 ---
 
 ## 🔄 El Ciclo de Impacto GUISO
-Understand how our ecosystem works in 10 seconds:
+Entiende cómo funciona nuestro ecosistema en 10 segundos:
 
 ![Ecosistema GUISO Token](/public/guiso-flow.png)
 
