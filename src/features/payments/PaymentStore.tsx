@@ -11,9 +11,16 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [payments, setPayments] = useState<Record<string, PaymentIntent>>({});
 
   useEffect(() => {
+    let errorCount = 0;
     const fetchPayments = async () => {
       try {
-        const res = await fetch('/api/payments');
+        const res = await fetch('/api/payments', {
+          headers: {
+            'Accept': 'application/json',
+            'Cache-Control': 'no-cache'
+          }
+        });
+        
         const contentType = res.headers.get('content-type');
         
         if (res.ok && contentType && contentType.includes('application/json')) {
@@ -23,14 +30,24 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({ child
             return acc;
           }, {});
           setPayments(paymentsMap);
+          errorCount = 0; // Reset on success
         } else if (!res.ok) {
-          console.error(`Error fetching payments: ${res.status} ${res.statusText}`);
+          if (errorCount < 3) {
+            console.error(`Error fetching payments: ${res.status} ${res.statusText}`);
+            errorCount++;
+          }
         } else {
           // res.ok but not JSON (likely HTML fallback)
-          console.warn('Received non-JSON response from /api/payments');
+          if (errorCount < 3) {
+            console.warn('Received non-JSON response from /api/payments');
+            errorCount++;
+          }
         }
-      } catch (error) {
-        console.error('Network error fetching payments:', error);
+      } catch (error: any) {
+        if (errorCount < 3) {
+          console.error('Network error fetching payments:', error.message || error);
+          errorCount++;
+        }
       }
     };
 

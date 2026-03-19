@@ -7,7 +7,32 @@ import rateLimit from "express-rate-limit";
 import cors from "cors";
 
 console.log("Starting GUISO Server initialization...");
-const payments: Record<string, any> = {};
+const payments: Record<string, any> = {
+  'p1': {
+    id: 'p1',
+    merchantId: 'm1',
+    merchantName: 'Eco Market',
+    fiatAmount: 12.50,
+    tokenAmount: 1250,
+    status: 'completed',
+    description: 'Compra de vegetales orgánicos',
+    createdAt: Date.now() - 3600000,
+    expiresAt: Date.now() + 3600000,
+    walletAddress: '0x1234...5678'
+  },
+  'p2': {
+    id: 'p2',
+    merchantId: 'm2',
+    merchantName: 'Panadería La Unión',
+    fiatAmount: 5.00,
+    tokenAmount: 500,
+    status: 'awaiting_payment',
+    description: 'Pan artesanal',
+    createdAt: Date.now() - 1800000,
+    expiresAt: Date.now() + 1800000,
+    walletAddress: '0x1234...5678'
+  }
+};
 
 async function startServer() {
   const app = express();

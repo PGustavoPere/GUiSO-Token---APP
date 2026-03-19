@@ -37,6 +37,15 @@ export interface Badge {
   dateEarned: string;
 }
 
+export interface Certificate {
+  id: string;
+  name: string;
+  image: string;
+  date: string;
+  impactPoints: number;
+  category: string;
+}
+
 export interface UserState {
   username: string;
   bio?: string;
@@ -44,6 +53,7 @@ export interface UserState {
   impactScore: number;
   communityLevel: string;
   badges: Badge[];
+  certificates: Certificate[];
   isWalletConnected: boolean;
   walletAddress: string | null;
   hasExperiencedImpactMoment: boolean;
@@ -104,6 +114,24 @@ const INITIAL_USER: UserState = {
   impactScore: 0,
   communityLevel: impactEngine.calculateLevel(0).level,
   badges: [],
+  certificates: [
+    {
+      id: 'cert1',
+      name: 'Certificado de Impacto: Alimentación',
+      image: 'https://images.unsplash.com/photo-1594708767771-a7502209ff51?q=80&w=400&auto=format&fit=crop',
+      date: '2024-01-15',
+      impactPoints: 500,
+      category: 'Alimentación'
+    },
+    {
+      id: 'cert2',
+      name: 'Certificado de Impacto: Educación',
+      image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=400&auto=format&fit=crop',
+      date: '2024-02-10',
+      impactPoints: 300,
+      category: 'Educación'
+    }
+  ],
   isWalletConnected: false,
   walletAddress: null,
   hasExperiencedImpactMoment: false,

@@ -159,8 +159,17 @@ export default function ProfilePage() {
               {user.bio}
             </p>
             <div className="flex items-center gap-2 mt-2">
-              <code className="text-[10px] md:text-xs bg-gray-100 px-2 py-1 rounded-lg text-gray-500">
+              <code className="text-[10px] md:text-xs bg-gray-100 px-2 py-1 rounded-lg text-gray-500 flex items-center gap-2">
                 {address?.slice(0, 6)}...{address?.slice(-4)}
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(address || '');
+                    alert('Dirección copiada');
+                  }}
+                  className="hover:text-guiso-orange transition-colors"
+                >
+                  <Copy size={12} />
+                </button>
               </code>
             </div>
           </div>
@@ -246,10 +255,69 @@ export default function ProfilePage() {
             
             <ActivityTimeline activities={history} />
           </Card>
+
+          {/* Certificates */}
+          <div className="space-y-4">
+            <h3 className="text-xl font-display font-bold flex items-center gap-2">
+              <Award size={24} className="text-guiso-orange" />
+              Certificados de Impacto (NFTs)
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {user.certificates.map(cert => (
+                <Card key={cert.id} variant="glass" padding="none" rounded="2xl" className="overflow-hidden group">
+                  <div className="relative h-32 overflow-hidden">
+                    <img 
+                      src={cert.image} 
+                      alt={cert.name} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-3 left-3">
+                      <Badge variant="primary" className="text-[10px]">{cert.category}</Badge>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h4 className="font-bold text-sm mb-1">{cert.name}</h4>
+                    <div className="flex justify-between items-center text-[10px] text-gray-500">
+                      <span>{new Date(cert.date).toLocaleDateString()}</span>
+                      <span className="text-guiso-orange font-bold">+{cert.impactPoints} IP</span>
+                    </div>
+                    <Button variant="ghost" size="sm" className="w-full mt-3 text-[10px] h-8">
+                      Ver en Explorador <ExternalLink size={10} className="ml-1" />
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Sidebar Info */}
         <div className="space-y-8">
+          {/* Identity Panel */}
+          <Card variant="glass" padding="md" rounded="2xl" className="border-l-4 border-l-blue-500">
+            <h4 className="font-display font-bold mb-4 flex items-center gap-2">
+              <ShieldCheck size={18} className="text-blue-500" />
+              Identidad de Impacto
+            </h4>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">Estado</span>
+                <Badge variant="success" className="text-[10px]">Verificado</Badge>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">Rol</span>
+                <span className="font-bold">Colaborador</span>
+              </div>
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-500">Antigüedad</span>
+                <span className="font-bold">3 meses</span>
+              </div>
+              <div className="pt-2 border-t border-gray-100">
+                <p className="text-[10px] text-gray-400 italic">Tu identidad está respaldada por tus acciones verificadas en la red GUISO.</p>
+              </div>
+            </div>
+          </Card>
           {/* Impact Distribution */}
           {impactByCategory.length > 0 && (
             <Card variant="glass" padding="sm" rounded="2xl">
