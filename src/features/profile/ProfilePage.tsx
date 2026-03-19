@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Wallet, Award, History, ExternalLink, ShieldCheck, LogOut, Heart, Sparkles } from 'lucide-react';
+import { Wallet, Award, History, ExternalLink, ShieldCheck, LogOut, Heart, Sparkles, User, Edit2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { useWallet } from '../../core/WalletProvider';
 import { impactEngine } from '../../system/impactEngine';
 import { Card, Button, Badge } from '../../components/ui';
+import { ActivityTimeline } from '../../components/ActivityTimeline';
 
 export default function ProfilePage() {
   const { 
@@ -67,15 +68,34 @@ export default function ProfilePage() {
     <div className="space-y-10">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-guiso-orange to-guiso-terracotta rounded-2xl flex items-center justify-center text-white text-xl md:text-2xl font-bold shrink-0">
-            {address?.substring(2, 4).toUpperCase() || 'G'}
+          <div className="relative group">
+            <div className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-guiso-orange to-guiso-terracotta rounded-3xl flex items-center justify-center text-white text-2xl md:text-4xl font-bold shrink-0 overflow-hidden shadow-xl border-4 border-white">
+              {user.avatar ? (
+                <img src={user.avatar} alt={user.username} className="w-full h-full object-cover" />
+              ) : (
+                address?.substring(2, 4).toUpperCase() || 'G'
+              )}
+            </div>
+            <button className="absolute -bottom-1 -right-1 bg-white p-1.5 rounded-full shadow-md text-gray-400 hover:text-guiso-orange transition-colors border border-gray-100">
+              <Edit2 size={14} />
+            </button>
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl md:text-3xl font-display font-bold flex items-center gap-2">
-              <span className="truncate">{address}</span>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl md:text-3xl font-display font-bold truncate">
+                {user.username}
+              </h1>
               <ShieldCheck size={20} className="text-blue-500 shrink-0" />
-            </h1>
-            <p className="text-gray-500 text-xs md:text-sm">{communityLevel}</p>
+            </div>
+            <p className="text-gray-500 text-xs md:text-sm font-medium mb-2">{communityLevel}</p>
+            <p className="text-gray-400 text-xs md:text-sm max-w-md italic">
+              {user.bio}
+            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <code className="text-[10px] md:text-xs bg-gray-100 px-2 py-1 rounded-lg text-gray-500">
+                {address?.slice(0, 6)}...{address?.slice(-4)}
+              </code>
+            </div>
           </div>
         </div>
       </header>
@@ -106,41 +126,18 @@ export default function ProfilePage() {
           </div>
 
           {/* History */}
-          <Card variant="glass" padding="md" rounded="2xl">
-            <h3 className="text-lg md:text-xl font-display font-bold mb-4 md:mb-6 flex items-center gap-2">
-              <History size={20} className="text-guiso-orange" />
-              Registro de Impacto Verificable
-            </h3>
-            <div className="space-y-3 md:space-y-4">
-              {history.length > 0 ? (
-                history.map((item) => (
-                  <motion.div 
-                    initial={{ x: -10, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    key={item.id} 
-                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 md:p-4 rounded-2xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100 gap-2 sm:gap-4"
-                  >
-                    <div className="flex items-center gap-3 md:gap-4 w-full sm:w-auto">
-                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-guiso-orange/10 text-guiso-orange flex items-center justify-center shrink-0">
-                        <Heart size={16} className="md:w-[18px] md:h-[18px]" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-xs md:text-sm truncate">Impacto en {item.target}</p>
-                        <p className="text-[10px] md:text-xs text-gray-400 truncate">{item.date} • {item.amount} GSO registrados</p>
-                      </div>
-                    </div>
-                    <div className="text-left sm:text-right pl-11 sm:pl-0">
-                      <p className="text-[10px] md:text-xs font-bold text-green-500">+{item.impactPoints} IP</p>
-                    </div>
-                  </motion.div>
-                ))
-              ) : (
-                <div className="text-center py-12 text-gray-400">
-                  <p>Aún no has registrado ninguna acción de impacto.</p>
-                  <p className="text-xs">¡Visita la sección de Impacto para comenzar!</p>
-                </div>
-              )}
+          <Card variant="glass" padding="md" rounded="2xl" className="border-t-4 border-t-guiso-orange">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-lg md:text-xl font-display font-bold flex items-center gap-2">
+                <History size={20} className="text-guiso-orange" />
+                Tu Historia de Impacto
+              </h3>
+              <Badge variant="neutral" className="text-[10px] uppercase tracking-widest">
+                Blockchain Verificada
+              </Badge>
             </div>
+            
+            <ActivityTimeline activities={history} />
           </Card>
         </div>
 

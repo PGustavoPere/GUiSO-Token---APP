@@ -22,8 +22,6 @@ export default function PaymentPage() {
 
   useEffect(() => {
     if (paymentId) {
-      let isSimulating = false;
-      
       const fetchPayment = async () => {
         try {
           const res = await fetch(`/api/payments/${paymentId}`);
@@ -31,30 +29,6 @@ export default function PaymentPage() {
             const p = await res.json();
             setPayment(p);
             setIsLoading(false);
-            
-            // Iniciar simulación automática si está awaiting_payment
-            if (p.status === 'awaiting_payment' && !isSimulating) {
-              isSimulating = true;
-              
-              // Update to pending immediately to show processing
-              await fetch(`/api/payments/${paymentId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'pending' })
-              });
-              
-              setTimeout(async () => {
-                await fetch(`/api/payments/${paymentId}`, {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ 
-                    status: 'completed', 
-                    simulated: true, 
-                    completedAt: Date.now() 
-                  })
-                });
-              }, 4000);
-            }
           } else {
             setIsLoading(false);
           }
@@ -200,6 +174,23 @@ export default function PaymentPage() {
     }
   };
 
+  const handleSimulatePayment = async () => {
+    if (isProcessing || isCompleted) return;
+    
+    setErrorMsg(null);
+    await updatePaymentStatus(payment.id, 'pending');
+    
+    setTimeout(async () => {
+      await updatePaymentStatus(payment.id, 'confirming', '0x_simulated_tx_hash_' + Date.now());
+      
+      setTimeout(async () => {
+        await updatePaymentStatus(payment.id, 'completed');
+        // We don't recordSupportTransaction here because the user might not be connected on the mobile device
+        // and we want the merchant to see the payment regardless.
+      }, 2000);
+    }, 2000);
+  };
+
   const mapStatusToTxStatus = (): TransactionStatus => {
     switch (payment.status) {
       case 'pending': return 'pending';
@@ -309,6 +300,20 @@ export default function PaymentPage() {
                     <CreditCard className="mr-2" />
                     Pagar con dinero local
                   </Button>
+
+                  <div className="pt-4">
+                    <Button 
+                      onClick={handleSimulatePayment}
+                      disabled={isProcessing}
+                      variant="neutral"
+                      className="w-full py-3 text-sm bg-gray-100 hover:bg-gray-200 text-gray-600 border-dashed border-2 border-gray-300"
+                    >
+                      Simular Pago (Demo MVP)
+                    </Button>
+                    <p className="text-[10px] text-gray-400 text-center mt-2 italic">
+                      Usa este botón para la presentación en vivo si no tienes una wallet conectada en el móvil.
+                    </p>
+                  </div>
 
                   {errorMsg && (
                     <p className="text-red-500 text-xs font-bold text-center mt-2 flex items-center justify-center gap-1">

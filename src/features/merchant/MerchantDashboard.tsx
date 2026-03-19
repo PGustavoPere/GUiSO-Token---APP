@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Store, Plus, Wallet, CheckCircle2, Clock, XCircle, Shield } from 'lucide-react';
+import { Store, Plus, Wallet, CheckCircle2, Clock, XCircle, Shield, ArrowUpRight, Banknote } from 'lucide-react';
 import { useMerchantStore } from './MerchantStore';
 import { usePaymentStore } from '../payments/PaymentStore';
 import { useTrustStore } from '../trust/TrustStore';
@@ -8,6 +8,7 @@ import { PaymentIntent } from '../payments/types';
 import { useWallet } from '../../core/WalletProvider';
 import { Card, Button, Badge } from '../../components/ui';
 import CreatePaymentModal from './CreatePaymentModal';
+import { convertGuisoToFiat, FIAT_SYMBOL, TOKEN_SYMBOL } from '../../core/economy';
 
 export default function MerchantDashboard() {
   const { merchant, registerMerchant, isMerchant } = useMerchantStore();
@@ -16,7 +17,7 @@ export default function MerchantDashboard() {
   const { isConnected, connect, address } = useWallet();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [regName, setRegName] = useState('');
-  const [prevCompletedCount, setPrevCompletedCount] = useState(0);
+  const [prevCompletedCount, setPrevCompletedCount] = useState<number | null>(null);
 
   // Audio for success
   const playSuccessSound = () => {
@@ -33,7 +34,7 @@ export default function MerchantDashboard() {
       p => p.walletAddress === merchant.walletAddress && p.status === 'completed'
     ).length;
     
-    if (currentCompletedCount > prevCompletedCount && prevCompletedCount > 0) {
+    if (prevCompletedCount !== null && currentCompletedCount > prevCompletedCount) {
       playSuccessSound();
     }
     setPrevCompletedCount(currentCompletedCount);
@@ -98,6 +99,12 @@ export default function MerchantDashboard() {
     .filter(p => p.walletAddress === merchant?.walletAddress)
     .sort((a, b) => b.createdAt - a.createdAt);
 
+  const totalGsoEarned = merchantPayments
+    .filter(p => p.status === 'completed')
+    .reduce((sum, p) => sum + p.tokenAmount, 0);
+
+  const totalFiatValue = convertGuisoToFiat(totalGsoEarned);
+
   const trustProfile = merchant ? getMerchantTrust(merchant.walletAddress) : null;
   const trustScore = trustProfile?.trustScore || 50;
   const trustColor = trustScore >= 80 ? 'bg-green-500' : trustScore >= 50 ? 'bg-yellow-500' : 'bg-red-500';
@@ -129,38 +136,63 @@ export default function MerchantDashboard() {
         </Button>
       </div>
 
-      {trustProfile && (
-        <Card variant="glass" padding="md" className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card variant="glass" padding="md" className="space-y-4 border-l-4 border-l-guiso-orange">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-guiso-dark flex items-center gap-2">
-              <Shield size={20} className={trustTextColor} />
-              Nivel de Confianza
-            </h3>
-            <span className={`text-2xl font-display font-bold ${trustTextColor}`}>
-              {trustScore}%
-            </span>
-          </div>
-          
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div className={`h-2.5 rounded-full ${trustColor}`} style={{ width: `${trustScore}%` }}></div>
-          </div>
-          
-          <div className="grid grid-cols-3 gap-4 text-center pt-2">
-            <div>
-              <p className="text-xs text-gray-400">Pagos Exitosos</p>
-              <p className="font-bold text-gray-700">{trustProfile.successfulPayments}</p>
+            <div className="flex items-center gap-2 text-guiso-orange">
+              <Banknote size={20} />
+              <h3 className="font-bold uppercase tracking-wider text-xs">Balance Liquidable</h3>
             </div>
-            <div>
-              <p className="text-xs text-gray-400">Pagos Fallidos</p>
-              <p className="font-bold text-gray-700">{trustProfile.failedPayments}</p>
-            </div>
-            <div>
-              <p className="text-xs text-gray-400">Impacto Generado</p>
-              <p className="font-bold text-guiso-orange">+{trustProfile.totalImpactGenerated}</p>
-            </div>
+            <Badge variant="neutral">{FIAT_SYMBOL}</Badge>
           </div>
+          <div>
+            <p className="text-3xl font-display font-bold text-guiso-dark">
+              ${totalFiatValue.toLocaleString()}
+            </p>
+            <p className="text-sm text-gray-500">Equivalente a {totalGsoEarned.toLocaleString()} {TOKEN_SYMBOL}</p>
+          </div>
+          <Button 
+            variant="outline" 
+            className="w-full flex items-center justify-center gap-2 text-sm"
+            onClick={() => alert('Esta funcionalidad enviará una solicitud de liquidación a la tesorería de GUISO. Recibirás tus ARS en tu cuenta bancaria vinculada.')}
+          >
+            <ArrowUpRight size={16} /> Solicitar Liquidación
+          </Button>
         </Card>
-      )}
+
+        {trustProfile && (
+          <Card variant="glass" padding="md" className="space-y-4 border-l-4 border-l-green-500">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                <Shield size={16} className={trustTextColor} />
+                Nivel de Confianza
+              </h3>
+              <span className={`text-xl font-display font-bold ${trustTextColor}`}>
+                {trustScore}%
+              </span>
+            </div>
+            
+            <div className="w-full bg-gray-100 rounded-full h-2">
+              <div className={`h-2 rounded-full ${trustColor}`} style={{ width: `${trustScore}%` }}></div>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-2 text-center pt-1">
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase">Ventas</p>
+                <p className="font-bold text-sm text-gray-700">{trustProfile.successfulPayments}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase">Impacto</p>
+                <p className="font-bold text-sm text-guiso-orange">+{trustProfile.totalImpactGenerated}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-400 uppercase">Estado</p>
+                <p className="font-bold text-sm text-green-500">Activo</p>
+              </div>
+            </div>
+          </Card>
+        )}
+      </div>
 
       <Card variant="glass" padding="md" className="space-y-6">
         <h3 className="text-xl font-display font-bold">Cobros Recientes</h3>

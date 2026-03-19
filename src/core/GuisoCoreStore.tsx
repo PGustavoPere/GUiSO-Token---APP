@@ -15,11 +15,14 @@ import { tokenBalanceService } from '../web3/tokenBalanceService';
 /**
  * Tipos de datos para el Core Store
  */
+export type ActivityType = 'support' | 'receive' | 'vote' | 'purchase' | 'donation' | 'level_up';
+
 export interface Transaction {
   id: string;
-  type: 'support' | 'receive' | 'vote';
+  type: ActivityType;
   amount: number;
   target: string;
+  description?: string;
   date: string;
   impactPoints: number;
   txHash?: string;
@@ -27,6 +30,8 @@ export interface Transaction {
 
 export interface UserState {
   username: string;
+  bio?: string;
+  avatar?: string;
   impactScore: number;
   communityLevel: string;
   isWalletConnected: boolean;
@@ -62,6 +67,8 @@ interface GuisoCoreContextType {
 
   // Actions
   recordSupportTransaction: (projectId: string, projectTitle: string, amount: number, txHash: string) => void;
+  addActivity: (activity: Omit<Transaction, 'id' | 'date'>) => void;
+  updateProfile: (data: Partial<Pick<UserState, 'username' | 'bio' | 'avatar'>>) => void;
   earnImpact: (points: number) => void;
   updateGlobalImpact: (impact: number, meals?: number) => void;
   dismissNotification: () => void;
@@ -81,6 +88,8 @@ const GuisoCoreContext = createContext<GuisoCoreContextType | undefined>(undefin
  */
 const INITIAL_USER: UserState = {
   username: "Explorador Guiso",
+  bio: "Cocinando un mundo más justo, un GSO a la vez. 🍲",
+  avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Guiso",
   impactScore: 0,
   communityLevel: impactEngine.calculateLevel(0).level,
   isWalletConnected: false,
@@ -164,6 +173,45 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   }, [user, token, global]);
 
   /**
+   * Acción: Agregar una actividad genérica al registro
+   */
+  const addActivity = useCallback((activity: Omit<Transaction, 'id' | 'date'>) => {
+    const newTransaction: Transaction = {
+      ...activity,
+      id: Math.random().toString(36).substr(2, 9),
+      date: new Date().toISOString(),
+    };
+
+    setToken(prev => ({
+      ...prev,
+      transactions: [newTransaction, ...prev.transactions],
+    }));
+
+    if (activity.impactPoints > 0) {
+      const newImpactScore = user.impactScore + activity.impactPoints;
+      const nextLevel = impactEngine.calculateLevel(newImpactScore);
+      
+      setUser(prev => ({
+        ...prev,
+        impactScore: newImpactScore,
+        communityLevel: nextLevel.level,
+      }));
+
+      setGlobal(prev => ({
+        ...prev,
+        totalImpact: prev.totalImpact + activity.impactPoints,
+      }));
+    }
+  }, [user.impactScore]);
+
+  /**
+   * Acción: Actualizar datos del perfil
+   */
+  const updateProfile = useCallback((data: Partial<Pick<UserState, 'username' | 'bio' | 'avatar'>>) => {
+    setUser(prev => ({ ...prev, ...data }));
+  }, []);
+
+  /**
    * Acción: Registrar una transacción de apoyo confirmada
    */
   const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string) => {
@@ -177,7 +225,8 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       type: 'support',
       amount,
       target: projectTitle,
-      date: new Date().toISOString().split('T')[0],
+      description: `Apoyo al proyecto: ${projectTitle}`,
+      date: new Date().toISOString(),
       impactPoints: impactGenerated,
       txHash: txHash
     };
@@ -273,6 +322,8 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       levelUpNotification,
       activeImpactMoment,
       recordSupportTransaction,
+      addActivity,
+      updateProfile,
       earnImpact,
       updateGlobalImpact,
       dismissNotification,

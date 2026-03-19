@@ -6,12 +6,11 @@ import { Button } from '../../components/ui';
 import { usePaymentStore } from '../payments/PaymentStore';
 import { useMerchantStore } from './MerchantStore';
 import { generatePaymentQRUrl } from '../payments/paymentQR';
+import { convertFiatToGuiso, TOKEN_SYMBOL } from '../../core/economy';
 
 interface CreatePaymentModalProps {
   onClose: () => void;
 }
-
-const GUISO_RATE_ARS = 100; // 1 GUISO = 100 ARS
 
 export default function CreatePaymentModal({ onClose }: CreatePaymentModalProps) {
   const { merchant } = useMerchantStore();
@@ -21,7 +20,7 @@ export default function CreatePaymentModal({ onClose }: CreatePaymentModalProps)
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<string>('');
 
-  const tokenAmount = amountARS ? Math.ceil(Number(amountARS) / GUISO_RATE_ARS) : 0;
+  const tokenAmount = amountARS ? convertFiatToGuiso(Number(amountARS)) : 0;
 
   const handleCreate = async () => {
     if (!merchant || !amountARS || !description) return;
