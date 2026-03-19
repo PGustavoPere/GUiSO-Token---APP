@@ -30,6 +30,8 @@ Entiende cómo funciona nuestro ecosistema en 10 segundos:
 ### 🏗️ Estructura del Ecosistema (Flujo de Transparencia)
 El siguiente diagrama detalla la arquitectura de confianza que permite que cada donación en **GSO** se transforme en impacto real verificable a través de la **Binance Smart Chain (BSC)**:
 
+![Flujo del sistema GUISO](/public/ecosystem-flow.svg)
+
 ```mermaid
 graph LR
     A[Donante/ONG] -->|Aporte en GSO| B[Plataforma GUISO]
