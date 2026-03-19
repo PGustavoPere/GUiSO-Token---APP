@@ -23,14 +23,14 @@ Utilizamos la tecnología para hacer que el impacto sea tangible:
 ---
 
 ## 🔄 El Ciclo de Impacto GUISO
-Entiende cómo funciona nuestro ecosistema en 10 segundos:
+ecosistema en 10 segundos:
 
 ![Ecosistema GUISO](/ecosystem-flow.svg)
 
 ### 🏗️ Estructura del Ecosistema (Flujo de Transparencia)
 El siguiente diagrama detalla la arquitectura de confianza que permite que cada donación en **GSO** se transforme en impacto real verificable a través de la **Binance Smart Chain (BSC)**:
 
-![Flujo Estructural GUISO](/guiso-flow.png)
+![Flujo Estructural GUISO](/ecosystem-flow.svg)
 
 ```mermaid
 graph LR

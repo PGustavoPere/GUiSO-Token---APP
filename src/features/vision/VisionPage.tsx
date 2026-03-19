@@ -82,9 +82,9 @@ export default function VisionPage() {
       {/* SECCIÓN 3 — LA SOLUCIÓN GUISO */}
       <section className="space-y-16">
         <div className="text-center space-y-4">
-          <h2 className="text-3xl font-display font-bold">Ecosistema y Flujo de Trabajo</h2>
-          <p className="text-gray-500 max-w-2xl mx-auto">
-            Un modelo de economía circular donde la tecnología asegura que cada acción fortalezca el tejido social de forma transparente.
+          <h2 className="text-3xl font-display font-bold">🏗️ Estructura del Ecosistema (Flujo de Transparencia)</h2>
+          <p className="text-gray-500 max-w-3xl mx-auto leading-relaxed">
+            El siguiente diagrama detalla la arquitectura de confianza que permite que cada donación en <span className="text-guiso-orange font-bold">GSO</span> se transforme en impacto real verificable a través de la <span className="font-bold text-gray-900">Binance Smart Chain (BSC)</span>:
           </p>
         </div>
 
@@ -96,38 +96,71 @@ export default function VisionPage() {
           className="relative max-w-5xl mx-auto bg-white rounded-[2.5rem] p-8 md:p-12 border border-gray-100 shadow-sm overflow-hidden"
         >
           <div className="absolute top-0 right-0 w-64 h-64 bg-guiso-orange/5 blur-[100px] -z-10" />
-          <img 
-            src="/ecosystem-flow.svg" 
-            alt="Ecosistema y Flujo de Trabajo GUISO" 
-            className="w-full h-auto"
-            referrerPolicy="no-referrer"
-          />
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8 border-t border-gray-50 pt-12">
-            {[
-              {
-                icon: Zap,
-                title: "Pagos con Propósito",
-                desc: "Cada transacción en comercios adheridos genera un aporte automático a causas sociales validadas."
-              },
-              {
-                icon: Users,
-                title: "Validación Colectiva",
-                desc: "La comunidad participa activamente en la auditoría y votación de los proyectos que reciben fondos."
-              },
-              {
-                icon: ShieldCheck,
-                title: "Trazabilidad Absoluta",
-                desc: "Mediante blockchain, cada movimiento de valor es público, inmutable y verificable por cualquier persona."
-              }
-            ].map((item, i) => (
-              <div key={i} className="space-y-3">
-                <div className="w-10 h-10 bg-guiso-orange/10 rounded-xl flex items-center justify-center text-guiso-orange">
-                  <item.icon size={20} />
+          
+          <div className="space-y-12">
+            <div className="text-center space-y-2 mb-8">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em]">ecosistema en 10 segundos:</p>
+              <img 
+                src="/ecosystem-flow.svg" 
+                alt="Ecosistema y Flujo de Trabajo GUISO" 
+                className="w-full h-auto max-w-4xl mx-auto"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+
+            {/* FLUJO HORIZONTAL DE ICONOS (Basado en el screenshot) */}
+            <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8 py-8 border-y border-gray-50">
+              {[
+                { icon: Users, label: "Usuario", color: "text-emerald-500", bg: "bg-emerald-50" },
+                { icon: Heart, label: "Apoya Causa", color: "text-red-500", bg: "bg-red-50" },
+                { icon: Zap, label: "Impacto Registrado", color: "text-blue-500", bg: "bg-blue-50" },
+                { icon: Award, label: "Certificado", color: "text-amber-500", bg: "bg-amber-50" },
+                { icon: Star, label: "Reputación (IP)", color: "text-indigo-500", bg: "bg-indigo-50" },
+                { icon: Users, label: "Participación", color: "text-cyan-500", bg: "bg-cyan-50" }
+              ].map((item, i) => (
+                <React.Fragment key={i}>
+                  <div className="flex flex-col items-center gap-2">
+                    <div className={`w-12 h-12 ${item.bg} ${item.color} rounded-full flex items-center justify-center shadow-sm`}>
+                      <item.icon size={20} />
+                    </div>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tight">{item.label}</span>
+                  </div>
+                  {i < 5 && (
+                    <div className="hidden sm:block text-gray-200">
+                      <ArrowRight size={16} />
+                    </div>
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-4">
+              {[
+                {
+                  icon: Zap,
+                  title: "Pagos con Propósito",
+                  desc: "Cada transacción en comercios adheridos genera un aporte automático a causas sociales validadas."
+                },
+                {
+                  icon: Users,
+                  title: "Validación Colectiva",
+                  desc: "La comunidad participa activamente en la auditoría y votación de los proyectos que reciben fondos."
+                },
+                {
+                  icon: ShieldCheck,
+                  title: "Trazabilidad Absoluta",
+                  desc: "Mediante blockchain, cada movimiento de valor es público, inmutable y verificable por cualquier persona."
+                }
+              ].map((item, i) => (
+                <div key={i} className="space-y-3">
+                  <div className="w-10 h-10 bg-guiso-orange/10 rounded-xl flex items-center justify-center text-guiso-orange">
+                    <item.icon size={20} />
+                  </div>
+                  <h3 className="font-bold text-lg">{item.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
                 </div>
-                <h3 className="font-bold text-lg">{item.title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </motion.div>
       </section>
