@@ -12,6 +12,8 @@ import { useWallet } from './WalletProvider';
 import { web3Bridge } from '../web3/web3Provider';
 import { tokenBalanceService } from '../web3/tokenBalanceService';
 
+import { impactCertificateService } from '../features/impactCertificate/impactCertificateService';
+
 /**
  * Tipos de datos para el Core Store
  */
@@ -62,8 +64,6 @@ export interface UserState {
   hasSeenWelcome: boolean;
   joinedAt: string;
 }
-
-import { impactCertificateService } from '../features/impactCertificate/impactCertificateService';
 
 export interface TokenState {
   gsoBalance: number;
@@ -145,7 +145,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const { isConnected, address } = useWallet();
   const [user, setUser] = useState<UserState>(INITIAL_USER);
   const [token, setToken] = useState<TokenState>(INITIAL_TOKEN);
-  const [global, setGlobal] = useState<GlobalImpactState>(INITIAL_GLOBAL_STATS_ADAPTED);
+  const [global, setGlobal] = useState<GlobalImpactState>(INITIAL_GLOBAL);
   const [levelUpNotification, setLevelUpNotification] = useState<LevelThreshold | null>(null);
   const [activeImpactMoment, setActiveImpactMoment] = useState<{ points: number; target: string } | null>(null);
   const isLoaded = useRef(false);
@@ -244,12 +244,20 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    */
   const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string, category: string = 'General') => {
     if (amount > token.gsoBalance) return '';
+    if (!address) return '';
 
     const impactGenerated = impactEngine.calculateImpactPoints(amount);
     
-    // Mapping of category to unique images
+    // Mapping of project IDs to specific unique images
+    const projectSpecificImages: Record<string, string> = {
+      'kitchen': 'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=400&auto=format&fit=crop',
+      'homeless': 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=400&auto=format&fit=crop',
+      'food': 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=400&auto=format&fit=crop',
+    };
+
+    // Mapping of category to fallback images
     const categoryImages: Record<string, string> = {
-      'Alimentación': 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=400&auto=format&fit=crop',
+      'Alimentación': 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=400&auto=format&fit=crop',
       'Educación': 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=400&auto=format&fit=crop',
       'Salud': 'https://images.unsplash.com/photo-1505751172107-573967a4dd29?q=80&w=400&auto=format&fit=crop',
       'Medio Ambiente': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=400&auto=format&fit=crop',
@@ -257,7 +265,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       'General': 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=400&auto=format&fit=crop'
     };
 
-    const certImage = categoryImages[category] || categoryImages['General'];
+    const certImage = projectSpecificImages[projectId] || categoryImages[category] || categoryImages['General'];
 
     // 1. Actualizar Token State (Balance y Transacciones)
     const newTransaction: Transaction = {
@@ -330,7 +338,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }));
 
     return certId;
-  }, [token.gsoBalance, user.impactScore, user.hasExperiencedImpactMoment]);
+  }, [token.gsoBalance, user.impactScore, user.hasExperiencedImpactMoment, address]);
 
   /**
    * Acción: Transferir tokens a otra wallet
@@ -489,8 +497,3 @@ export const useGuisoCore = () => {
 };
 
 // Adaptador para mantener compatibilidad con valores previos si existen
-const INITIAL_GLOBAL_STATS_ADAPTED = {
-  totalImpact: 125400,
-  supportedCauses: 42,
-  communityMembers: 856,
-};

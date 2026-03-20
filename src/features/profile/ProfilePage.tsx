@@ -177,16 +177,6 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-        <div className="absolute top-0 right-0 md:relative md:top-auto md:right-auto">
-          <button 
-            onClick={disconnect}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-500 rounded-xl hover:bg-red-50 hover:text-red-500 transition-all font-bold text-xs"
-            title="Desconectar Wallet"
-          >
-            <LogOut size={16} />
-            <span className="hidden sm:inline">Desconectar</span>
-          </button>
-        </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
