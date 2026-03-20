@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { X, Camera, AlertCircle, RefreshCw, Image as ImageIcon, Upload } from 'lucide-react';
 import { motion } from 'motion/react';
+import { Button } from './ui';
 
 interface QRScannerProps {
   onScan: (decodedText: string) => void;
@@ -11,6 +12,7 @@ interface QRScannerProps {
 export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
   const [error, setError] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
+  const [isCameraActive, setIsCameraActive] = useState(false);
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scannerId = "qr-reader-element";
@@ -23,14 +25,17 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
         console.warn("Error al detener el escáner:", e);
       }
     }
+    setIsCameraActive(false);
   };
 
   const startScanner = async () => {
     try {
       setIsInitializing(true);
       setError(null);
+      setIsCameraActive(true);
 
       await stopScanner();
+      setIsCameraActive(true); // Reset after stop
 
       // Ensure the element exists
       const element = document.getElementById(scannerId);
@@ -113,13 +118,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
   };
 
   useEffect(() => {
-    // Small delay to ensure DOM is ready
-    const timer = setTimeout(() => {
-      startScanner();
-    }, 800);
-
     return () => {
-      clearTimeout(timer);
       stopScanner();
     };
   }, []);
@@ -150,7 +149,27 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
         <div className="p-4 bg-gray-900 relative aspect-square flex items-center justify-center overflow-hidden">
           <div id={scannerId} className="w-full h-full"></div>
           
-          {isInitializing && (
+          {!isCameraActive && !error && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-white p-8 text-center gap-6 z-30">
+              <div className="w-20 h-20 bg-guiso-orange/20 rounded-full flex items-center justify-center text-guiso-orange">
+                <Camera size={40} />
+              </div>
+              <div className="space-y-2">
+                <h4 className="text-lg font-bold">Activar Cámara</h4>
+                <p className="text-xs text-gray-400 leading-relaxed">
+                  GUISO necesita acceder a tu cámara para escanear el código QR del comercio.
+                </p>
+              </div>
+              <Button 
+                onClick={() => startScanner()}
+                className="w-full py-4 shadow-xl shadow-guiso-orange/20"
+              >
+                Permitir y Comenzar
+              </Button>
+            </div>
+          )}
+
+          {isInitializing && isCameraActive && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-white gap-4 z-10">
               <RefreshCw size={32} className="animate-spin text-guiso-orange" />
               <p className="text-sm font-medium">Iniciando cámara...</p>

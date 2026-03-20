@@ -196,7 +196,12 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   // Persistencia: Guardar cambios
   useEffect(() => {
     if (isLoaded.current) {
-      localStorage.setItem('guiso_core_store', JSON.stringify({ user, token, global }));
+      try {
+        localStorage.setItem('guiso_core_store', JSON.stringify({ user, token, global }));
+      } catch (e) {
+        console.error("Error al guardar en localStorage:", e);
+        // If storage is full, we might want to clear some old data or just ignore
+      }
     }
   }, [user, token, global]);
 
@@ -251,7 +256,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // Mapping of project IDs to specific unique images
     const projectSpecificImages: Record<string, string> = {
       'kitchen': 'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=400&auto=format&fit=crop',
-      'homeless': 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=400&auto=format&fit=crop',
+      'homeless': 'https://images.unsplash.com/photo-1542810634-71277d95dcbb?q=80&w=400&auto=format&fit=crop',
       'food': 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=400&auto=format&fit=crop',
     };
 
@@ -314,22 +319,28 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     );
 
     const certId = officialCert.id;
-    const newCertificate: Certificate = {
-      id: certId,
-      name: `Impacto en ${projectTitle}`,
-      image: certImage,
-      date: new Date().toISOString(),
-      impactPoints: impactGenerated,
-      category: category
-    };
+    
+    // Prevent duplicate certificates in user state
+    setUser(prev => {
+      if (prev.certificates.some(c => c.id === certId)) return prev;
+      
+      const newCertificate: Certificate = {
+        id: certId,
+        name: `Impacto en ${projectTitle}`,
+        image: certImage,
+        date: new Date().toISOString(),
+        impactPoints: impactGenerated,
+        category: category
+      };
 
-    setUser(prev => ({
-      ...prev,
-      impactScore: newImpactScore,
-      communityLevel: nextLevel.level,
-      hasExperiencedImpactMoment: prev.hasExperiencedImpactMoment || isFirstImpact,
-      certificates: [newCertificate, ...prev.certificates]
-    }));
+      return {
+        ...prev,
+        impactScore: newImpactScore,
+        communityLevel: nextLevel.level,
+        hasExperiencedImpactMoment: prev.hasExperiencedImpactMoment || isFirstImpact,
+        certificates: [newCertificate, ...prev.certificates]
+      };
+    });
 
     // 3. Actualizar Global Impact
     setGlobal(prev => ({
