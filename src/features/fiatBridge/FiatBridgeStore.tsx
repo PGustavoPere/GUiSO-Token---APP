@@ -14,17 +14,7 @@ interface FiatBridgeContextType {
 const FiatBridgeContext = createContext<FiatBridgeContextType | undefined>(undefined);
 
 export const FiatBridgeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [payments, setPayments] = useState<Record<string, FiatPayment>>(() => {
-    const saved = localStorage.getItem('guiso_fiat_payments');
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    return {};
-  });
-
-  useEffect(() => {
-    localStorage.setItem('guiso_fiat_payments', JSON.stringify(payments));
-  }, [payments]);
+  const [payments, setPayments] = useState<Record<string, FiatPayment>>({});
 
   const createFiatPayment = useCallback((paymentIntentId: string, arsAmount: number) => {
     const id = `FIAT-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;

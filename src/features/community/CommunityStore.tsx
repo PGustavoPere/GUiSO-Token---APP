@@ -44,24 +44,6 @@ const INITIAL_PROPOSALS: Proposal[] = [
 export const CommunityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [proposals, setProposals] = useState<Proposal[]>(INITIAL_PROPOSALS);
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        setProposals(JSON.parse(saved));
-      }
-    } catch (error) {
-      console.error("Failed to load proposals from localStorage:", error);
-      setProposals(INITIAL_PROPOSALS);
-    }
-  }, []);
-
-  // Save to localStorage whenever proposals change
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(proposals));
-  }, [proposals]);
-
   const vote = useCallback((proposalId: string, walletAddress: string) => {
     setProposals(prev => {
       const updated = prev.map(p => {

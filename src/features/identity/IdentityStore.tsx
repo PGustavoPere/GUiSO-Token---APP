@@ -19,29 +19,7 @@ const calculateLevelAndTitle = (totalImpact: number): { level: number; title: st
 };
 
 export const IdentityProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [identities, setIdentities] = useState<Record<string, ImpactIdentity>>(() => {
-    const saved = localStorage.getItem('guiso_identities');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // Migration: Recalculate levels and titles for all existing identities
-      const migrated: Record<string, ImpactIdentity> = {};
-      Object.keys(parsed).forEach(wallet => {
-        const id = parsed[wallet];
-        const { level, title } = calculateLevelAndTitle(id.totalImpact);
-        migrated[wallet] = {
-          ...id,
-          impactLevel: level,
-          title: title
-        };
-      });
-      return migrated;
-    }
-    return {};
-  });
-
-  useEffect(() => {
-    localStorage.setItem('guiso_identities', JSON.stringify(identities));
-  }, [identities]);
+  const [identities, setIdentities] = useState<Record<string, ImpactIdentity>>({});
 
   const createIdentity = useCallback((wallet: string) => {
     setIdentities(prev => {

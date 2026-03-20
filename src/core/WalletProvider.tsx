@@ -24,7 +24,6 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const handleDisconnect = useCallback(() => {
     setAddress(null);
     setIsConnected(false);
-    localStorage.removeItem('guiso_wallet_address');
     setShowDisconnectModal(true);
   }, []);
 
@@ -41,37 +40,27 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       handleDisconnect();
     } else {
       setAddress(accounts[0]);
-      localStorage.setItem('guiso_wallet_address', accounts[0]);
     }
   }, [handleDisconnect]);
 
-  // Persistence and event listeners
+  // Event listeners
   useEffect(() => {
-    const savedAddress = localStorage.getItem('guiso_wallet_address');
-    
     const initWallet = async () => {
-      if (savedAddress && (window as any).ethereum) {
+      if ((window as any).ethereum) {
         try {
           const chainId = await (window as any).ethereum.request({ method: 'eth_chainId' });
           if (chainId === '0x61') {
             const accounts = await (window as any).ethereum.request({ method: 'eth_accounts' });
-            if (accounts.length > 0 && accounts[0].toLowerCase() === savedAddress.toLowerCase()) {
-              setAddress(savedAddress);
+            if (accounts.length > 0) {
+              setAddress(accounts[0]);
               setIsConnected(true);
-            } else {
-              localStorage.removeItem('guiso_wallet_address');
             }
           } else {
             setIsWrongNetwork(true);
-            setAddress(savedAddress);
-            setIsConnected(true);
           }
         } catch (e) {
           console.error("Failed to auto-connect", e);
         }
-      } else if (savedAddress && web3Bridge.getMode() === 'simulation') {
-        setAddress(savedAddress);
-        setIsConnected(true);
       }
     };
 
@@ -100,7 +89,6 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       const newAddress = await currentAdapter.connect();
       setAddress(newAddress);
       setIsConnected(true);
-      localStorage.setItem('guiso_wallet_address', newAddress);
     } catch (error: any) {
       console.error('Failed to connect wallet:', error);
       if (error.message === 'WRONG_NETWORK') {
@@ -117,7 +105,6 @@ export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     setAddress(null);
     setIsConnected(false);
     setIsWrongNetwork(false);
-    localStorage.removeItem('guiso_wallet_address');
   }, []);
 
   return (

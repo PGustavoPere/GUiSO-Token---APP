@@ -3,17 +3,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { User, Heart, Link as LinkIcon, FileCheck, Star, Users, X } from 'lucide-react';
 
 export default function WelcomeModal() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    const hasSeenWelcome = localStorage.getItem('guiso_welcome_seen');
-    if (!hasSeenWelcome) {
-      setIsOpen(true);
-    }
-  }, []);
+  const [isOpen, setIsOpen] = useState(true);
 
   const handleClose = () => {
-    localStorage.setItem('guiso_welcome_seen', 'true');
     setIsOpen(false);
   };
 

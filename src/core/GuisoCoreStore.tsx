@@ -170,40 +170,10 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [isConnected, address]);
 
-  // Persistencia: Cargar estado inicial
+  // Marcar como cargado (sin persistencia local)
   useEffect(() => {
-    const savedStore = localStorage.getItem('guiso_core_store');
-    
-    if (savedStore) {
-      const parsed = JSON.parse(savedStore);
-      // Merge with INITIAL_USER to ensure new properties exist
-      setUser(prev => {
-        const userState = { 
-          ...INITIAL_USER, 
-          ...parsed.user, 
-          hasSeenWelcome: true 
-        };
-        // Migration: Recalculate community level
-        userState.communityLevel = impactEngine.calculateLevel(userState.impactScore).level;
-        return userState;
-      });
-      setToken(parsed.token);
-      setGlobal(parsed.global);
-    }
     isLoaded.current = true;
   }, []);
-
-  // Persistencia: Guardar cambios
-  useEffect(() => {
-    if (isLoaded.current) {
-      try {
-        localStorage.setItem('guiso_core_store', JSON.stringify({ user, token, global }));
-      } catch (e) {
-        console.error("Error al guardar en localStorage:", e);
-        // If storage is full, we might want to clear some old data or just ignore
-      }
-    }
-  }, [user, token, global]);
 
   /**
    * Acción: Agregar una actividad genérica al registro

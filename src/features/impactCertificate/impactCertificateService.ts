@@ -1,19 +1,14 @@
 import { ImpactCertificate } from './types';
 
 class ImpactCertificateService {
-  private demoStorage: Record<string, ImpactCertificate> = {};
+  private inMemoryStorage: Record<string, ImpactCertificate> = {};
 
   private getStorage(): Record<string, ImpactCertificate> {
-    const saved = localStorage.getItem('guiso_certificates');
-    const demoSaved = localStorage.getItem('guiso_demo_certificates');
-    const storage = saved ? JSON.parse(saved) : {};
-    const demoStorage = demoSaved ? JSON.parse(demoSaved) : {};
-    return { ...storage, ...demoStorage };
+    return this.inMemoryStorage;
   }
 
   private saveStorage(data: Record<string, ImpactCertificate>) {
-    // Separar demo de reales si es necesario, pero por ahora guardamos todo en guiso_certificates para asegurar persistencia
-    localStorage.setItem('guiso_certificates', JSON.stringify(data));
+    this.inMemoryStorage = data;
   }
 
   public generateCertificate(
@@ -51,17 +46,14 @@ class ImpactCertificateService {
     return certificate;
   }
 
-  public clearDemoCertificates() {
-    localStorage.removeItem('GSO_DEMO_CERTIFICATES');
-  }
-
-  public getDemoCertificates(): ImpactCertificate[] {
-    return Object.values(this.demoStorage);
+  public clearCertificates() {
+    this.inMemoryStorage = {};
+    window.dispatchEvent(new CustomEvent('certificates_updated'));
   }
 
   public getCertificate(id: string): ImpactCertificate | null {
     const storage = this.getStorage();
-    return storage[id] || this.demoStorage[id] || null;
+    return storage[id] || null;
   }
 
   public getCertificatesByWallet(wallet: string): ImpactCertificate[] {

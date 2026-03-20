@@ -12,20 +12,8 @@ const MerchantContext = createContext<MerchantContextType | undefined>(undefined
 
 export const MerchantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { address, isConnected } = useWallet();
-  const [merchants, setMerchants] = useState<Record<string, Merchant>>(() => {
-    const saved = localStorage.getItem('guiso_merchants');
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    return {};
-  });
+  const [merchants, setMerchants] = useState<Record<string, Merchant>>({});
   const [merchant, setMerchant] = useState<Merchant | null>(null);
-
-  useEffect(() => {
-    if (Object.keys(merchants).length > 0) {
-      localStorage.setItem('guiso_merchants', JSON.stringify(merchants));
-    }
-  }, [merchants]);
 
   useEffect(() => {
     if (isConnected && address && merchants[address]) {

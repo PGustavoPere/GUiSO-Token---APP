@@ -27,18 +27,8 @@ export const calculateTrustScore = (profile: MerchantTrustProfile): number => {
 };
 
 export const TrustProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [profiles, setProfiles] = useState<Record<string, MerchantTrustProfile>>(() => {
-    const saved = localStorage.getItem('guiso_trust_profiles');
-    if (saved) {
-      return JSON.parse(saved);
-    }
-    return {};
-  });
+  const [profiles, setProfiles] = useState<Record<string, MerchantTrustProfile>>({});
   const { payments } = usePaymentStore();
-
-  useEffect(() => {
-    localStorage.setItem('guiso_trust_profiles', JSON.stringify(profiles));
-  }, [profiles]);
 
   const updateTrustAfterPayment = useCallback((merchantId: string, success: boolean, impactGenerated: number = 0) => {
     setProfiles(prev => {
