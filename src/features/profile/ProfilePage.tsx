@@ -19,9 +19,10 @@ export default function ProfilePage() {
     user,
     token,
     global,
-    updateProfile
+    updateProfile,
+    transferTokens
   } = useGuisoCore();
-  const { address, isConnected, connect, isConnecting } = useWallet();
+  const { address, isConnected, connect, disconnect, isConnecting } = useWallet();
 
   const [isEditing, setIsEditing] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
@@ -130,7 +131,7 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-10">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative">
         <div className="flex items-center gap-4">
           <div className="relative group">
             <div className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-guiso-orange to-guiso-terracotta rounded-3xl flex items-center justify-center text-white text-2xl md:text-4xl font-bold shrink-0 overflow-hidden shadow-xl border-4 border-white">
@@ -148,13 +149,15 @@ export default function ProfilePage() {
             </button>
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl md:text-3xl font-display font-bold truncate">
-                {user.username}
-              </h1>
-              <ShieldCheck size={20} className="text-blue-500 shrink-0" />
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <h1 className="text-2xl md:text-3xl font-display font-bold truncate">
+                  {user.username}
+                </h1>
+                <ShieldCheck size={20} className="text-blue-500 shrink-0" />
+              </div>
             </div>
-            <p className="text-gray-500 text-xs md:text-sm font-medium mb-2">{communityLevel}</p>
+            <p className="text-gray-500 text-xs md:text-sm font-medium mb-2">{user.communityLevel}</p>
             <p className="text-gray-400 text-xs md:text-sm max-w-md italic">
               {user.bio}
             </p>
@@ -173,6 +176,16 @@ export default function ProfilePage() {
               </code>
             </div>
           </div>
+        </div>
+        <div className="absolute top-0 right-0 md:relative md:top-auto md:right-auto">
+          <button 
+            onClick={disconnect}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-500 rounded-xl hover:bg-red-50 hover:text-red-500 transition-all font-bold text-xs"
+            title="Desconectar Wallet"
+          >
+            <LogOut size={16} />
+            <span className="hidden sm:inline">Desconectar</span>
+          </button>
         </div>
       </header>
 
@@ -307,11 +320,13 @@ export default function ProfilePage() {
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-500">Rol</span>
-                <span className="font-bold">Colaborador</span>
+                <span className="font-bold">{user.communityLevel}</span>
               </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-500">Antigüedad</span>
-                <span className="font-bold">3 meses</span>
+                <span className="font-bold">
+                  {Math.floor((Date.now() - new Date(user.joinedAt).getTime()) / (1000 * 60 * 60 * 24 * 30))} meses
+                </span>
               </div>
               <div className="pt-2 border-t border-gray-100">
                 <p className="text-[10px] text-gray-400 italic">Tu identidad está respaldada por tus acciones verificadas en la red GUISO.</p>
@@ -368,21 +383,28 @@ export default function ProfilePage() {
               <Medal size={18} className="text-guiso-orange" />
               Tus Logros
             </h4>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-3">
               {user.badges.length > 0 ? (
                 user.badges.map(badge => (
                   <div key={badge.id} className="group relative">
-                    <div className="aspect-square bg-guiso-cream rounded-xl flex items-center justify-center text-guiso-orange border border-guiso-orange/10 hover:bg-guiso-orange hover:text-white transition-all cursor-help">
-                      <span className="text-lg">{badge.icon}</span>
+                    <div className="flex items-center gap-3 p-2 bg-guiso-cream/50 rounded-2xl border border-guiso-orange/10 hover:bg-guiso-orange/10 transition-all cursor-help">
+                      <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-guiso-orange shadow-sm">
+                        <span className="text-xl">{badge.icon}</span>
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-bold truncate">{badge.name}</p>
+                        <p className="text-[8px] text-gray-400 uppercase tracking-tighter font-bold">Rango: {user.communityLevel.split(' ')[0]}</p>
+                      </div>
                     </div>
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-32 p-2 bg-guiso-dark text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
-                      <p className="font-bold mb-1">{badge.name}</p>
+                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-3 bg-guiso-dark text-white text-[10px] rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center shadow-2xl">
+                      <p className="font-bold mb-1 text-guiso-orange">{badge.name}</p>
                       <p className="opacity-70">{badge.description}</p>
+                      <p className="mt-2 pt-2 border-t border-white/10 text-[8px] opacity-50">Obtenida el {new Date(badge.dateEarned).toLocaleDateString()}</p>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="col-span-4 py-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                <div className="col-span-2 py-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                   <p className="text-[10px] text-gray-400">Generá impacto para desbloquear medallas.</p>
                 </div>
               )}
@@ -451,7 +473,11 @@ export default function ProfilePage() {
         )}
 
         {showSendModal && (
-          <SendGsoModal onClose={() => setShowSendModal(false)} balance={balance} />
+          <SendGsoModal 
+            onClose={() => setShowSendModal(false)} 
+            balance={balance} 
+            onSend={(to, amount) => transferTokens(to, amount)}
+          />
         )}
 
         {showReceiveModal && (
@@ -543,7 +569,7 @@ export default function ProfilePage() {
   );
 }
 
-function SendGsoModal({ onClose, balance }: { onClose: () => void, balance: number }) {
+function SendGsoModal({ onClose, balance, onSend }: { onClose: () => void, balance: number, onSend: (to: string, amount: number) => void }) {
   const [to, setTo] = useState('');
   const [amount, setAmount] = useState('');
   const [isSending, setIsSending] = useState(false);
@@ -552,8 +578,11 @@ function SendGsoModal({ onClose, balance }: { onClose: () => void, balance: numb
   const handleSend = async () => {
     if (!to || !amount) return;
     setIsSending(true);
-    // Simulate transaction
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    onSend(to, Number(amount));
+    
     setIsSending(false);
     setSuccess(true);
     setTimeout(() => onClose(), 2000);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Heart, Utensils, Home, Sparkles, Coins, Wallet } from 'lucide-react';
+import { Heart, Utensils, Home, Sparkles, Coins, Wallet, Award } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useGuisoCore } from '../core/GuisoCoreStore';
 import { useWallet } from '../core/WalletProvider';
 import { useIdentityStore } from '../features/identity/IdentityStore';
@@ -18,6 +19,7 @@ const CAUSES = [
 ];
 
 export default function ImpactTransactionPanel() {
+  const navigate = useNavigate();
   const { token, recordSupportTransaction, user } = useGuisoCore();
   const { connect, isConnecting, address } = useWallet();
   const { updateAfterImpact } = useIdentityStore();
@@ -26,6 +28,7 @@ export default function ImpactTransactionPanel() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [showStory, setShowStory] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
+  const [certId, setCertId] = useState<string | null>(null);
   const [txStatus, setTxStatus] = useState<TransactionStatus>('idle');
 
   const handleSupport = async () => {
@@ -48,23 +51,16 @@ export default function ImpactTransactionPanel() {
     
     if (confirmed) {
       setTxStatus('confirmed');
-      recordSupportTransaction(selectedCause.id, selectedCause.title, amount, result.txHash);
+      const generatedCertId = recordSupportTransaction(selectedCause.id, selectedCause.title, amount, result.txHash, selectedCause.id === 'kitchen' ? 'Alimentación' : selectedCause.id === 'food' ? 'Alimentación' : 'Comunidad');
+      
+      if (generatedCertId) {
+        setCertId(generatedCertId as string);
+      }
       
       // Sync with Identity Store
       if (address) {
         const impactPoints = impactEngine.calculateImpactPoints(amount);
         updateAfterImpact(address, impactPoints, true);
-        
-        // Generate Certificate
-        impactCertificateService.generateCertificate(
-          result.txHash,
-          address,
-          `Impacto en ${selectedCause.title}`,
-          impactPoints
-        );
-        
-        // Notify components
-        window.dispatchEvent(new CustomEvent('certificates_updated'));
       }
       
       setIsSuccess(true);
@@ -101,6 +97,20 @@ export default function ImpactTransactionPanel() {
             <Badge variant="success">
               +{impactEngine.calculateImpactPoints(amount)} Puntos de Compromiso
             </Badge>
+            {certId && (
+              <div className="mt-4 p-4 bg-guiso-orange/5 rounded-2xl border border-guiso-orange/20">
+                <p className="text-xs text-gray-500 font-bold mb-2">Tu Certificado de Impacto</p>
+                <Button 
+                  onClick={() => navigate(`/impact/${certId}`)}
+                  variant="primary"
+                  size="sm"
+                  className="w-full flex items-center justify-center gap-2"
+                >
+                  <Award size={14} />
+                  Ver Certificado Oficial
+                </Button>
+              </div>
+            )}
             {txHash && (
               <div className="mt-4 p-3 bg-white/50 rounded-xl border border-green-200">
                 <p className="text-xs text-gray-500 font-bold mb-1">Hash de Transacción</p>

@@ -60,7 +60,10 @@ export interface UserState {
   isDemoModeActive: boolean;
   demoStep: number;
   hasSeenWelcome: boolean;
+  joinedAt: string;
 }
+
+import { impactCertificateService } from '../features/impactCertificate/impactCertificateService';
 
 export interface TokenState {
   gsoBalance: number;
@@ -86,7 +89,8 @@ interface GuisoCoreContextType {
   activeImpactMoment: { points: number; target: string } | null;
 
   // Actions
-  recordSupportTransaction: (projectId: string, projectTitle: string, amount: number, txHash: string, category?: string) => void;
+  recordSupportTransaction: (projectId: string, projectTitle: string, amount: number, txHash: string, category?: string) => string | void;
+  transferTokens: (to: string, amount: number, description?: string) => void;
   addActivity: (activity: Omit<Transaction, 'id' | 'date'>) => void;
   updateProfile: (data: Partial<Pick<UserState, 'username' | 'bio' | 'avatar'>>) => void;
   addBadge: (badge: Omit<Badge, 'dateEarned'>) => void;
@@ -114,37 +118,21 @@ const INITIAL_USER: UserState = {
   impactScore: 0,
   communityLevel: impactEngine.calculateLevel(0).level,
   badges: [],
-  certificates: [
-    {
-      id: 'cert1',
-      name: 'Certificado de Impacto: Alimentación',
-      image: 'https://images.unsplash.com/photo-1594708767771-a7502209ff51?q=80&w=400&auto=format&fit=crop',
-      date: '2024-01-15',
-      impactPoints: 500,
-      category: 'Alimentación'
-    },
-    {
-      id: 'cert2',
-      name: 'Certificado de Impacto: Educación',
-      image: 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=400&auto=format&fit=crop',
-      date: '2024-02-10',
-      impactPoints: 300,
-      category: 'Educación'
-    }
-  ],
+  certificates: [],
   isWalletConnected: false,
   walletAddress: null,
   hasExperiencedImpactMoment: false,
   isDemoModeActive: false,
   demoStep: 0,
   hasSeenWelcome: false,
+  joinedAt: new Date().toISOString(),
 };
 
 const INITIAL_TOKEN: TokenState = {
   gsoBalance: 10000,
   transactions: [],
-  impactPower: 15000,
-  influenceBadge: 'Pilar de la Comunidad',
+  impactPower: 0,
+  influenceBadge: 'Nuevo Miembro',
 };
 
 const INITIAL_GLOBAL: GlobalImpactState = {
@@ -255,10 +243,22 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    * Acción: Registrar una transacción de apoyo confirmada
    */
   const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string, category: string = 'General') => {
-    if (amount > token.gsoBalance) return;
+    if (amount > token.gsoBalance) return '';
 
     const impactGenerated = impactEngine.calculateImpactPoints(amount);
     
+    // Mapping of category to unique images
+    const categoryImages: Record<string, string> = {
+      'Alimentación': 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=400&auto=format&fit=crop',
+      'Educación': 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=400&auto=format&fit=crop',
+      'Salud': 'https://images.unsplash.com/photo-1505751172107-573967a4dd29?q=80&w=400&auto=format&fit=crop',
+      'Medio Ambiente': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=400&auto=format&fit=crop',
+      'Comunidad': 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=400&auto=format&fit=crop',
+      'General': 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=400&auto=format&fit=crop'
+    };
+
+    const certImage = categoryImages[category] || categoryImages['General'];
+
     // 1. Actualizar Token State (Balance y Transacciones)
     const newTransaction: Transaction = {
       id: Math.random().toString(36).substr(2, 9),
@@ -291,16 +291,36 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       setLevelUpNotification(nextLevel);
     }
 
-    // Trigger Impact Moment if first time
-    if (!user.hasExperiencedImpactMoment) {
+    // Trigger Impact Moment if first time (check impactScore was 0)
+    const isFirstImpact = user.impactScore === 0 && !user.hasExperiencedImpactMoment;
+    if (isFirstImpact) {
       setActiveImpactMoment({ points: impactGenerated, target: projectTitle });
     }
+
+    // Generate the official certificate via the service
+    const officialCert = impactCertificateService.generateCertificate(
+      txHash,
+      address,
+      `Impacto en ${projectTitle}`,
+      impactGenerated
+    );
+
+    const certId = officialCert.id;
+    const newCertificate: Certificate = {
+      id: certId,
+      name: `Impacto en ${projectTitle}`,
+      image: certImage,
+      date: new Date().toISOString(),
+      impactPoints: impactGenerated,
+      category: category
+    };
 
     setUser(prev => ({
       ...prev,
       impactScore: newImpactScore,
       communityLevel: nextLevel.level,
-      hasExperiencedImpactMoment: true,
+      hasExperiencedImpactMoment: prev.hasExperiencedImpactMoment || isFirstImpact,
+      certificates: [newCertificate, ...prev.certificates]
     }));
 
     // 3. Actualizar Global Impact
@@ -308,7 +328,37 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       ...prev,
       totalImpact: prev.totalImpact + impactGenerated,
     }));
+
+    return certId;
   }, [token.gsoBalance, user.impactScore, user.hasExperiencedImpactMoment]);
+
+  /**
+   * Acción: Transferir tokens a otra wallet
+   */
+  const transferTokens = useCallback((to: string, amount: number, description: string = 'Transferencia enviada') => {
+    if (amount > token.gsoBalance) return;
+
+    const newTransaction: Transaction = {
+      id: Math.random().toString(36).substr(2, 9),
+      type: 'purchase', // Using purchase as a generic outgoing type for now, or we could add 'transfer'
+      amount,
+      target: to,
+      description,
+      date: new Date().toISOString(),
+      impactPoints: 0, // Transfers don't usually generate impact points directly
+    };
+
+    setToken(prev => {
+      const newBalance = prev.gsoBalance - amount;
+      return {
+        ...prev,
+        gsoBalance: newBalance,
+        transactions: [newTransaction, ...prev.transactions],
+        impactPower: tokenBalanceService.getImpactPower(newBalance),
+        influenceBadge: tokenBalanceService.getInfluenceBadge(newBalance),
+      };
+    });
+  }, [token.gsoBalance]);
 
   /**
    * Acción: Ganar impacto (por otras acciones como votar)
@@ -411,6 +461,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       levelUpNotification,
       activeImpactMoment,
       recordSupportTransaction,
+      transferTokens,
       addActivity,
       updateProfile,
       addBadge,
