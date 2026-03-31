@@ -36,7 +36,7 @@ const payments: Record<string, any> = {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   // Standard middlewares
   app.use(cors({
@@ -195,7 +195,7 @@ async function startServer() {
     });
 
   // Catch-all for undefined API routes
-  app.all("/api/*", (req, res) => {
+  app.all("/api/*all", (req, res) => {
     res.status(404).json({ error: `Ruta de API no encontrada: ${req.method} ${req.url}` });
   });
 
@@ -219,7 +219,7 @@ async function startServer() {
   } else {
     console.log("Serving production build from dist...");
     app.use(express.static(path.join(process.cwd(), "dist")));
-    app.get("*", (req, res) => {
+    app.get("*all", (req, res) => {
       res.sendFile(path.join(process.cwd(), "dist", "index.html"));
     });
   }
