@@ -3,8 +3,8 @@ services:
     name: guiso-app
     env: node
     plan: free
-    buildCommand: "npm install --legacy-peer-deps && npm run build"
-    startCommand: npm start
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm start"
     envVars:
       - key: NODE_ENV
         value: production

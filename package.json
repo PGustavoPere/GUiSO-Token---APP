@@ -13,7 +13,7 @@
     "lint": "tsc --noEmit"
   },
   "engines": {
-    "node": ">=22.6.0"
+    "node": "22.11.0"
   },
   "dependencies": {
     "@google/genai": "^1.44.0",
@@ -47,6 +47,6 @@
     "autoprefixer": "^10.4.21",
     "tailwindcss": "^4.2.2",
     "typescript": "~5.8.2",
-    "vite": "^8.0.3"
+    "vite": "^7.3.2"
   }
 }
