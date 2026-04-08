@@ -5,34 +5,9 @@ import fs from "fs";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import cors from "cors";
+import { paymentRepo } from "./src/system/database.ts";
 
 console.log("Starting GUISO Server initialization...");
-const payments: Record<string, any> = {
-  'p1': {
-    id: 'p1',
-    merchantId: 'm1',
-    merchantName: 'Eco Market',
-    fiatAmount: 12.50,
-    tokenAmount: 1250,
-    status: 'completed',
-    description: 'Compra de vegetales orgánicos',
-    createdAt: Date.now() - 3600000,
-    expiresAt: Date.now() + 3600000,
-    walletAddress: '0x1234...5678'
-  },
-  'p2': {
-    id: 'p2',
-    merchantId: 'm2',
-    merchantName: 'Panadería La Unión',
-    fiatAmount: 5.00,
-    tokenAmount: 500,
-    status: 'awaiting_payment',
-    description: 'Pan artesanal',
-    createdAt: Date.now() - 1800000,
-    expiresAt: Date.now() + 1800000,
-    walletAddress: '0x1234...5678'
-  }
-};
 
 async function startServer() {
   const app = express();
@@ -122,9 +97,10 @@ async function startServer() {
   // --- Payments Mock API ---
   app.get("/api/payments", (req, res) => {
     try {
-      console.log(`[API] Serving GET /api/payments - Found ${Object.keys(payments).length} payments`);
+      const allPayments = paymentRepo.getAll();
+      console.log(`[API] Serving GET /api/payments - Found ${allPayments.length} payments`);
       res.setHeader('Content-Type', 'application/json');
-      res.json(Object.values(payments));
+      res.json(allPayments);
     } catch (err: any) {
       console.error("Error in GET /api/payments:", err);
       res.status(500).json({ error: "Internal Server Error", message: err.message });
@@ -132,38 +108,58 @@ async function startServer() {
   });
 
   app.post("/api/payments", express.json(), (req, res) => {
-    const data = req.body;
-    const id = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    payments[id] = { ...data, id, status: 'awaiting_payment', createdAt: Date.now() };
-    res.json({ id });
+    try {
+      const data = req.body;
+      console.log(`[API] Received POST /api/payments with data:`, JSON.stringify(data));
+      const id = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes
+      const newPayment = { 
+        ...data, 
+        id, 
+        status: 'awaiting_payment', 
+        createdAt: Date.now(),
+        expiresAt
+      };
+      paymentRepo.create(newPayment);
+      console.log(`[API] Created payment with ID: ${id}`);
+      res.json({ id });
+    } catch (err: any) {
+      console.error("Error in POST /api/payments:", err);
+      res.status(500).json({ error: "Error al crear el pago", message: err.message });
+    }
   });
 
   app.get("/api/payments/:id", (req, res) => {
-    const payment = payments[req.params.id];
+    const id = req.params.id;
+    console.log(`[API] GET /api/payments/${id}`);
+    const payment = paymentRepo.getById(id);
     if (!payment) {
+      console.warn(`[API] Payment not found: ${id}`);
       return res.status(404).json({ error: "Pago no encontrado" });
     }
+    console.log(`[API] Returning payment: ${id} (Status: ${payment.status})`);
     res.json(payment);
   });
 
   app.put("/api/payments/:id", express.json(), (req, res) => {
     const id = req.params.id;
-    if (!payments[id]) {
+    const payment = paymentRepo.getById(id);
+    if (!payment) {
       return res.status(404).json({ error: "Pago no encontrado" });
     }
-    payments[id] = { ...payments[id], ...req.body };
+    const updated = paymentRepo.update(id, req.body);
     
     // Notify SSE clients
     notifyPaymentUpdate(id);
     
-    res.json(payments[id]);
+    res.json(updated);
   });
 
   // --- SSE for Real-time Payment Updates ---
   const sseClients = new Set<express.Response>();
 
   const notifyPaymentUpdate = (paymentId: string) => {
-    const payment = payments[paymentId];
+    const payment = paymentRepo.getById(paymentId);
     if (!payment) return;
     
     const data = JSON.stringify(payment);
