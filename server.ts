@@ -1,11 +1,10 @@
 import express from "express";
-import { createServer as createViteServer } from "vite";
 import path from "path";
 import fs from "fs";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import cors from "cors";
-import { paymentRepo } from "./src/system/database.ts";
+import { paymentRepo } from "./src/system/database";
 
 console.log("Starting GUISO Server initialization...");
 
@@ -204,6 +203,7 @@ async function startServer() {
 
   if (!isProduction || !hasDist) {
     console.log("Using Vite middleware for development...");
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { 
         middlewareMode: true,

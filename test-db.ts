@@ -1,4 +1,4 @@
-import { paymentRepo } from './src/system/database.ts';
+import { paymentRepo } from './src/system/database';
 
 try {
   const id = 'TEST-' + Date.now();

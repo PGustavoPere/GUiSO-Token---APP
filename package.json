@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@google/genai": "^1.44.0",
-    "better-sqlite3": "^12.4.1",
     "clsx": "^2.1.1",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
