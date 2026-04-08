@@ -4,6 +4,7 @@ import { Sparkles, ArrowRight, Heart, ShieldCheck, Zap, CheckCircle2, MapPin } f
 import { useNavigate } from 'react-router-dom';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { Card, Button } from '../../components/ui';
+import SupportModal from '../impact/SupportModal';
 
 function cn(...inputs: any[]) {
   return inputs.filter(Boolean).join(' ');
@@ -13,6 +14,7 @@ export default function DashboardPage() {
   const { user } = useGuisoCore();
   const navigate = useNavigate();
   const [selectedAmount, setSelectedAmount] = React.useState<number | null>(null);
+  const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false);
 
   const highlightedProject = {
     id: "1",
@@ -22,6 +24,7 @@ export default function DashboardPage() {
     image: "https://images.unsplash.com/photo-1594708767771-a7502209ff51?q=80&w=1000&auto=format&fit=crop",
     raised: 150000,
     goal: 200000,
+    category: "Alimentación"
   };
 
   const recentDonations = [
@@ -147,7 +150,10 @@ export default function DashboardPage() {
             {[500, 1000, 2000].map((amount) => (
               <button
                 key={amount}
-                onClick={() => setSelectedAmount(amount)}
+                onClick={() => {
+                  setSelectedAmount(amount);
+                  setIsSupportModalOpen(true);
+                }}
                 className={cn(
                   "py-8 rounded-3xl text-2xl font-bold transition-all border-2",
                   selectedAmount === amount 
@@ -165,7 +171,7 @@ export default function DashboardPage() {
               size="lg" 
               className="w-full py-8 text-xl"
               disabled={!selectedAmount}
-              onClick={() => navigate('/impacto')}
+              onClick={() => setIsSupportModalOpen(true)}
             >
               Confirmar donación
             </Button>
@@ -268,6 +274,14 @@ export default function DashboardPage() {
           </div>
         </div>
       </section>
+
+      {isSupportModalOpen && (
+        <SupportModal 
+          project={highlightedProject}
+          initialAmount={selectedAmount || 100}
+          onClose={() => setIsSupportModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
