@@ -12,15 +12,14 @@ import { useWallet } from '../../core/WalletProvider';
 
 interface SupportModalProps {
   project: { id: string; title: string; category: string };
-  initialAmount?: number;
   onClose: () => void;
 }
 
-export default function SupportModal({ project, initialAmount = 100, onClose }: SupportModalProps) {
+export default function SupportModal({ project, onClose }: SupportModalProps) {
   const { token, recordSupportTransaction } = useGuisoCore();
   const { updateAfterImpact } = useIdentityStore();
   const { address } = useWallet();
-  const [amount, setAmount] = useState(initialAmount);
+  const [amount, setAmount] = useState(100);
   const [isSuccess, setIsSuccess] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [txStatus, setTxStatus] = useState<TransactionStatus>('idle');
@@ -85,22 +84,22 @@ export default function SupportModal({ project, initialAmount = 100, onClose }: 
               className="p-6 md:p-8"
             >
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl md:text-2xl font-display font-bold">Donar a esta causa</h3>
+                <h3 className="text-xl md:text-2xl font-display font-bold">Apoyar Causa</h3>
                 <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                   <X size={20} />
                 </button>
               </div>
 
               <div className="bg-guiso-cream p-4 rounded-2xl mb-6 border border-guiso-orange/10">
-                <p className="text-xs text-gray-500 uppercase font-bold mb-1">Causa seleccionada</p>
+                <p className="text-xs text-gray-500 uppercase font-bold mb-1">Proyecto</p>
                 <p className="font-display font-bold text-lg text-guiso-dark">{project.title}</p>
               </div>
 
               <div className="space-y-4 mb-8">
                 <div className="flex flex-col sm:flex-row justify-between text-xs md:text-sm font-bold gap-1">
-                  <span>Monto a donar</span>
+                  <span>Cantidad GSO</span>
                   <span className={amount > token.gsoBalance ? "text-red-500" : "text-guiso-orange"}>
-                    Disponible: {token.gsoBalance.toLocaleString()} Créditos
+                    Balance: {token.gsoBalance.toLocaleString()} GSO
                   </span>
                 </div>
                 
@@ -111,7 +110,7 @@ export default function SupportModal({ project, initialAmount = 100, onClose }: 
                     onChange={(e) => setAmount(Number(e.target.value))}
                     className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-xl md:text-2xl font-display font-bold focus:outline-none focus:ring-2 focus:ring-guiso-orange/20"
                   />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Créditos</div>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">GSO</div>
                 </div>
 
                 <div className="grid grid-cols-4 gap-2">
@@ -128,7 +127,7 @@ export default function SupportModal({ project, initialAmount = 100, onClose }: 
                 
                 {amount > token.gsoBalance && (
                   <p className="text-red-500 text-xs font-bold text-center mt-2">
-                    Necesitás más créditos para realizar esta donación.
+                    Necesitás tokens GUISO para generar impacto.
                   </p>
                 )}
               </div>
@@ -149,7 +148,7 @@ export default function SupportModal({ project, initialAmount = 100, onClose }: 
                 ) : (
                   <>
                     <Heart size={20} />
-                    Confirmar donación
+                    Confirmar Apoyo
                   </>
                 )}
               </Button>
@@ -166,17 +165,17 @@ export default function SupportModal({ project, initialAmount = 100, onClose }: 
                 <Sparkles size={40} className="animate-pulse md:w-12 md:h-12" />
               </div>
               <div>
-                <h3 className="text-2xl md:text-3xl font-display font-bold text-guiso-dark mb-2">¡Gracias por tu ayuda!</h3>
+                <h3 className="text-2xl md:text-3xl font-display font-bold text-guiso-dark mb-2">¡Impacto Generado!</h3>
                 <p className="text-guiso-orange font-bold text-xs md:text-sm mb-2 italic">"{impactEngine.getRandomMotivation()}"</p>
-                <p className="text-gray-500 text-sm md:text-base">Tu aporte de {amount} créditos fue registrado correctamente.</p>
+                <p className="text-gray-500 text-sm md:text-base">Has aportado {amount} GSO a esta causa.</p>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <div className="px-4 py-2 bg-guiso-orange/10 text-guiso-orange rounded-full text-xs md:text-sm font-bold">
-                  +{impactEngine.calculateImpactPoints(amount)} Puntos de Impacto
+                  +{impactEngine.calculateImpactPoints(amount)} Impact Points
                 </div>
                 {txHash && (
                   <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100 w-full">
-                    <p className="text-xs text-gray-500 font-bold mb-1">Comprobante de transparencia</p>
+                    <p className="text-xs text-gray-500 font-bold mb-1">Transaction Hash</p>
                     <a 
                       href={`https://testnet.bscscan.com/tx/${txHash}`}
                       target="_blank"

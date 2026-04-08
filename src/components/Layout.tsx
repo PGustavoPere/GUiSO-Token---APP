@@ -22,13 +22,13 @@ export default function Layout() {
   const { address, isConnected, connect, disconnect, isConnecting } = useWallet();
 
   const navItems = [
-    { to: '/', icon: LayoutDashboard, label: 'Inicio' },
-    { to: '/impacto', icon: Heart, label: 'Causas' },
-    { to: '/comunidad', icon: Users, label: 'Comunidad' },
-    { to: '/vision', icon: Globe, label: 'Nuestra Visión' },
-    { to: '/perfil', icon: User, label: 'Mi Cuenta' },
-    { to: '/merchant', icon: Store, label: 'Comercios Amigos' },
-    { to: '/impact-explorer', icon: Activity, label: 'Transparencia' },
+    { to: '/', icon: LayoutDashboard, label: 'Panel de Control' },
+    { to: '/impacto', icon: Heart, label: 'Impacto Verificable' },
+    { to: '/comunidad', icon: Users, label: 'Ecosistema' },
+    { to: '/vision', icon: Globe, label: 'Visión' },
+    { to: '/perfil', icon: User, label: 'Mi Perfil' },
+    { to: '/merchant', icon: Store, label: 'Comercios' },
+    { to: '/impact-explorer', icon: Activity, label: 'Explorador de Impacto' },
   ];
 
   return (
@@ -43,7 +43,7 @@ export default function Layout() {
           {isConnected ? (
             <div className="flex items-center gap-3">
               <div className="flex flex-col items-end">
-                <span className="text-[10px] font-bold text-guiso-orange uppercase tracking-tighter">{token.gsoBalance.toLocaleString()} Créditos</span>
+                <span className="text-[10px] font-bold text-guiso-orange uppercase tracking-tighter">{token.gsoBalance.toLocaleString()} GSO</span>
                 <span className="text-[8px] text-gray-400 font-mono">{address?.slice(0, 6)}...{address?.slice(-4)}</span>
               </div>
               <button 
@@ -76,7 +76,7 @@ export default function Layout() {
           <div className="w-10 h-10 bg-guiso-orange rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-guiso-orange/20">G</div>
           <div className="flex flex-col">
             <span className="font-display font-bold text-xl leading-none">GUISO</span>
-            <span className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Impacto Social</span>
+            <span className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Proyecto Token</span>
           </div>
         </div>
 
@@ -101,8 +101,8 @@ export default function Layout() {
         <div className="p-4 mt-auto space-y-4">
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-2">
-              <Activity size={12} className="text-guiso-orange" />
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Estado de Red</span>
+              <Cpu size={12} className="text-guiso-orange" />
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Estado del Puente</span>
             </div>
             <button 
               onClick={() => {
@@ -118,14 +118,14 @@ export default function Layout() {
           </div>
 
           <div className="bg-guiso-cream rounded-2xl p-4 border border-guiso-orange/10">
-            <p className="text-xs text-gray-500 mb-2">Tu Cuenta</p>
+            <p className="text-xs text-gray-500 mb-2">Tu Wallet</p>
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[10px] text-gray-400 truncate">
                 {isConnected ? address : 'No conectada'}
               </span>
               <div className="flex justify-between items-end mt-1">
                 <span className="font-display font-bold text-lg">
-                  {isConnected ? `${token.gsoBalance.toLocaleString()} Créditos` : '---'}
+                  {isConnected ? `${token.gsoBalance.toLocaleString()} GSO` : '---'}
                 </span>
                 {isConnected ? (
                   <button 
