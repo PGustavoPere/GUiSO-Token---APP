@@ -1,235 +1,273 @@
 import React from 'react';
-import { motion } from 'motion/react';
-import { Sparkles, ArrowRight, Heart, ShieldCheck, Zap, X, Info, Star, Award, TrendingUp } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
-import { AnimatePresence } from 'motion/react';
-import ImpactDashboard from '../../components/ImpactDashboard';
-import ImpactHistory from '../../components/ImpactHistory';
-import GlobalImpactStats from '../../components/GlobalImpactStats';
-import CertificateHistory from '../impactCertificate/CertificateHistory';
-import InvestorPanel from '../../components/InvestorPanel';
-import IdentityPanel from '../identity/IdentityPanel';
+import { motion, AnimatePresence } from 'motion/react';
+import { Sparkles, ArrowRight, Heart, ShieldCheck, Zap, CheckCircle2, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { Card, Button } from '../../components/ui';
+
+function cn(...inputs: any[]) {
+  return inputs.filter(Boolean).join(' ');
+}
 
 export default function DashboardPage() {
   const { user } = useGuisoCore();
   const navigate = useNavigate();
-  const [showLevelsModal, setShowLevelsModal] = React.useState(false);
+  const [selectedAmount, setSelectedAmount] = React.useState<number | null>(null);
 
-  const levels = [
-    { name: 'Aspirante', minIp: 0, color: 'bg-gray-100 text-gray-500', icon: '🌱', desc: 'Tu inicio en el ecosistema. Empezás a sembrar impacto.' },
-    { name: 'Agente GUISO', minIp: 500, color: 'bg-guiso-orange/10 text-guiso-orange', icon: '🕵️', desc: 'Tu compromiso crece. Ya eres un actor reconocido y activo.' },
-    { name: 'Guardián', minIp: 2000, color: 'bg-amber-100 text-amber-700', icon: '🛡️', desc: 'Impacto sólido. Proteges y fortaleces la comunidad.' },
-    { name: 'Embajador', minIp: 5000, color: 'bg-indigo-100 text-indigo-700', icon: '🌍', desc: 'Liderazgo humanitario. Representas los valores de GUISO.' },
-    { name: 'Leyenda', minIp: 10000, color: 'bg-purple-100 text-purple-700', icon: '👑', desc: 'Máximo nivel de impacto. Tu legado es eterno en la red.' },
+  const highlightedProject = {
+    id: "1",
+    title: "Comedor 'Los Pibes'",
+    location: "Córdoba, Argentina",
+    description: "Necesitan alimentos básicos para 35 personas.",
+    image: "https://images.unsplash.com/photo-1594708767771-a7502209ff51?q=80&w=1000&auto=format&fit=crop",
+    raised: 150000,
+    goal: 200000,
+  };
+
+  const recentDonations = [
+    { name: "Juan", amount: 1000 },
+    { name: "María", amount: 500 },
+    { name: "Carlos", amount: 2000 },
   ];
 
+  const totalRaised = recentDonations.reduce((acc, curr) => acc + curr.amount, 0) + 45000;
+
   return (
-    <div className="space-y-12 pb-20">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-[2rem] md:rounded-[3rem] bg-guiso-dark p-6 md:p-16 text-white">
-        <div className="absolute top-0 right-0 w-1/2 h-full opacity-20 pointer-events-none">
-          <div className="absolute top-[-20%] right-[-10%] w-[80%] h-[80%] rounded-full bg-guiso-orange blur-[120px]" />
+    <div className="space-y-20 pb-20">
+      {/* 1. HERO SECTION */}
+      <section className="relative overflow-hidden rounded-[2.5rem] md:rounded-[4rem] bg-guiso-dark p-8 md:p-24 text-white text-center flex flex-col items-center justify-center min-h-[70vh]">
+        <div className="absolute top-0 left-0 w-full h-full opacity-30 pointer-events-none">
+          <div className="absolute top-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-guiso-orange blur-[150px]" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-guiso-terracotta blur-[130px]" />
         </div>
         
-        <div className="relative z-10 max-w-2xl space-y-6 md:space-y-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-[10px] md:text-xs font-bold uppercase tracking-widest"
-          >
-            <Zap size={14} className="text-guiso-orange" />
-            Ecosistema de Impacto MVP v1.0
-          </motion.div>
-          
+        <div className="relative z-10 max-w-3xl space-y-8">
           <motion.h1 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl md:text-7xl font-display font-bold leading-[1.1] md:leading-[0.9] tracking-tight"
+            className="text-5xl md:text-8xl font-display font-bold leading-[1.05] tracking-tight"
           >
-            Pequeñas Acciones, <br />
-            <span className="text-guiso-orange">Impacto Real.</span>
+            Ayudá a personas reales, <br />
+            <span className="text-guiso-orange">con total transparencia.</span>
           </motion.h1>
           
           <motion.p 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-base md:text-lg text-white/60 leading-relaxed"
+            transition={{ delay: 0.1 }}
+            className="text-lg md:text-2xl text-white/70 max-w-xl mx-auto leading-relaxed"
           >
-            GUISO es una herramienta para que tu ayuda llegue de forma directa y transparente. 
-            Conecta tu billetera y sé parte de una red que transforma la tecnología en bienestar para la comunidad.
+            Doná en segundos y seguí exactamente a dónde va tu ayuda.
           </motion.p>
 
           <motion.div 
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-col sm:flex-row flex-wrap gap-4"
+            transition={{ delay: 0.2 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-4"
           >
-            <Link to="/impacto" className="w-full sm:w-auto">
-              <Button size="lg" className="w-full flex items-center justify-center gap-2">
-                Explorar Causas
-                <ArrowRight size={20} />
-              </Button>
-            </Link>
-            <div className="flex items-center justify-center gap-3 px-6 py-4 rounded-full border border-white/20 text-sm font-bold w-full sm:w-auto">
-              <ShieldCheck size={20} className="text-green-400" />
-              Ayuda Verificada
-            </div>
+            <Button 
+              size="lg" 
+              className="w-full sm:w-auto px-12 py-8 text-xl shadow-2xl shadow-guiso-orange/20"
+              onClick={() => document.getElementById('causas')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Donar ahora
+            </Button>
+            <button 
+              onClick={() => document.getElementById('como-funciona')?.scrollIntoView({ behavior: 'smooth' })}
+              className="text-white/60 hover:text-white font-bold transition-colors flex items-center gap-2 group"
+            >
+              Ver cómo funciona
+              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+            </button>
           </motion.div>
         </div>
       </section>
 
-      {/* Global Impact Stats */}
-      <GlobalImpactStats />
-
-      {/* Investor Metrics (Simulated) */}
-      <InvestorPanel />
-
-      {/* MVP Core Experience */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Main Column */}
-        <div className="lg:col-span-2 space-y-8">
-          <section id="dashboard-stats" className="space-y-4">
-            <h2 className="text-2xl font-display font-bold px-2">Panel de Control</h2>
-            <ImpactDashboard />
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="text-2xl font-display font-bold px-2">Mi Identidad de Impacto</h2>
-            <IdentityPanel />
-          </section>
-
-          <section className="space-y-4">
-            <h2 className="text-2xl font-display font-bold px-2">Historial Reciente</h2>
-            <ImpactHistory />
-          </section>
-
-          <section className="space-y-4">
-            <CertificateHistory />
-          </section>
+      {/* 2. SECCIÓN CAUSAS */}
+      <section id="causas" className="max-w-5xl mx-auto px-4 space-y-10">
+        <div className="text-center space-y-2">
+          <h2 className="text-3xl md:text-5xl font-display font-bold text-gray-900">Hoy podés ayudar acá 👇</h2>
         </div>
 
-        {/* Sidebar Column */}
-        <div className="space-y-8">
-          {/* Education Card */}
-          <Card variant="cream" padding="md" rounded="2xl">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-guiso-orange rounded-xl flex items-center justify-center text-white">
-                <Heart size={20} />
-              </div>
-              <h4 className="font-display font-bold">¿Cómo funciona?</h4>
+        <Card variant="glass" padding="none" className="overflow-hidden group border-none shadow-2xl">
+          <div className="grid grid-cols-1 md:grid-cols-2">
+            <div className="relative h-72 md:h-auto overflow-hidden">
+              <img 
+                src={highlightedProject.image} 
+                alt={highlightedProject.title} 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent md:hidden" />
             </div>
-            <p className="text-sm text-gray-500 leading-relaxed mb-4">
-              Cada vez que aportas GSO, estás ayudando directamente a una causa real. 
-              Tus "Puntos de Impacto" (IP) reflejan tu compromiso y te permiten participar activamente en las decisiones de la comunidad.
-            </p>
-            <button 
-              onClick={() => setShowLevelsModal(true)}
-              className="text-guiso-orange text-sm font-bold flex items-center gap-1 hover:gap-2 transition-all cursor-pointer"
-            >
-              Saber más sobre niveles <ArrowRight size={14} />
-            </button>
-          </Card>
-        </div>
-      </div>
-
-      {/* Levels Info Modal */}
-      <AnimatePresence>
-        {showLevelsModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col shadow-2xl"
-            >
-              <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-guiso-cream/30">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-guiso-orange/10 rounded-xl text-guiso-orange">
-                    <TrendingUp size={24} />
-                  </div>
-                  <h3 className="text-xl font-display font-bold">Niveles de Reputación</h3>
+            <div className="p-8 md:p-12 flex flex-col justify-center space-y-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-guiso-orange font-bold text-sm">
+                  <MapPin size={18} />
+                  {highlightedProject.location}
                 </div>
-                <button onClick={() => setShowLevelsModal(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                  <X size={20} />
-                </button>
+                <h3 className="text-3xl md:text-4xl font-display font-bold text-gray-900">{highlightedProject.title}</h3>
               </div>
-              
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                <div className="bg-guiso-dark text-white p-6 rounded-2xl space-y-3">
-                  <h4 className="font-bold flex items-center gap-2">
-                    <Star size={18} className="text-guiso-orange" />
-                    ¿Para qué sirve el compromiso?
-                  </h4>
-                  <p className="text-sm text-white/60 leading-relaxed">
-                    En GUISO, tu lugar en la comunidad no se compra, se construye ayudando. A medida que apoyas causas reales, acumulas <span className="text-guiso-orange font-bold">Impact Points (IP)</span> que reflejan tu compromiso y desbloquean nuevas formas de participar:
-                  </p>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                    <li className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
-                      <Award size={14} className="text-guiso-orange" />
-                      Mayor voz en las decisiones de la comunidad
-                    </li>
-                    <li className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
-                      <Award size={14} className="text-guiso-orange" />
-                      Certificados de ayuda especiales
-                    </li>
-                    <li className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
-                      <Award size={14} className="text-guiso-orange" />
-                      Reconocimiento en eventos solidarios
-                    </li>
-                    <li className="flex items-center gap-2 bg-white/5 p-2 rounded-lg">
-                      <Award size={14} className="text-guiso-orange" />
-                      Insignias de compromiso verificado
-                    </li>
-                  </ul>
+              <p className="text-lg text-gray-600 leading-relaxed">
+                "{highlightedProject.description}"
+              </p>
+              <div className="space-y-4 pt-4">
+                <div className="flex justify-between items-end">
+                  <span className="text-guiso-orange font-bold text-xl">${highlightedProject.raised.toLocaleString()}</span>
+                  <span className="text-gray-400 text-sm">Meta: ${highlightedProject.goal.toLocaleString()}</span>
                 </div>
-
-                <div className="space-y-3">
-                  <h4 className="font-bold text-gray-900 px-2">Tu Camino de Compromiso</h4>
-                  <div className="space-y-2">
-                    {levels.map((lvl, idx) => (
-                      <div key={lvl.name} className="flex items-center gap-4 p-3 rounded-xl border border-gray-100 hover:bg-gray-50 transition-colors">
-                        <div className="text-2xl w-12 h-12 flex items-center justify-center bg-gray-50 rounded-xl">
-                          {lvl.icon}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="font-bold text-sm">{lvl.name}</span>
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${lvl.color}`}>
-                              {lvl.minIp}+ IP
-                            </span>
-                          </div>
-                          <p className="text-xs text-gray-500">{lvl.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 flex gap-4">
-                  <div className="p-2 bg-blue-100 text-blue-600 rounded-xl shrink-0 h-fit">
-                    <Info size={20} />
-                  </div>
-                  <div>
-                    <h5 className="font-bold text-sm text-blue-900 mb-1">¿Cómo subo de nivel?</h5>
-                    <p className="text-xs text-blue-800/70">
-                      Cada vez que apoyas una causa desde el panel de "Apoyar una Causa", recibes IP proporcional a tu ayuda. El sistema actualiza tu reconocimiento automáticamente.
-                    </p>
-                  </div>
+                <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-guiso-orange transition-all duration-1000"
+                    style={{ width: `${(highlightedProject.raised / highlightedProject.goal) * 100}%` }} 
+                  />
                 </div>
               </div>
-              
-              <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
-                <Button onClick={() => setShowLevelsModal(false)}>Entendido</Button>
-              </div>
-            </motion.div>
+              <Button 
+                className="w-full py-6 text-lg"
+                onClick={() => document.getElementById('donacion')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Donar a esta causa
+              </Button>
+            </div>
           </div>
-        )}
-      </AnimatePresence>
+        </Card>
+      </section>
+
+      {/* 3. SECCIÓN DONACIÓN */}
+      <section id="donacion" className="bg-guiso-cream/30 py-24 rounded-[3rem] md:rounded-[5rem]">
+        <div className="max-w-3xl mx-auto px-4 text-center space-y-12">
+          <div className="space-y-4">
+            <h2 className="text-3xl md:text-5xl font-display font-bold text-gray-900">Elegí cuánto querés aportar</h2>
+            <p className="text-gray-500 text-lg">Tu ayuda llega directamente a esta causa. Podés ver el impacto en tiempo real.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[500, 1000, 2000].map((amount) => (
+              <button
+                key={amount}
+                onClick={() => setSelectedAmount(amount)}
+                className={cn(
+                  "py-8 rounded-3xl text-2xl font-bold transition-all border-2",
+                  selectedAmount === amount 
+                    ? "bg-guiso-orange border-guiso-orange text-white shadow-xl shadow-guiso-orange/20 scale-105" 
+                    : "bg-white border-gray-100 text-gray-900 hover:border-guiso-orange/30"
+                )}
+              >
+                ${amount}
+              </button>
+            ))}
+          </div>
+
+          <div className="pt-8">
+            <Button 
+              size="lg" 
+              className="w-full py-8 text-xl"
+              disabled={!selectedAmount}
+              onClick={() => navigate('/impacto')}
+            >
+              Confirmar donación
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. SECCIÓN TRANSPARENCIA */}
+      <section className="max-w-4xl mx-auto px-4 space-y-12">
+        <div className="text-center space-y-4">
+          <h2 className="text-3xl md:text-5xl font-display font-bold text-gray-900">Transparencia total</h2>
+          <p className="text-gray-500 text-lg">Mirá cómo impacta tu ayuda</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="space-y-4">
+            {recentDonations.map((donation, idx) => (
+              <motion.div 
+                key={idx}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className="flex items-center justify-between p-6 bg-white rounded-2xl border border-gray-100 shadow-sm"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-guiso-orange/10 rounded-full flex items-center justify-center text-guiso-orange font-bold">
+                    {donation.name[0]}
+                  </div>
+                  <p className="font-bold text-gray-900">{donation.name} donó</p>
+                </div>
+                <p className="text-guiso-orange font-bold text-xl">${donation.amount}</p>
+              </motion.div>
+            ))}
+            <div className="pt-6 border-t border-gray-100 flex justify-between items-center px-2">
+              <p className="text-gray-500 font-medium">Total recaudado:</p>
+              <p className="text-3xl font-display font-bold text-guiso-orange">${totalRaised.toLocaleString()}</p>
+            </div>
+          </div>
+          <div className="bg-guiso-dark p-10 rounded-[3rem] text-white space-y-6 relative overflow-hidden">
+            <ShieldCheck size={120} className="absolute -right-10 -bottom-10 text-white/5 rotate-12" />
+            <h4 className="text-2xl font-display font-bold">Seguridad Garantizada</h4>
+            <p className="text-white/60 leading-relaxed">
+              Cada centavo está registrado de forma inmutable. No hay intermediarios, no hay costos ocultos. Tu ayuda llega a quien más lo necesita.
+            </p>
+            <div className="flex items-center gap-3 text-guiso-orange font-bold">
+              <CheckCircle2 size={20} />
+              Verificado por la comunidad
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. SECCIÓN "CÓMO FUNCIONA" */}
+      <section id="como-funciona" className="max-w-6xl mx-auto px-4 py-12">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-5xl font-display font-bold text-gray-900">¿Cómo funciona?</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          {[
+            { step: "1", title: "Elegís una causa real", desc: "Explorá los proyectos verificados que necesitan ayuda hoy mismo.", icon: <Heart className="text-guiso-orange" size={32} /> },
+            { step: "2", title: "Hacés tu aporte", desc: "Doná de forma segura y rápida con el monto que prefieras.", icon: <Zap className="text-guiso-orange" size={32} /> },
+            { step: "3", title: "Ves el impacto de tu ayuda", desc: "Recibí actualizaciones y comprobantes de cómo se usó tu dinero.", icon: <Sparkles className="text-guiso-orange" size={32} /> },
+          ].map((item, idx) => (
+            <div key={idx} className="relative p-10 bg-white rounded-[2.5rem] border border-gray-100 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-2">
+              <div className="absolute -top-6 -left-6 w-12 h-12 bg-guiso-dark text-white rounded-full flex items-center justify-center font-bold text-xl">
+                {item.step}
+              </div>
+              <div className="mb-6">{item.icon}</div>
+              <h4 className="text-xl font-bold text-gray-900 mb-4">{item.title}</h4>
+              <p className="text-gray-500 leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 6. SECCIÓN FINAL (CTA) */}
+      <section className="max-w-5xl mx-auto px-4">
+        <div className="bg-guiso-orange p-12 md:p-24 rounded-[3rem] md:rounded-[5rem] text-white text-center space-y-10 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-full h-full opacity-20 pointer-events-none">
+            <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[100%] rounded-full bg-white blur-[120px]" />
+          </div>
+          
+          <div className="relative z-10 space-y-6">
+            <h2 className="text-4xl md:text-7xl font-display font-bold leading-tight">
+              Cada pequeño aporte <br /> puede cambiar una vida.
+            </h2>
+            <p className="text-xl md:text-2xl text-white/80 font-medium">Sumate hoy y sé parte del cambio.</p>
+          </div>
+
+          <div className="relative z-10">
+            <Button 
+              size="lg" 
+              variant="secondary" 
+              className="px-16 py-8 text-2xl bg-white text-guiso-orange hover:bg-guiso-cream shadow-2xl"
+              onClick={() => document.getElementById('causas')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              Donar ahora
+            </Button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
