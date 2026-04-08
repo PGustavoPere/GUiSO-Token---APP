@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "tsx server.ts",
     "build": "vite build",
-    "start": "NODE_ENV=production node server.ts",
+    "start": "NODE_ENV=production node --experimental-strip-types server.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"
@@ -38,6 +38,7 @@
     "react-router-dom": "^7.13.2",
     "recharts": "^3.7.0",
     "tailwind-merge": "^3.5.0",
+    "tsx": "^4.21.0",
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
@@ -45,7 +46,6 @@
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
     "tailwindcss": "^4.2.2",
-    "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^8.0.3"
   }
