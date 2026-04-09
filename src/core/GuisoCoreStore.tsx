@@ -12,6 +12,7 @@ import { useWallet } from './WalletProvider';
 import { web3Bridge } from '../web3/web3Provider';
 import { tokenBalanceService } from '../web3/tokenBalanceService';
 
+import { api } from '../services/api';
 import { impactCertificateService } from '../features/impactCertificate/impactCertificateService';
 
 /**
@@ -187,7 +188,24 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
 
     const interval = setInterval(fetchLatestData, 5000);
-    return () => clearInterval(interval);
+    
+    // Also fetch global stats periodically
+    const fetchGlobalStats = async () => {
+      try {
+        const stats = await api.getStats();
+        setGlobal(stats);
+      } catch (err) {
+        console.error("Error fetching global stats:", err);
+      }
+    };
+    
+    fetchGlobalStats();
+    const statsInterval = setInterval(fetchGlobalStats, 10000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(statsInterval);
+    };
   }, [isConnected, address]);
 
   // Marcar como cargado (sin persistencia local)

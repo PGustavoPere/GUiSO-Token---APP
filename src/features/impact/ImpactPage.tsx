@@ -98,8 +98,8 @@ export default function ImpactPage() {
 
               <div className="space-y-4">
                 <div className="flex justify-between items-end mb-1">
-                  <span className="text-sm font-bold">${project.raised.toLocaleString()} recaudados</span>
-                  <span className="text-[10px] md:text-xs text-gray-400">Objetivo: ${project.goal.toLocaleString()}</span>
+                  <span className="text-sm font-bold">{project.raised.toLocaleString()} GSO recaudados</span>
+                  <span className="text-[10px] md:text-xs text-gray-400">Objetivo: {project.goal.toLocaleString()} GSO</span>
                 </div>
                 <div className="w-full bg-gray-100 h-2 md:h-3 rounded-full overflow-hidden">
                   <div 

@@ -40,6 +40,19 @@ async function startServer() {
   // --- Mock API Routes ---
   // Define these BEFORE static files to ensure they take precedence
   
+  // Global Stats
+  app.get("/api/stats", (req, res) => {
+    const projects = projectRepo.getAll();
+    const dynamicImpact = projects.reduce((acc, p) => acc + p.raised, 0);
+    const dynamicCauses = projects.filter(p => p.raised > 0).length;
+    
+    res.json({
+      totalImpact: 125400 + dynamicImpact,
+      supportedCauses: 42 + dynamicCauses,
+      communityMembers: 856 + Math.floor(dynamicImpact / 1000)
+    });
+  });
+
   // Token Stats
   app.get("/api/token/stats", (req, res) => {
     res.json({

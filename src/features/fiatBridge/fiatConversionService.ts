@@ -1,4 +1,6 @@
-export const FIAT_CONVERSION_RATE = 100; // 1 GUISO = 100 ARS
+import { GUISO_RATE_ARS } from '../../core/economy';
+
+export const FIAT_CONVERSION_RATE = GUISO_RATE_ARS;
 
 export const fiatConversionService = {
   convertFiatToGuiso: (arsAmount: number): number => {

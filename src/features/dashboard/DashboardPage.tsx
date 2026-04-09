@@ -53,13 +53,13 @@ export default function DashboardPage() {
     walletAddress: "0x742d35Cc6634C0532925a3b8D4C9b4444"
   };
 
+  const totalRaised = projects.reduce((acc, curr) => acc + curr.raised, 0);
+
   const recentDonations = [
     { name: "Juan", amount: 1000 },
     { name: "María", amount: 500 },
     { name: "Carlos", amount: 2000 },
   ];
-
-  const totalRaised = recentDonations.reduce((acc, curr) => acc + curr.amount, 0) + 45000;
 
   return (
     <div className="space-y-20 pb-20">
@@ -143,8 +143,8 @@ export default function DashboardPage() {
               </p>
               <div className="space-y-4 pt-4">
                 <div className="flex justify-between items-end">
-                  <span className="text-guiso-orange font-bold text-xl">${highlightedProject.raised.toLocaleString()}</span>
-                  <span className="text-gray-400 text-sm">Meta: ${highlightedProject.goal.toLocaleString()}</span>
+                  <span className="text-guiso-orange font-bold text-xl">{highlightedProject.raised.toLocaleString()} GSO</span>
+                  <span className="text-gray-400 text-sm">Meta: {highlightedProject.goal.toLocaleString()} GSO</span>
                 </div>
                 <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
                   <div 
@@ -233,7 +233,7 @@ export default function DashboardPage() {
             ))}
             <div className="pt-6 border-t border-gray-100 flex justify-between items-center px-2">
               <p className="text-gray-500 font-medium">Total recaudado:</p>
-              <p className="text-3xl font-display font-bold text-guiso-orange">${totalRaised.toLocaleString()}</p>
+              <p className="text-3xl font-display font-bold text-guiso-orange">{totalRaised.toLocaleString()} GSO</p>
             </div>
           </div>
           <div className="bg-guiso-dark p-10 rounded-[3rem] text-white space-y-6 relative overflow-hidden">

@@ -11,6 +11,7 @@ import { useIdentityStore } from '../identity/IdentityStore';
 import { useWallet } from '../../core/WalletProvider';
 
 import { api } from '../../services/api';
+import { convertGuisoToFiat } from '../../core/economy';
 
 interface SupportModalProps {
   project: { id: string; title: string; category: string; walletAddress: string };
@@ -40,7 +41,7 @@ export default function SupportModal({ project, initialAmount = 100, onClose, on
         merchantId: project.id,
         merchantName: project.title,
         tokenAmount: amount,
-        fiatAmount: amount / 10, // Mock conversion
+        fiatAmount: convertGuisoToFiat(amount),
         description: `Donación a ${project.title}`,
         walletAddress: project.walletAddress
       });

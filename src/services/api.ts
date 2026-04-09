@@ -1,3 +1,9 @@
+export interface GlobalImpactState {
+  totalImpact: number;
+  supportedCauses: number;
+  communityMembers: number;
+}
+
 export interface TokenStats {
   price: number;
   priceChange24h: number;
@@ -65,6 +71,11 @@ export const api = {
   async getTokenStats(): Promise<TokenStats> {
     const res = await fetch(`${API_BASE}/token/stats`);
     return handleResponse<TokenStats>(res);
+  },
+
+  async getStats(): Promise<GlobalImpactState> {
+    const res = await fetch(`${API_BASE}/stats?t=${Date.now()}`);
+    return handleResponse<GlobalImpactState>(res);
   },
 
   async getProjects(): Promise<Project[]> {

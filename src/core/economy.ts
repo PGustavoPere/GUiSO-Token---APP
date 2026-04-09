@@ -3,9 +3,9 @@
  * Define la paridad y las reglas de conversión.
  */
 
-// Paridad: 1 GSO = 100 ARS (Pesos Argentinos)
+// Paridad: 1 GSO = 1 ARS (Pesos Argentinos)
 // Esta tasa es fija para el MVP para dar estabilidad a los comercios.
-export const GUISO_RATE_ARS = 100;
+export const GUISO_RATE_ARS = 1;
 
 // Símbolos y formatos
 export const FIAT_SYMBOL = 'ARS';
