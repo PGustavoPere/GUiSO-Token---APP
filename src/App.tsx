@@ -32,8 +32,9 @@ import { FiatBridgeProvider } from './features/fiatBridge/FiatBridgeStore';
 import { TrustProvider } from './features/trust/TrustStore';
 import { IdentityProvider } from './features/identity/IdentityStore';
 import { CommunityProvider } from './features/community/CommunityStore';
-import CommunityPage from './features/community/CommunityPage';
+import DAOPage from './features/community/DAOPage';
 
+// v1.0.2 - DAO Governance Update
 export default function App() {
   console.log("Router mounted");
   return (
@@ -53,7 +54,7 @@ export default function App() {
                           <Route path="/" element={<Layout />}>
                             <Route index element={<DashboardPage />} />
                             <Route path="impacto" element={<ImpactPage />} />
-                            <Route path="comunidad" element={<CommunityPage />} />
+                            <Route path="ecosistema" element={<DAOPage />} />
                             <Route path="perfil" element={<ProfilePage />} />
                             <Route path="vision" element={<VisionPage />} />
                             <Route path="merchant" element={<MerchantDashboard />} />

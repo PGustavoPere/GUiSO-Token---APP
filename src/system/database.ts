@@ -1,17 +1,32 @@
+import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
-const dbPath = path.join(process.cwd(), 'data', 'payments.json');
+const dbPath = path.join(process.cwd(), 'data', 'guiso.db');
 
 // Ensure data directory exists
 if (!fs.existsSync(path.join(process.cwd(), 'data'))) {
   fs.mkdirSync(path.join(process.cwd(), 'data'), { recursive: true });
 }
 
-// Initialize JSON file if it doesn't exist
-if (!fs.existsSync(dbPath)) {
-  fs.writeFileSync(dbPath, JSON.stringify([], null, 2));
-}
+const db = new Database(dbPath);
+
+// Initialize tables
+db.exec(`
+  CREATE TABLE IF NOT EXISTS payments (
+    id TEXT PRIMARY KEY,
+    merchantId TEXT,
+    merchantName TEXT,
+    fiatAmount REAL,
+    tokenAmount INTEGER,
+    status TEXT,
+    description TEXT,
+    createdAt INTEGER,
+    expiresAt INTEGER,
+    walletAddress TEXT,
+    txHash TEXT
+  )
+`);
 
 export interface PaymentRecord {
   id: string;
@@ -27,49 +42,41 @@ export interface PaymentRecord {
   txHash?: string;
 }
 
-const readData = (): PaymentRecord[] => {
-  try {
-    const data = fs.readFileSync(dbPath, 'utf8');
-    return JSON.parse(data);
-  } catch (err) {
-    console.error('Error reading payments.json:', err);
-    return [];
-  }
-};
-
-const writeData = (data: PaymentRecord[]) => {
-  try {
-    fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
-  } catch (err) {
-    console.error('Error writing payments.json:', err);
-  }
-};
-
 export const paymentRepo = {
   getAll: (): PaymentRecord[] => {
-    return readData().sort((a, b) => b.createdAt - a.createdAt);
+    return db.prepare('SELECT * FROM payments ORDER BY createdAt DESC').all() as PaymentRecord[];
   },
   
   getById: (id: string): PaymentRecord | undefined => {
-    return readData().find(p => p.id === id);
+    return db.prepare('SELECT * FROM payments WHERE id = ?').get(id) as PaymentRecord | undefined;
   },
   
   create: (payment: PaymentRecord) => {
-    const data = readData();
-    data.push(payment);
-    writeData(data);
+    const stmt = db.prepare(`
+      INSERT INTO payments (id, merchantId, merchantName, fiatAmount, tokenAmount, status, description, createdAt, expiresAt, walletAddress)
+      VALUES (@id, @merchantId, @merchantName, @fiatAmount, @tokenAmount, @status, @description, @createdAt, @expiresAt, @walletAddress)
+    `);
+    stmt.run(payment);
     return payment;
   },
   
   update: (id: string, updates: Partial<PaymentRecord>) => {
-    const data = readData();
-    const index = data.findIndex(p => p.id === id);
-    if (index === -1) return undefined;
+    const current = paymentRepo.getById(id);
+    if (!current) return undefined;
     
-    data[index] = { ...data[index], ...updates };
-    writeData(data);
-    return data[index];
+    const updated = { ...current, ...updates };
+    const stmt = db.prepare(`
+      UPDATE payments 
+      SET status = @status, txHash = @txHash
+      WHERE id = @id
+    `);
+    stmt.run({
+      status: updated.status,
+      txHash: updated.txHash || null,
+      id
+    });
+    return updated;
   }
 };
 
-export default { dbPath };
+export default db;

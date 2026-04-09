@@ -229,7 +229,7 @@ export default function ImpactPage() {
                   <div className="p-2 bg-white/10 rounded-xl text-guiso-orange">
                     <Vote size={24} />
                   </div>
-                  <h3 className="text-xl font-display font-bold">Decisiones de la Comunidad</h3>
+                  <h3 className="text-xl font-display font-bold">Gobernanza del Ecosistema</h3>
                 </div>
                 <button onClick={() => setShowDAO(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
                   <X size={20} />

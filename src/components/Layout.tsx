@@ -24,7 +24,7 @@ export default function Layout() {
   const navItems = [
     { to: '/', icon: LayoutDashboard, label: 'Inicio' },
     { to: '/impacto', icon: Heart, label: 'Causas' },
-    { to: '/comunidad', icon: Users, label: 'Comunidad' },
+    { to: '/ecosistema', icon: Users, label: 'Ecosistema' },
     { to: '/vision', icon: Globe, label: 'Nuestra Visión' },
     { to: '/perfil', icon: User, label: 'Mi Cuenta' },
     { to: '/merchant', icon: Store, label: 'Comercios Amigos' },
@@ -94,6 +94,11 @@ export default function Layout() {
             >
               <item.icon size={20} className={cn("transition-transform group-hover:scale-110")} />
               <span>{item.label}</span>
+              {item.to === '/ecosistema' && (
+                <span className="ml-auto text-[8px] font-bold bg-guiso-orange text-white px-1.5 py-0.5 rounded-full animate-pulse">
+                  NEW
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -171,6 +176,11 @@ export default function Layout() {
                 >
                   <item.icon size={24} />
                   <span>{item.label}</span>
+                  {item.to === '/ecosistema' && (
+                    <span className="ml-auto text-xs font-bold bg-guiso-orange text-white px-2 py-1 rounded-full">
+                      NEW
+                    </span>
+                  )}
                 </NavLink>
               ))}
             </nav>
