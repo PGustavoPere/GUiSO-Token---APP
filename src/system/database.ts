@@ -25,7 +25,19 @@ db.exec(`
     expiresAt INTEGER,
     walletAddress TEXT,
     txHash TEXT
-  )
+  );
+
+  CREATE TABLE IF NOT EXISTS projects (
+    id TEXT PRIMARY KEY,
+    title TEXT,
+    description TEXT,
+    status TEXT,
+    raised INTEGER,
+    goal INTEGER,
+    image TEXT,
+    category TEXT,
+    walletAddress TEXT
+  );
 `);
 
 export interface PaymentRecord {
@@ -41,6 +53,42 @@ export interface PaymentRecord {
   walletAddress: string;
   txHash?: string;
 }
+
+export interface ProjectRecord {
+  id: string;
+  title: string;
+  description: string;
+  status: string;
+  raised: number;
+  goal: number;
+  image: string;
+  category: string;
+  walletAddress: string;
+}
+
+export const projectRepo = {
+  getAll: (): ProjectRecord[] => {
+    return db.prepare('SELECT * FROM projects').all() as ProjectRecord[];
+  },
+  
+  getById: (id: string): ProjectRecord | undefined => {
+    return db.prepare('SELECT * FROM projects WHERE id = ?').get(id) as ProjectRecord | undefined;
+  },
+  
+  create: (project: ProjectRecord) => {
+    const stmt = db.prepare(`
+      INSERT INTO projects (id, title, description, status, raised, goal, image, category, walletAddress)
+      VALUES (@id, @title, @description, @status, @raised, @goal, @image, @category, @walletAddress)
+    `);
+    stmt.run(project);
+    return project;
+  },
+  
+  incrementRaised: (id: string, amount: number) => {
+    const stmt = db.prepare('UPDATE projects SET raised = raised + ? WHERE id = ?');
+    stmt.run(amount, id);
+  }
+};
 
 export const paymentRepo = {
   getAll: (): PaymentRecord[] => {

@@ -170,6 +170,26 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [isConnected, address]);
 
+  // Real-time updates for balance and transactions
+  useEffect(() => {
+    if (!isConnected || !address) return;
+
+    const fetchLatestData = async () => {
+      if (web3Bridge.getMode() === 'web3') {
+        const result = await tokenBalanceService.getBalance(address);
+        setToken(prev => ({
+          ...prev,
+          gsoBalance: result.balance,
+          impactPower: tokenBalanceService.getImpactPower(result.balance),
+          influenceBadge: tokenBalanceService.getInfluenceBadge(result.balance),
+        }));
+      }
+    };
+
+    const interval = setInterval(fetchLatestData, 5000);
+    return () => clearInterval(interval);
+  }, [isConnected, address]);
+
   // Marcar como cargado (sin persistencia local)
   useEffect(() => {
     isLoaded.current = true;

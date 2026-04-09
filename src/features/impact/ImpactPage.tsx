@@ -20,11 +20,24 @@ export default function ImpactPage() {
 
   const recentEvents = getRecentEvents().slice(0, 5);
 
-  useEffect(() => {
+  const fetchProjects = () => {
+    console.log("ImpactPage: Fetching projects...");
     api.getProjects().then(data => {
+      console.log("ImpactPage: Received projects", data);
       setProjects(data);
       setLoading(false);
+    }).catch(err => {
+      console.error("ImpactPage: Error fetching projects", err);
+      setLoading(false);
     });
+  };
+
+  useEffect(() => {
+    fetchProjects();
+    
+    // Set up a polling interval for the MVP presentation to ensure real-time updates
+    const interval = setInterval(fetchProjects, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   if (loading) {
@@ -121,6 +134,7 @@ export default function ImpactPage() {
         <SupportModal 
           project={selectedProject} 
           onClose={() => setSelectedProject(null)} 
+          onSuccess={fetchProjects}
         />
       )}
 

@@ -177,7 +177,7 @@ export default function DAOPage() {
                           <Badge variant="neutral" className="w-fit uppercase text-[10px] tracking-widest">
                             {proposal.category}
                           </Badge>
-                          <Badge variant="outline" className="text-[9px] border-guiso-orange/30 text-guiso-orange h-5">
+                          <Badge variant="neutral" className="text-[9px] border-guiso-orange/30 text-guiso-orange h-5">
                             DAO Verified
                           </Badge>
                         </div>

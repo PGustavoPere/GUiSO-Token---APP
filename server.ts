@@ -4,7 +4,7 @@ import fs from "fs";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import cors from "cors";
-import { paymentRepo } from "./src/system/database";
+import { paymentRepo, projectRepo } from "./src/system/database";
 
 console.log("Starting GUISO Server initialization...");
 
@@ -54,52 +54,9 @@ async function startServer() {
 
   // Social Projects
   app.get("/api/projects", (req, res) => {
-    res.json([
-      {
-        id: "1",
-        title: "Un Lugar — General Cabrera",
-        description: "Espacio comunitario que brinda desayuno, almuerzo y merienda a niños y niñas de 2 a 16 años. Ofrece contención, juego y aprendizaje a los más vulnerables de nuestra comunidad.",
-        status: "active",
-        raised: 87500,
-        goal: 150000,
-        image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1000&auto=format&fit=crop",
-        category: "Infancia y Alimentación",
-        walletAddress: "0x742d35Cc6634C0532925a3b8D4C9b4444"
-      },
-      {
-        id: "2",
-        title: "Asociación Civil Comedor Comunitario Tía Kusi",
-        description: "Comedor comunitario en Córdoba Capital que asiste a familias en situación de vulnerabilidad con alimentación y apoyo escolar.",
-        status: "active",
-        raised: 45000,
-        goal: 100000,
-        image: "https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=1000&auto=format&fit=crop",
-        category: "Alimentación",
-        walletAddress: "0x821d35Cc6634C0532925a3b8D4C9b4444"
-      },
-      {
-        id: "3",
-        title: "Comedor Pancitas Felices",
-        description: "Brindamos raciones diarias y talleres para niños en Córdoba Capital. Nuestro objetivo es erradicar la desnutrición infantil.",
-        status: "active",
-        raised: 32000,
-        goal: 80000,
-        image: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=1000&auto=format&fit=crop",
-        category: "Infancia",
-        walletAddress: "0x932e35Cc6634C0532925a3b8D4C9b4444"
-      },
-      {
-        id: "4",
-        title: "Remar Córdoba",
-        description: "Centro comunitario de ayuda social, merenderos y rehabilitación de adicciones. Trabajamos en la reinserción social y apoyo integral.",
-        status: "active",
-        raised: 120000,
-        goal: 250000,
-        image: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=1000&auto=format&fit=crop",
-        category: "Social y Salud",
-        walletAddress: "0xa43f35Cc6634C0532925a3b8D4C9b4444"
-      }
-    ]);
+    const projects = projectRepo.getAll();
+    console.log(`[API] GET /api/projects - Returning ${projects.length} projects`);
+    res.json(projects);
   });
 
   // User Profile Mock
@@ -116,6 +73,54 @@ async function startServer() {
   });
 
   // --- Payments Mock API ---
+  // Hardcoded initial projects
+  const INITIAL_PROJECTS = [
+    {
+      id: "1",
+      title: "Un Lugar — General Cabrera",
+      description: "Espacio comunitario que brinda desayuno, almuerzo y merienda a niños y niñas de 2 a 16 años. Ofrece contención, juego y aprendizaje a los más vulnerables de nuestra comunidad.",
+      status: "active",
+      raised: 87500,
+      goal: 150000,
+      image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1000&auto=format&fit=crop",
+      category: "Infancia y Alimentación",
+      walletAddress: "0x742d35Cc6634C0532925a3b8D4C9b4444"
+    },
+    {
+      id: "2",
+      title: "Asociación Civil Comedor Comunitario Tía Kusi",
+      description: "Comedor comunitario en Córdoba Capital que asiste a familias en situación de vulnerabilidad con alimentación y apoyo escolar.",
+      status: "active",
+      raised: 45000,
+      goal: 100000,
+      image: "https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=1000&auto=format&fit=crop",
+      category: "Alimentación",
+      walletAddress: "0x821d35Cc6634C0532925a3b8D4C9b4444"
+    },
+    {
+      id: "3",
+      title: "Comedor Pancitas Felices",
+      description: "Brindamos raciones diarias y talleres para niños en Córdoba Capital. Nuestro objetivo es erradicar la desnutrición infantil.",
+      status: "active",
+      raised: 32000,
+      goal: 80000,
+      image: "https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=1000&auto=format&fit=crop",
+      category: "Infancia",
+      walletAddress: "0x932e35Cc6634C0532925a3b8D4C9b4444"
+    },
+    {
+      id: "4",
+      title: "Remar Córdoba",
+      description: "Centro comunitario de ayuda social, merenderos y rehabilitación de adicciones. Trabajamos en la reinserción social y apoyo integral.",
+      status: "active",
+      raised: 120000,
+      goal: 250000,
+      image: "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=1000&auto=format&fit=crop",
+      category: "Social y Salud",
+      walletAddress: "0xa43f35Cc6634C0532925a3b8D4C9b4444"
+    }
+  ];
+
   // Hardcoded initial payments for persistence and specific history
   const INITIAL_PAYMENTS = [
     // Un Lugar — General Cabrera
@@ -217,6 +222,15 @@ async function startServer() {
 
   // Seed database with hardcoded payments if they don't exist
   try {
+    console.log("[Seed] Checking for initial projects...");
+    INITIAL_PROJECTS.forEach(p => {
+      const existing = projectRepo.getById(p.id);
+      if (!existing) {
+        console.log(`[Seed] Adding missing project: ${p.id}`);
+        projectRepo.create(p as any);
+      }
+    });
+
     console.log("[Seed] Checking for initial payments...");
     INITIAL_PAYMENTS.forEach(p => {
       const existing = paymentRepo.getById(p.id);
@@ -251,6 +265,8 @@ async function startServer() {
         ...data, 
         id, 
         status: 'awaiting_payment', 
+        tokenAmount: Number(data.tokenAmount) || 0,
+        fiatAmount: Number(data.fiatAmount) || 0,
         createdAt: Date.now(),
         expiresAt
       };
@@ -281,7 +297,22 @@ async function startServer() {
     if (!payment) {
       return res.status(404).json({ error: "Pago no encontrado" });
     }
+    
+    const oldStatus = payment.status;
+    const newStatus = req.body.status;
+    
     const updated = paymentRepo.update(id, req.body);
+    
+    // If payment just completed, increment project raised amount
+    if (oldStatus !== 'completed' && newStatus === 'completed' && payment.merchantId) {
+      const amountToIncrement = Number(payment.tokenAmount);
+      console.log(`[API] Payment ${id} completed. Incrementing raised amount for project ${payment.merchantId} by ${amountToIncrement}`);
+      projectRepo.incrementRaised(payment.merchantId, amountToIncrement);
+      
+      // Verify update
+      const updatedProject = projectRepo.getById(payment.merchantId);
+      console.log(`[API] Project ${payment.merchantId} new raised amount: ${updatedProject?.raised}`);
+    }
     
     // Notify SSE clients
     notifyPaymentUpdate(id);

@@ -32,6 +32,20 @@ export interface UserProfile {
   }>;
 }
 
+export interface Payment {
+  id: string;
+  merchantId: string;
+  merchantName: string;
+  fiatAmount: number;
+  tokenAmount: number;
+  status: string;
+  description: string;
+  createdAt: number;
+  expiresAt: number;
+  walletAddress: string;
+  txHash?: string;
+}
+
 const API_BASE = '/api';
 
 async function handleResponse<T>(res: Response): Promise<T> {
@@ -54,7 +68,7 @@ export const api = {
   },
 
   async getProjects(): Promise<Project[]> {
-    const res = await fetch(`${API_BASE}/projects`);
+    const res = await fetch(`${API_BASE}/projects?t=${Date.now()}`);
     return handleResponse<Project[]>(res);
   },
 
@@ -62,4 +76,22 @@ export const api = {
     const res = await fetch(`${API_BASE}/user/profile/${address}`);
     return handleResponse<UserProfile>(res);
   },
+
+  async createPayment(data: Partial<Payment>): Promise<{ id: string }> {
+    const res = await fetch(`${API_BASE}/payments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return handleResponse<{ id: string }>(res);
+  },
+
+  async updatePayment(id: string, data: Partial<Payment>): Promise<Payment> {
+    const res = await fetch(`${API_BASE}/payments/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    return handleResponse<Payment>(res);
+  }
 };

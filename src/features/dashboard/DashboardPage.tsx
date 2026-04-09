@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, ArrowRight, Heart, ShieldCheck, Zap, CheckCircle2, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
 import { Card, Button } from '../../components/ui';
 import SupportModal from '../impact/SupportModal';
+import { api, Project } from '../../services/api';
 
 function cn(...inputs: any[]) {
   return inputs.filter(Boolean).join(' ');
@@ -15,16 +16,41 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const [selectedAmount, setSelectedAmount] = React.useState<number | null>(null);
   const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const highlightedProject = {
+  const fetchProjects = () => {
+    console.log("Dashboard: Fetching projects...");
+    api.getProjects().then(data => {
+      console.log("Dashboard: Received projects", data);
+      setProjects(data);
+      setLoading(false);
+    }).catch(err => {
+      console.error("Dashboard: Error fetching projects", err);
+      setLoading(false);
+    });
+  };
+
+  useEffect(() => {
+    fetchProjects();
+    
+    // Set up a polling interval for the MVP presentation to ensure real-time updates
+    // even if the SSE stream has issues
+    const interval = setInterval(fetchProjects, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Find the project in the current projects list to ensure we have the latest raised amount
+  const highlightedProject = projects.find(p => p.id === "1") || projects[0] || {
     id: "1",
-    title: "Comedor 'Los Pibes'",
-    location: "Córdoba, Argentina",
-    description: "Necesitan alimentos básicos para 35 personas.",
-    image: "https://images.unsplash.com/photo-1594708767771-a7502209ff51?q=80&w=1000&auto=format&fit=crop",
-    raised: 150000,
-    goal: 200000,
-    category: "Alimentación"
+    title: "Un Lugar — General Cabrera",
+    description: "Espacio comunitario que brinda desayuno, almuerzo y merienda a niños y niñas de 2 a 16 años.",
+    status: "active",
+    raised: 87500,
+    goal: 150000,
+    image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=1000&auto=format&fit=crop",
+    category: "Infancia y Alimentación",
+    walletAddress: "0x742d35Cc6634C0532925a3b8D4C9b4444"
   };
 
   const recentDonations = [
@@ -108,7 +134,7 @@ export default function DashboardPage() {
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-guiso-orange font-bold text-sm">
                   <MapPin size={18} />
-                  {highlightedProject.location}
+                  {highlightedProject.category}
                 </div>
                 <h3 className="text-3xl md:text-4xl font-display font-bold text-gray-900">{highlightedProject.title}</h3>
               </div>
@@ -280,6 +306,7 @@ export default function DashboardPage() {
           project={highlightedProject}
           initialAmount={selectedAmount || 100}
           onClose={() => setIsSupportModalOpen(false)}
+          onSuccess={fetchProjects}
         />
       )}
     </div>

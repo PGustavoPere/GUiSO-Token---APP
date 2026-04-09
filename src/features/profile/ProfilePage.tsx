@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Wallet, Award, History, ExternalLink, ShieldCheck, LogOut, Heart, Sparkles, User, Edit2, X, Check, PieChart as PieChartIcon, Medal, Zap, Camera, ArrowUpRight, ArrowDownLeft, Copy, QrCode } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import { ActivityTimeline } from '../../components/ActivityTimeline';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { QRScanner } from '../../components/QRScanner';
 import ImpactTransactionPanel from '../../components/ImpactTransactionPanel';
+import { api } from '../../services/api';
 
 const COLORS = ['#FF6321', '#5A5A40', '#141414', '#F27D26', '#E4E3E0'];
 
@@ -55,6 +56,19 @@ export default function ProfilePage() {
   const balance = token.gsoBalance;
   const history = token.transactions;
   const totalSupportedCauses = global.supportedCauses;
+
+  const fetchProjects = () => {
+    console.log("Profile: Fetching projects for real-time update...");
+    // We don't need to store projects here, but calling it ensures the backend is active
+    // and we can potentially sync other data if needed.
+    api.getProjects();
+  };
+
+  useEffect(() => {
+    // Polling for real-time updates in profile too
+    const interval = setInterval(fetchProjects, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   const nextThreshold = impactEngine.getNextThreshold(impactScore);
   const currentThreshold = impactEngine.calculateLevel(impactScore);

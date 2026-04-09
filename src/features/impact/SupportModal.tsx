@@ -10,13 +10,16 @@ import { impactCertificateService } from '../impactCertificate/impactCertificate
 import { useIdentityStore } from '../identity/IdentityStore';
 import { useWallet } from '../../core/WalletProvider';
 
+import { api } from '../../services/api';
+
 interface SupportModalProps {
-  project: { id: string; title: string; category: string };
+  project: { id: string; title: string; category: string; walletAddress: string };
   initialAmount?: number;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function SupportModal({ project, initialAmount = 100, onClose }: SupportModalProps) {
+export default function SupportModal({ project, initialAmount = 100, onClose, onSuccess }: SupportModalProps) {
   const { token, recordSupportTransaction } = useGuisoCore();
   const { updateAfterImpact } = useIdentityStore();
   const { address } = useWallet();
@@ -29,6 +32,23 @@ export default function SupportModal({ project, initialAmount = 100, onClose }: 
     if (amount > token.gsoBalance) return;
     
     setTxStatus('pending');
+    
+    // 1. Create payment on backend
+    let paymentId = '';
+    try {
+      const p = await api.createPayment({
+        merchantId: project.id,
+        merchantName: project.title,
+        tokenAmount: amount,
+        fiatAmount: amount / 10, // Mock conversion
+        description: `Donación a ${project.title}`,
+        walletAddress: project.walletAddress
+      });
+      paymentId = p.id;
+    } catch (err) {
+      console.error("Error creating payment on backend:", err);
+    }
+
     const transactionAdapter = web3Bridge.getTransaction();
     const result = await transactionAdapter.sendTransaction(amount, project.title);
     
@@ -47,10 +67,24 @@ export default function SupportModal({ project, initialAmount = 100, onClose }: 
       setTxStatus('confirmed');
       const impactPoints = impactEngine.calculateImpactPoints(amount);
       
-      // 1. Record in core store
+      // 2. Update payment on backend to completed (this triggers incrementRaised)
+      if (paymentId) {
+        try {
+          console.log("SupportModal: Updating payment to completed", paymentId);
+          await api.updatePayment(paymentId, {
+            status: 'completed',
+            txHash: result.txHash
+          });
+          console.log("SupportModal: Payment updated successfully");
+        } catch (err) {
+          console.error("Error updating payment on backend:", err);
+        }
+      }
+
+      // 3. Record in core store
       recordSupportTransaction(project.id, project.title, amount, result.txHash, project.category);
       
-      // 2. Generate Certificate
+      // 4. Generate Certificate
       if (address) {
         impactCertificateService.generateCertificate(
           result.txHash,
@@ -59,11 +93,19 @@ export default function SupportModal({ project, initialAmount = 100, onClose }: 
           impactPoints
         );
         
-        // 3. Update Identity Store
+        // 5. Update Identity Store
         updateAfterImpact(address, impactPoints, true);
       }
       
       setIsSuccess(true);
+      
+      // Wait a bit for the backend to process the increment before calling onSuccess
+      setTimeout(() => {
+        if (onSuccess) {
+          console.log("SupportModal: Success! Calling onSuccess callback after delay.");
+          onSuccess();
+        }
+      }, 1000);
     } else {
       setTxStatus('failed');
       setTimeout(() => setTxStatus('idle'), 3000);
@@ -100,7 +142,7 @@ export default function SupportModal({ project, initialAmount = 100, onClose }: 
                 <div className="flex flex-col sm:flex-row justify-between text-xs md:text-sm font-bold gap-1">
                   <span>Monto a donar</span>
                   <span className={amount > token.gsoBalance ? "text-red-500" : "text-guiso-orange"}>
-                    Disponible: {token.gsoBalance.toLocaleString()} Créditos
+                    Disponible: {token.gsoBalance.toLocaleString()} GSO
                   </span>
                 </div>
                 
@@ -111,7 +153,7 @@ export default function SupportModal({ project, initialAmount = 100, onClose }: 
                     onChange={(e) => setAmount(Number(e.target.value))}
                     className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl text-xl md:text-2xl font-display font-bold focus:outline-none focus:ring-2 focus:ring-guiso-orange/20"
                   />
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Créditos</div>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">GSO</div>
                 </div>
 
                 <div className="grid grid-cols-4 gap-2">
@@ -128,7 +170,7 @@ export default function SupportModal({ project, initialAmount = 100, onClose }: 
                 
                 {amount > token.gsoBalance && (
                   <p className="text-red-500 text-xs font-bold text-center mt-2">
-                    Necesitás más créditos para realizar esta donación.
+                    Necesitás más GSO para realizar esta donación.
                   </p>
                 )}
               </div>
@@ -168,7 +210,7 @@ export default function SupportModal({ project, initialAmount = 100, onClose }: 
               <div>
                 <h3 className="text-2xl md:text-3xl font-display font-bold text-guiso-dark mb-2">¡Gracias por tu ayuda!</h3>
                 <p className="text-guiso-orange font-bold text-xs md:text-sm mb-2 italic">"{impactEngine.getRandomMotivation()}"</p>
-                <p className="text-gray-500 text-sm md:text-base">Tu aporte de {amount} créditos fue registrado correctamente.</p>
+                <p className="text-gray-500 text-sm md:text-base">Tu aporte de {amount} GSO fue registrado correctamente.</p>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <div className="px-4 py-2 bg-guiso-orange/10 text-guiso-orange rounded-full text-xs md:text-sm font-bold">

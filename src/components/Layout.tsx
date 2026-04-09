@@ -43,7 +43,7 @@ export default function Layout() {
           {isConnected ? (
             <div className="flex items-center gap-3">
               <div className="flex flex-col items-end">
-                <span className="text-[10px] font-bold text-guiso-orange uppercase tracking-tighter">{token.gsoBalance.toLocaleString()} Créditos</span>
+                <span className="text-[10px] font-bold text-guiso-orange uppercase tracking-tighter">{token.gsoBalance.toLocaleString()} GSO</span>
                 <span className="text-[8px] text-gray-400 font-mono">{address?.slice(0, 6)}...{address?.slice(-4)}</span>
               </div>
               <button 
@@ -130,7 +130,7 @@ export default function Layout() {
               </span>
               <div className="flex justify-between items-end mt-1">
                 <span className="font-display font-bold text-lg">
-                  {isConnected ? `${token.gsoBalance.toLocaleString()} Créditos` : '---'}
+                  {isConnected ? `${token.gsoBalance.toLocaleString()} GSO` : '---'}
                 </span>
                 {isConnected ? (
                   <button 
