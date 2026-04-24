@@ -47,14 +47,13 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
       // 1. Request cameras first - this triggers the browser permission prompt
       // and gives us the list of available devices.
       let devices: any[] = [];
+      let enumerationError = false;
       try {
         devices = await Html5Qrcode.getCameras();
       } catch (camErr: any) {
         console.error("Error al obtener cámaras:", camErr);
-        if (camErr.toString().includes("Permission denied") || camErr === "Permission denied") {
-          throw new Error("Permission denied");
-        }
-        // If it's not a permission error, we might still be able to start with facingMode
+        enumerationError = true;
+        // Don't throw yet, we'll try to start with facingMode as a fallback
       }
 
       const html5QrCode = new Html5Qrcode(scannerId);
@@ -83,7 +82,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
             () => {} // Ignore scan errors
           );
         } else {
-          // Fallback to facingMode if no devices list (some browsers)
+          // Fallback to facingMode if no devices list (some browsers or if enumeration failed)
           await html5QrCode.start(
             { facingMode: "environment" }, 
             config, 
@@ -95,6 +94,7 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
         }
       } catch (startErr: any) {
         console.error("Error al iniciar stream:", startErr);
+        // If we also failed with facingMode and we had an enumeration error, then it's a real problem
         throw startErr;
       }
       
@@ -104,14 +104,14 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
       let msg = "No se pudo acceder a la cámara.";
       const errStr = err.toString() || err.message || "";
       
-      if (errStr.includes("Permission denied") || errStr.includes("NotAllowedError")) {
-        msg = "Permiso denegado. Por favor, permití el acceso a la cámara en los ajustes de tu navegador. Si estás en el editor, probá abriendo la app en una pestaña nueva.";
+      if (errStr.includes("Permission denied") || errStr.includes("NotAllowedError") || errStr.includes("PermissionDeniedError")) {
+        msg = "Permiso de cámara denegado. Para solucionar esto:\n1. Habilitar el permiso en tu navegador.\n2. Si estás en AI Studio, probá el botón arriba a la derecha 'Open in new tab' para que el navegador te pida el permiso correctamente.";
       } else if (errStr.includes("NotFound") || errStr.includes("DevicesNotFoundError")) {
-        msg = "No se encontró ninguna cámara en este dispositivo.";
+        msg = "No se encontró ninguna cámara. Si estás en desktop, asegurate de tener una conectada.";
       } else if (errStr.includes("NotReadableError") || errStr.includes("TrackStartError")) {
-        msg = "La cámara está siendo usada por otra aplicación o pestaña. Cerralas e intentá de nuevo.";
+        msg = "La cámara está bloqueada por otra app o pestaña. Cerrá otras cámaras e intentá de nuevo.";
       } else {
-        msg = "Error al iniciar la cámara. Verificá que uses HTTPS y que el navegador tenga permisos.";
+        msg = "Error de hardware o seguridad. Verificá que estés usando HTTPS y que no haya otra app usando la cámara.";
       }
       setError(msg);
       setIsInitializing(false);

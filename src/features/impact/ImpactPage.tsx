@@ -25,57 +25,64 @@ export default function ImpactPage() {
   const recentEvents = getRecentEvents().slice(0, 5);
 
   useEffect(() => {
-    console.log("ImpactPage: Setting up Firestore projects subscription...");
-    
     let isMounted = true;
-    let initialLoadAttempted = false;
+    let initialLoadDone = false;
 
-    const unsub = onSnapshot(collection(db, 'projects'), (snapshot) => {
-      if (!isMounted) return;
-
-      if (snapshot.empty) {
-        if (!initialLoadAttempted) {
-          initialLoadAttempted = true;
+    // Use a simpler approach: check Firestore once, seed if empty, then subscribe
+    const setupSync = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'projects'));
+        
+        if (querySnapshot.empty && isMounted) {
           console.log("ImpactPage: Firestore empty, seeding from API...");
+          const mockData = await api.getProjects();
+          if (isMounted) {
+            setProjects(mockData);
+            setLoading(false);
+            // Seed background
+            for (const p of mockData) {
+              await setDoc(doc(db, 'projects', p.id), p);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("ImpactPage: Initial setup error", err);
+      }
+
+      // Now start the real-time subscription
+      if (!isMounted) return;
+      
+      const unsub = onSnapshot(collection(db, 'projects'), (snapshot) => {
+        if (!isMounted) return;
+        if (!snapshot.empty || initialLoadDone) {
+          const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
+          setProjects(data);
+          setLoading(false);
+          initialLoadDone = true;
+        }
+      }, (err) => {
+        console.error("ImpactPage: Firestore sub error", err);
+        if (isMounted && !initialLoadDone) {
           api.getProjects().then(data => {
             if (isMounted) {
-              // Only set if we don't have data yet
               setProjects(data);
               setLoading(false);
-              
-              // Seed Firestore in background
-              data.forEach(p => {
-                setDoc(doc(db, 'projects', p.id), p).catch(console.error);
-              });
             }
-          }).catch(err => {
-            console.error("ImpactPage: API error", err);
-            if (isMounted) setLoading(false);
           });
         }
-      } else {
-        initialLoadAttempted = true;
-        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
-        console.log("ImpactPage: Received projects from Firestore", data.length);
-        setProjects(data);
-        setLoading(false);
-      }
-    }, (err) => {
-      console.error("ImpactPage: Firestore subscription error", err);
-      // Only fallback if we haven't successfully loaded anything
-      if (isMounted && !initialLoadAttempted) {
-        api.getProjects().then(data => {
-          if (isMounted) {
-            setProjects(data);
-            setLoading(false);
-          }
-        });
-      }
+      });
+
+      return unsub;
+    };
+
+    let unsubscribe: (() => void) | undefined;
+    setupSync().then(unsub => {
+      unsubscribe = unsub;
     });
 
     return () => {
       isMounted = false;
-      unsub();
+      if (unsubscribe) unsubscribe();
     };
   }, []);
 
