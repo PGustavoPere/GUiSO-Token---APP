@@ -26,24 +26,53 @@ export default function PaymentPage() {
   useEffect(() => {
     if (!paymentId) return;
 
-    const unsub = onSnapshot(doc(db, 'payments', paymentId), (docSnap) => {
-      if (docSnap.exists()) {
-        setPayment(docSnap.data());
-        setIsLoading(false);
-      } else {
-        setIsLoading(false);
-        // Fallback to fetch from API just in case
-        fetch(`${window.location.origin}/api/payments/${paymentId}`)
-          .then(res => res.json())
-          .then(data => setPayment(data))
-          .catch(() => setPayment(null));
-      }
-    }, (error) => {
-      console.error('Error listening to payment status:', error);
-      setIsLoading(false);
-    });
+    console.log(`PaymentPage: Checking for payment ${paymentId}`);
+    let retryCount = 0;
+    const maxRetries = 3;
 
-    return () => unsub();
+    const attemptFetch = () => {
+      const unsub = onSnapshot(doc(db, 'payments', paymentId), (docSnap) => {
+        if (docSnap.exists()) {
+          console.log(`PaymentPage: Payment ${paymentId} found in Firestore`);
+          setPayment(docSnap.data());
+          setIsLoading(false);
+        } else {
+          console.warn(`PaymentPage: Payment ${paymentId} NOT found in Firestore (Attempt ${retryCount + 1})`);
+          
+          if (retryCount < maxRetries) {
+            retryCount++;
+            setTimeout(attemptFetch, 2000); // Retry after 2 seconds
+            return;
+          }
+
+          // Fallback to fetch from API as last resort
+          fetch(`${window.location.origin}/api/payments/${paymentId}`)
+            .then(res => {
+              if (!res.ok) throw new Error("API also failed");
+              return res.json();
+            })
+            .then(data => {
+              console.log(`PaymentPage: Payment ${paymentId} found via API fallback`);
+              setPayment(data);
+              setIsLoading(false);
+            })
+            .catch((err) => {
+              console.error(`PaymentPage: All recovery attempts failed for ${paymentId}`, err);
+              setIsLoading(false);
+              setPayment(null);
+            });
+        }
+      }, (error) => {
+        console.error('Error listening to payment status:', error);
+        setIsLoading(false);
+      });
+      return unsub;
+    };
+
+    const unsubscribe = attemptFetch();
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
   }, [paymentId]);
 
   const updatePaymentStatus = async (id: string, status: string, txHash?: string) => {

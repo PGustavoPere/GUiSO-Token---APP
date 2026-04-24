@@ -141,52 +141,52 @@ async function startServer() {
       id: "PAY-Cabrera-1",
       merchantId: "1",
       merchantName: "Un Lugar — General Cabrera",
-      fiatAmount: 250,
-      tokenAmount: 2500,
+      fiatAmount: 2500, // 2500 ARS
+      tokenAmount: 25,   // 25 GSO
       status: "completed",
       description: "Donación anónima",
-      createdAt: 1744011408000, // 2 days ago
+      createdAt: 1744011408000, 
       expiresAt: 1744011408000 + 1800000,
-      walletAddress: "0x742d35Cc6634C0532925a3b8D4C9b4444",
+      walletAddress: "0x742d35cc6634c0532925a3b8d4c9b4444",
       txHash: "0x7b2f8a9c4d5e6f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a"
     },
     {
       id: "PAY-Cabrera-2",
       merchantId: "1",
       merchantName: "Un Lugar — General Cabrera",
-      fiatAmount: 1000,
-      tokenAmount: 10000,
+      fiatAmount: 10000,
+      tokenAmount: 100,
       status: "completed",
       description: "Donación Empresa Local Cabrera",
-      createdAt: 1743752208000, // 5 days ago
+      createdAt: 1743752208000,
       expiresAt: 1743752208000 + 1800000,
-      walletAddress: "0x742d35Cc6634C0532925a3b8D4C9b4444",
+      walletAddress: "0x742d35cc6634c0532925a3b8d4c9b4444",
       txHash: "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2b"
     },
     {
       id: "PAY-Cabrera-3",
       merchantId: "1",
       merchantName: "Un Lugar — General Cabrera",
-      fiatAmount: 100,
-      tokenAmount: 1000,
+      fiatAmount: 1000,
+      tokenAmount: 10,
       status: "completed",
       description: "Donante anónimo",
-      createdAt: 1743493008000, // 8 days ago
+      createdAt: 1743493008000,
       expiresAt: 1743493008000 + 1800000,
-      walletAddress: "0x742d35Cc6634C0532925a3b8D4C9b4444",
+      walletAddress: "0x742d35cc6634c0532925a3b8d4c9b4444",
       txHash: "0x9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b0a9f8e"
     },
     {
       id: "PAY-Cabrera-4",
       merchantId: "1",
       merchantName: "Un Lugar — General Cabrera",
-      fiatAmount: 2500,
-      tokenAmount: 25000,
+      fiatAmount: 25000,
+      tokenAmount: 250,
       status: "completed",
       description: "Donación Municipalidad Gral. Cabrera",
-      createdAt: 1742888208000, // 15 days ago
+      createdAt: 1742888208000,
       expiresAt: 1742888208000 + 1800000,
-      walletAddress: "0x742d35Cc6634C0532925a3b8D4C9b4444",
+      walletAddress: "0x742d35cc6634c0532925a3b8d4c9b4444",
       txHash: "0x0d1c2b3a4f5e6d7c8b9a0f1e2d3c4b5a6f7e8d9c0b1a2f3e4d5c6b7a8f9e0d1c"
     },
     // Tía Kusi
@@ -194,13 +194,13 @@ async function startServer() {
       id: "PAY-Kusi-1",
       merchantId: "2",
       merchantName: "Asociación Civil Comedor Comunitario Tía Kusi",
-      fiatAmount: 500,
-      tokenAmount: 5000,
+      fiatAmount: 5000,
+      tokenAmount: 50,
       status: "completed",
       description: "Apoyo mensual",
       createdAt: 1743925008000,
       expiresAt: 1743925008000 + 1800000,
-      walletAddress: "0x821d35Cc6634C0532925a3b8D4C9b4444",
+      walletAddress: "0x821d35cc6634c0532925a3b8d4c9b4444",
       txHash: "0x2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f"
     },
     // Pancitas Felices
@@ -208,13 +208,13 @@ async function startServer() {
       id: "PAY-Pancitas-1",
       merchantId: "3",
       merchantName: "Comedor Pancitas Felices",
-      fiatAmount: 300,
-      tokenAmount: 3000,
+      fiatAmount: 3000,
+      tokenAmount: 30,
       status: "completed",
       description: "Donación para insumos",
       createdAt: 1743838608000,
       expiresAt: 1743838608000 + 1800000,
-      walletAddress: "0x932e35Cc6634C0532925a3b8D4C9b4444",
+      walletAddress: "0x932e35cc6634c0532925a3b8d4c9b4444",
       txHash: "0x4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b"
     },
     // Remar Córdoba
@@ -222,13 +222,13 @@ async function startServer() {
       id: "PAY-Remar-1",
       merchantId: "4",
       merchantName: "Remar Córdoba",
-      fiatAmount: 1500,
-      tokenAmount: 15000,
+      fiatAmount: 15000,
+      tokenAmount: 150,
       status: "completed",
       description: "Contribución rehabilitación",
       createdAt: 1743665808000,
       expiresAt: 1743665808000 + 1800000,
-      walletAddress: "0xa43f35Cc6634C0532925a3b8D4C9b4444",
+      walletAddress: "0xa43f35cc6634c0532925a3b8d4c9b4444",
       txHash: "0x6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d"
     }
   ];
