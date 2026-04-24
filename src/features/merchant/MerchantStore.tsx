@@ -25,7 +25,8 @@ export const MerchantProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       return;
     }
 
-    const unsub = onSnapshot(doc(db, 'merchants', address), (docSnap) => {
+    const normalizedAddress = address.toLowerCase();
+    const unsub = onSnapshot(doc(db, 'merchants', normalizedAddress), (docSnap) => {
       if (docSnap.exists()) {
         setMerchant(docSnap.data() as Merchant);
       } else {
@@ -41,7 +42,7 @@ export const MerchantProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, [isConnected, address]);
 
   const registerMerchant = useCallback(async (name: string, city?: string, category?: string, addressOverride?: string) => {
-    const targetAddress = addressOverride || address;
+    const targetAddress = (addressOverride || address)?.toLowerCase();
     if (!targetAddress) {
       throw new Error("No hay una wallet conectada.");
     }

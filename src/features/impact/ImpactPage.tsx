@@ -30,36 +30,38 @@ export default function ImpactPage() {
     let isMounted = true;
     let initialLoadAttempted = false;
 
+    // Use a reference to track if we are currently seeding to avoid flickering
     const unsub = onSnapshot(collection(db, 'projects'), (snapshot) => {
       if (!isMounted) return;
 
-      if (snapshot.empty && !initialLoadAttempted) {
-        initialLoadAttempted = true;
-        console.log("ImpactPage: Firestore projects empty, attempting fallback to API...");
-        api.getProjects().then(data => {
-          if (isMounted) {
-            setProjects(data);
-            setLoading(false);
-            
-            // Seed Firestore in background if empty
-            data.forEach(p => {
-              setDoc(doc(db, 'projects', p.id), p).catch(err => console.error("Error seeding project:", err));
-            });
-          }
-        }).catch(err => {
-          console.error("ImpactPage: API error", err);
-          if (isMounted) setLoading(false);
-        });
-      } else if (!snapshot.empty) {
+      if (snapshot.empty) {
+        if (!initialLoadAttempted) {
+          initialLoadAttempted = true;
+          console.log("ImpactPage: Firestore empty, seeding...");
+          api.getProjects().then(data => {
+            if (isMounted) {
+              setProjects(prev => data.length > 0 ? data : prev);
+              setLoading(false);
+              
+              // Seed background
+              data.forEach(p => {
+                setDoc(doc(db, 'projects', p.id), p).catch(console.error);
+              });
+            }
+          }).catch(err => {
+            console.error("ImpactPage API error:", err);
+            if (isMounted) setLoading(false);
+          });
+        }
+      } else {
         initialLoadAttempted = true;
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
-        console.log("ImpactPage: Received projects from Firestore", data);
         setProjects(data);
         setLoading(false);
       }
     }, (err) => {
       console.error("ImpactPage: Firestore error", err);
-      if (isMounted) {
+      if (isMounted && !initialLoadAttempted) {
         api.getProjects().then(data => {
           if (isMounted) {
             setProjects(data);
