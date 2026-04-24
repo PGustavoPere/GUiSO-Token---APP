@@ -27,19 +27,31 @@ export default function ImpactPage() {
   useEffect(() => {
     console.log("ImpactPage: Setting up Firestore projects subscription...");
     
+    let isMounted = true;
+    let initialLoadAttempted = false;
+
     const unsub = onSnapshot(collection(db, 'projects'), (snapshot) => {
-      if (snapshot.empty) {
-        console.log("ImpactPage: Firestore projects empty, seeding from API...");
-        // Fallback to API if Firestore is empty
+      if (!isMounted) return;
+
+      if (snapshot.empty && !initialLoadAttempted) {
+        initialLoadAttempted = true;
+        console.log("ImpactPage: Firestore projects empty, attempting fallback to API...");
         api.getProjects().then(data => {
-          setProjects(data);
-          setLoading(false);
-          // Optional: Seed Firestore from API data for future use
-          data.forEach(p => {
-            setDoc(doc(db, 'projects', p.id), p).catch(err => console.error("Error seeding project:", err));
-          });
+          if (isMounted) {
+            setProjects(data);
+            setLoading(false);
+            
+            // Seed Firestore in background if empty
+            data.forEach(p => {
+              setDoc(doc(db, 'projects', p.id), p).catch(err => console.error("Error seeding project:", err));
+            });
+          }
+        }).catch(err => {
+          console.error("ImpactPage: API error", err);
+          if (isMounted) setLoading(false);
         });
-      } else {
+      } else if (!snapshot.empty) {
+        initialLoadAttempted = true;
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
         console.log("ImpactPage: Received projects from Firestore", data);
         setProjects(data);
@@ -47,14 +59,20 @@ export default function ImpactPage() {
       }
     }, (err) => {
       console.error("ImpactPage: Firestore error", err);
-      // Fallback to API on error
-      api.getProjects().then(data => {
-        setProjects(data);
-        setLoading(false);
-      });
+      if (isMounted) {
+        api.getProjects().then(data => {
+          if (isMounted) {
+            setProjects(data);
+            setLoading(false);
+          }
+        });
+      }
     });
 
-    return () => unsub();
+    return () => {
+      isMounted = false;
+      unsub();
+    };
   }, []);
 
   const fetchProjects = () => {

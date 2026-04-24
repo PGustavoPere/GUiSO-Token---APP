@@ -11,12 +11,14 @@ import CreatePaymentModal from './CreatePaymentModal';
 import { convertGuisoToFiat, FIAT_SYMBOL, TOKEN_SYMBOL } from '../../core/economy';
 
 export default function MerchantDashboard() {
-  const { merchant, registerMerchant, isMerchant } = useMerchantStore();
+  const { merchant, registerMerchant, isMerchant, loading } = useMerchantStore();
   const { payments } = usePaymentStore();
   const { getMerchantTrust } = useTrustStore();
   const { isConnected, connect, address } = useWallet();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [regName, setRegName] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [regError, setRegError] = useState<string | null>(null);
   const [prevCompletedCount, setPrevCompletedCount] = useState<number | null>(null);
 
   // Audio for success
@@ -58,6 +60,15 @@ export default function MerchantDashboard() {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto py-12 text-center">
+        <div className="w-12 h-12 border-4 border-guiso-orange/20 border-t-guiso-orange rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-gray-500">Verificando estado del comercio...</p>
+      </div>
+    );
+  }
+
   if (!isMerchant) {
     return (
       <div className="max-w-4xl mx-auto space-y-8">
@@ -77,17 +88,37 @@ export default function MerchantDashboard() {
               <input 
                 type="text" 
                 value={regName}
-                onChange={(e) => setRegName(e.target.value)}
+                onChange={(e) => {
+                  setRegName(e.target.value);
+                  setRegError(null);
+                }}
                 placeholder="Ej. Panadería La Unión"
                 className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-guiso-orange/20"
+                disabled={isRegistering}
               />
             </div>
+
+            {regError && (
+              <p className="text-xs text-red-500 font-medium">{regError}</p>
+            )}
+
             <Button 
-              onClick={() => registerMerchant(regName)}
-              disabled={!regName}
+              onClick={async () => {
+                if (!regName || isRegistering) return;
+                setIsRegistering(true);
+                setRegError(null);
+                try {
+                  await registerMerchant(regName);
+                } catch (err: any) {
+                  console.error("Registration error:", err);
+                  setRegError("Error al registrar: " + (err.message || "Intente nuevamente"));
+                  setIsRegistering(false);
+                }
+              }}
+              disabled={!regName || isRegistering}
               className="w-full"
             >
-              Registrar Comercio
+              {isRegistering ? 'Registrando...' : 'Registrar Comercio'}
             </Button>
           </div>
         </Card>

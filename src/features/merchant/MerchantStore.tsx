@@ -6,8 +6,9 @@ import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
 interface MerchantContextType {
   merchant: Merchant | null;
-  registerMerchant: (name: string, city?: string, category?: string, addressOverride?: string) => void;
+  registerMerchant: (name: string, city?: string, category?: string, addressOverride?: string) => Promise<void>;
   isMerchant: boolean;
+  loading: boolean;
 }
 
 const MerchantContext = createContext<MerchantContextType | undefined>(undefined);
@@ -41,20 +42,23 @@ export const MerchantProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const registerMerchant = useCallback(async (name: string, city?: string, category?: string, addressOverride?: string) => {
     const targetAddress = addressOverride || address;
-    if (!targetAddress) return;
+    if (!targetAddress) {
+      throw new Error("No hay una wallet conectada.");
+    }
 
-    const id = Math.random().toString(36).substring(2, 15);
+    const id = `MER-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
     const newMerchant: Merchant = {
       id,
       name,
       walletAddress: targetAddress,
-      city,
-      category,
+      city: city || '',
+      category: category || 'Comercio',
     };
 
     try {
       await setDoc(doc(db, 'merchants', targetAddress), newMerchant);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("MerchantStore: Error in setDoc", error);
       handleFirestoreError(error, 'create', `merchants/${targetAddress}`);
     }
   }, [address]);
@@ -63,7 +67,8 @@ export const MerchantProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     <MerchantContext.Provider value={{
       merchant,
       registerMerchant,
-      isMerchant: !!merchant
+      isMerchant: !!merchant,
+      loading
     }}>
       {children}
     </MerchantContext.Provider>
