@@ -30,37 +30,39 @@ export default function ImpactPage() {
     let isMounted = true;
     let initialLoadAttempted = false;
 
-    // Use a reference to track if we are currently seeding to avoid flickering
     const unsub = onSnapshot(collection(db, 'projects'), (snapshot) => {
       if (!isMounted) return;
 
       if (snapshot.empty) {
         if (!initialLoadAttempted) {
           initialLoadAttempted = true;
-          console.log("ImpactPage: Firestore empty, seeding...");
+          console.log("ImpactPage: Firestore empty, seeding from API...");
           api.getProjects().then(data => {
             if (isMounted) {
-              setProjects(prev => data.length > 0 ? data : prev);
+              // Only set if we don't have data yet
+              setProjects(data);
               setLoading(false);
               
-              // Seed background
+              // Seed Firestore in background
               data.forEach(p => {
                 setDoc(doc(db, 'projects', p.id), p).catch(console.error);
               });
             }
           }).catch(err => {
-            console.error("ImpactPage API error:", err);
+            console.error("ImpactPage: API error", err);
             if (isMounted) setLoading(false);
           });
         }
       } else {
         initialLoadAttempted = true;
         const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
+        console.log("ImpactPage: Received projects from Firestore", data.length);
         setProjects(data);
         setLoading(false);
       }
     }, (err) => {
-      console.error("ImpactPage: Firestore error", err);
+      console.error("ImpactPage: Firestore subscription error", err);
+      // Only fallback if we haven't successfully loaded anything
       if (isMounted && !initialLoadAttempted) {
         api.getProjects().then(data => {
           if (isMounted) {
