@@ -32,7 +32,7 @@ export default function CreatePaymentModal({ onClose }: CreatePaymentModalProps)
     setIsCreating(true);
     setError(null);
 
-    const id = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const id = `pay-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes
     const tokenAmt = convertFiatToGuiso(Number(amountARS));
 

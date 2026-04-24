@@ -26,46 +26,58 @@ export default function PaymentPage() {
   useEffect(() => {
     if (!paymentId) return;
 
-    console.log(`PaymentPage: Checking for payment ${paymentId}`);
     let retryCount = 0;
     const maxRetries = 3;
 
     const attemptFetch = () => {
-      const unsub = onSnapshot(doc(db, 'payments', paymentId), (docSnap) => {
+      const normalizedId = paymentId.toLowerCase();
+      
+      // Track what we're currently trying to fetch
+      let currentId = retryCount === 0 ? paymentId : normalizedId;
+      console.log(`PaymentPage: Checking for payment ${currentId} (Attempt ${retryCount + 1})`);
+
+      const unsub = onSnapshot(doc(db, 'payments', currentId), (docSnap) => {
         if (docSnap.exists()) {
-          console.log(`PaymentPage: Payment ${paymentId} found in Firestore`);
+          console.log(`PaymentPage: Payment ${currentId} found in Firestore`);
           setPayment(docSnap.data());
           setIsLoading(false);
         } else {
-          console.warn(`PaymentPage: Payment ${paymentId} NOT found in Firestore (Attempt ${retryCount + 1})`);
-          
           if (retryCount < maxRetries) {
             retryCount++;
-            setTimeout(attemptFetch, 2000); // Retry after 2 seconds
+            setTimeout(attemptFetch, 1500);
             return;
           }
 
-          // Fallback to fetch from API as last resort
-          fetch(`${window.location.origin}/api/payments/${paymentId}`)
-            .then(res => {
-              if (!res.ok) throw new Error("API also failed");
-              return res.json();
-            })
+          // Final fallback: try API with both cases
+          const tryApi = async (id: string) => {
+            const res = await fetch(`${window.location.origin}/api/payments/${id}`);
+            if (res.ok) return res.json();
+            throw new Error("404");
+          };
+
+          tryApi(paymentId)
+            .catch(() => tryApi(normalizedId))
             .then(data => {
-              console.log(`PaymentPage: Payment ${paymentId} found via API fallback`);
+              console.log(`PaymentPage: Payment found via API`);
               setPayment(data);
               setIsLoading(false);
             })
-            .catch((err) => {
-              console.error(`PaymentPage: All recovery attempts failed for ${paymentId}`, err);
-              setIsLoading(false);
+            .catch(() => {
+              console.error(`PaymentPage: Payment not found anywhere`);
               setPayment(null);
+              setIsLoading(false);
             });
         }
       }, (error) => {
-        console.error('Error listening to payment status:', error);
-        setIsLoading(false);
+        console.error('Firestore snapshot error:', error);
+        if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(attemptFetch, 1000);
+        } else {
+          setIsLoading(false);
+        }
       });
+
       return unsub;
     };
 

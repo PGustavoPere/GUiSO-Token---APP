@@ -278,18 +278,18 @@ async function startServer() {
         return res.status(400).json({ error: "Faltan campos obligatorios" });
       }
 
-      const id = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes
+      const id = data.id || `pay-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      const expiresAt = data.expiresAt || (Date.now() + (30 * 60 * 1000)); // 30 minutes
       const newPayment = { 
         merchantId: data.merchantId || null,
         merchantName: data.merchantName,
         description: data.description || 'Sin descripción',
         walletAddress: data.walletAddress || '',
         id, 
-        status: 'awaiting_payment', 
+        status: data.status || 'awaiting_payment', 
         tokenAmount: Number(data.tokenAmount) || 0,
         fiatAmount: Number(data.fiatAmount) || 0,
-        createdAt: Date.now(),
+        createdAt: data.createdAt || Date.now(),
         expiresAt
       };
       
