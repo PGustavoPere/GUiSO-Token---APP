@@ -9,6 +9,9 @@ import { web3Bridge } from '../../web3/web3Provider';
 import { Card, Button } from '../../components/ui';
 import TransactionStatusBadge, { TransactionStatus } from '../../components/TransactionStatusBadge';
 import FiatPaymentModal from '../fiatBridge/FiatPaymentModal';
+import { db, handleFirestoreError } from '../../lib/firebase';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+
 export default function PaymentPage() {
   const { paymentId } = useParams<{ paymentId: string }>();
   const navigate = useNavigate();
@@ -21,53 +24,42 @@ export default function PaymentPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (paymentId) {
-      const fetchPayment = async () => {
-        try {
-          const url = `${window.location.origin}/api/payments/${paymentId}`;
-          const res = await fetch(url);
-          if (res.ok) {
-            const p = await res.json();
-            setPayment(p);
-            setIsLoading(false);
-          } else {
-            setIsLoading(false);
-          }
-        } catch (error) {
-          console.error('Error fetching payment:', error);
-          setIsLoading(false);
-        }
-      };
-      
-      fetchPayment();
-      
-      const interval = setInterval(async () => {
-        try {
-          const url = `${window.location.origin}/api/payments/${paymentId}`;
-          const res = await fetch(url);
-          if (res.ok) {
-            const updated = await res.json();
-            setPayment(updated);
-            if (updated.status === 'expired' || updated.status === 'completed') {
-              clearInterval(interval);
-            }
-          }
-        } catch (error) {
-          console.error('Error polling payment:', error);
-        }
-      }, 1000);
-      
-      return () => clearInterval(interval);
-    }
+    if (!paymentId) return;
+
+    const unsub = onSnapshot(doc(db, 'payments', paymentId), (docSnap) => {
+      if (docSnap.exists()) {
+        setPayment(docSnap.data());
+        setIsLoading(false);
+      } else {
+        setIsLoading(false);
+        // Fallback to fetch from API just in case
+        fetch(`${window.location.origin}/api/payments/${paymentId}`)
+          .then(res => res.json())
+          .then(data => setPayment(data))
+          .catch(() => setPayment(null));
+      }
+    }, (error) => {
+      console.error('Error listening to payment status:', error);
+      setIsLoading(false);
+    });
+
+    return () => unsub();
   }, [paymentId]);
 
   const updatePaymentStatus = async (id: string, status: string, txHash?: string) => {
     try {
-      await fetch(`/api/payments/${id}`, {
+      // Update Firestore directly
+      await updateDoc(doc(db, 'payments', id), {
+        status,
+        ...(txHash ? { txHash } : {})
+      });
+      
+      // Also notify the server for record keeping (optional)
+      fetch(`/api/payments/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status, ...(txHash ? { txHash } : {}) })
-      });
+      }).catch(err => console.error('Silent error updating server:', err));
     } catch (error) {
       console.error('Error updating payment status:', error);
     }

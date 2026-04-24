@@ -272,10 +272,19 @@ async function startServer() {
     try {
       const data = req.body;
       console.log(`[API] Received POST /api/payments with data:`, JSON.stringify(data));
+      
+      if (!data.merchantName || !data.fiatAmount) {
+        console.warn("[API] Missing required fields in payment creation");
+        return res.status(400).json({ error: "Faltan campos obligatorios" });
+      }
+
       const id = `PAY-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes
       const newPayment = { 
-        ...data, 
+        merchantId: data.merchantId || null,
+        merchantName: data.merchantName,
+        description: data.description || 'Sin descripción',
+        walletAddress: data.walletAddress || '',
         id, 
         status: 'awaiting_payment', 
         tokenAmount: Number(data.tokenAmount) || 0,
@@ -283,7 +292,9 @@ async function startServer() {
         createdAt: Date.now(),
         expiresAt
       };
-      paymentRepo.create(newPayment);
+      
+      console.log(`[API] Attempting to save payment to DB:`, id);
+      paymentRepo.create(newPayment as any);
       console.log(`[API] Created payment with ID: ${id}`);
       res.json({ id });
     } catch (err: any) {

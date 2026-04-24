@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "Merchant": {
+      "title": "Merchant",
+      "description": "Information about a merchant or cause collecting payments",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "walletAddress": { "type": "string" },
+        "city": { "type": "string" },
+        "category": { "type": "string" }
+      },
+      "required": ["id", "name", "walletAddress"]
+    },
+    "Payment": {
+      "title": "Payment",
+      "description": "A payment intent generated for a transaction",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "merchantId": { "type": "string" },
+        "merchantName": { "type": "string" },
+        "description": { "type": "string" },
+        "fiatAmount": { "type": "number" },
+        "tokenAmount": { "type": "number" },
+        "walletAddress": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "number" },
+        "expiresAt": { "type": "number" },
+        "txHash": { "type": "string" }
+      },
+      "required": ["id", "merchantName", "fiatAmount", "tokenAmount", "status", "createdAt", "expiresAt"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "Social project or cause that can receive donations",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "status": { "type": "string" },
+        "raised": { "type": "number" },
+        "goal": { "type": "number" },
+        "image": { "type": "string" },
+        "category": { "type": "string" },
+        "walletAddress": { "type": "string" }
+      },
+      "required": ["id", "title", "status", "raised", "goal", "walletAddress"]
+    }
+  },
+  "firestore": {
+    "merchants/{merchantId}": {
+      "schema": "Merchant",
+      "description": "Merchants registered in the system"
+    },
+    "payments/{paymentId}": {
+      "schema": "Payment",
+      "description": "Payment requests and their statuses"
+    },
+    "projects/{projectId}": {
+      "schema": "Project",
+      "description": "Social projects available for donation"
+    }
+  }
+}

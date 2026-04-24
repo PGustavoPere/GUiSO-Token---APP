@@ -25,6 +25,7 @@
     "ethers": "^6.16.0",
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.2",
+    "firebase": "^12.12.1",
     "helmet": "^8.1.0",
     "html5-qrcode": "^2.3.8",
     "lucide-react": "^0.546.0",

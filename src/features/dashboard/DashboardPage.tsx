@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, ArrowRight, Heart, ShieldCheck, Zap, CheckCircle2, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
+import { useWallet } from '../../core/WalletProvider';
 import { Card, Button } from '../../components/ui';
 import SupportModal from '../impact/SupportModal';
 import { api, Project } from '../../services/api';
@@ -12,7 +13,8 @@ function cn(...inputs: any[]) {
 }
 
 export default function DashboardPage() {
-  const { user } = useGuisoCore();
+  const { user, token } = useGuisoCore();
+  const { isConnected, connect, isConnecting } = useWallet();
   const navigate = useNavigate();
   const [selectedAmount, setSelectedAmount] = React.useState<number | null>(null);
   const [isSupportModalOpen, setIsSupportModalOpen] = React.useState(false);
@@ -193,14 +195,32 @@ export default function DashboardPage() {
           </div>
 
           <div className="pt-8">
-            <Button 
-              size="lg" 
-              className="w-full py-8 text-xl"
-              disabled={!selectedAmount}
-              onClick={() => setIsSupportModalOpen(true)}
-            >
-              Confirmar donación
-            </Button>
+            {!isConnected ? (
+              <Button 
+                size="lg" 
+                className="w-full py-8 text-xl bg-guiso-dark hover:bg-black"
+                onClick={connect}
+                disabled={isConnecting}
+              >
+                {isConnecting ? 'Conectando...' : 'Conectar Wallet para Donar'}
+              </Button>
+            ) : (
+              <Button 
+                size="lg" 
+                className="w-full py-8 text-xl"
+                disabled={!selectedAmount || token.gsoBalance < (selectedAmount || 0)}
+                onClick={() => setIsSupportModalOpen(true)}
+              >
+                {token.gsoBalance < (selectedAmount || 0) 
+                  ? 'GSO Insuficientes' 
+                  : 'Confirmar donación'}
+              </Button>
+            )}
+            {isConnected && token.gsoBalance > 0 && (
+              <p className="mt-4 text-xs text-gray-400 font-bold">
+                Tu balance: <span className="text-guiso-orange">{token.gsoBalance.toLocaleString()} GSO</span>
+              </p>
+            )}
           </div>
         </div>
       </section>

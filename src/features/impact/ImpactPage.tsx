@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { api, Project } from '../../services/api';
 import { Heart, CheckCircle2, Clock, MapPin, Share2, Sparkles, Shield, Info, ExternalLink, Vote, X } from 'lucide-react';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
+import { useWallet } from '../../core/WalletProvider';
 import { useImpactExplorerStore } from '../impactExplorer/ImpactExplorerStore';
 import SupportModal from './SupportModal';
 import CertificateHistory from '../impactCertificate/CertificateHistory';
 import EcosystemActivityFeed from '../../components/EcosystemActivityFeed';
 import { Card, Button, Badge } from '../../components/ui';
 import { motion, AnimatePresence } from 'motion/react';
+import { db } from '../../lib/firebase';
+import { collection, onSnapshot, doc, setDoc, query, getDocs } from 'firebase/firestore';
 
 export default function ImpactPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -16,29 +19,47 @@ export default function ImpactPage() {
   const [showLedger, setShowLedger] = useState(false);
   const [showDAO, setShowDAO] = useState(false);
   const { user } = useGuisoCore();
+  const { isConnected, connect, isConnecting } = useWallet();
   const { getRecentEvents } = useImpactExplorerStore();
 
   const recentEvents = getRecentEvents().slice(0, 5);
 
-  const fetchProjects = () => {
-    console.log("ImpactPage: Fetching projects...");
-    api.getProjects().then(data => {
-      console.log("ImpactPage: Received projects", data);
-      setProjects(data);
-      setLoading(false);
-    }).catch(err => {
-      console.error("ImpactPage: Error fetching projects", err);
-      setLoading(false);
-    });
-  };
-
   useEffect(() => {
-    fetchProjects();
+    console.log("ImpactPage: Setting up Firestore projects subscription...");
     
-    // Set up a polling interval for the MVP presentation to ensure real-time updates
-    const interval = setInterval(fetchProjects, 5000);
-    return () => clearInterval(interval);
+    const unsub = onSnapshot(collection(db, 'projects'), (snapshot) => {
+      if (snapshot.empty) {
+        console.log("ImpactPage: Firestore projects empty, seeding from API...");
+        // Fallback to API if Firestore is empty
+        api.getProjects().then(data => {
+          setProjects(data);
+          setLoading(false);
+          // Optional: Seed Firestore from API data for future use
+          data.forEach(p => {
+            setDoc(doc(db, 'projects', p.id), p).catch(err => console.error("Error seeding project:", err));
+          });
+        });
+      } else {
+        const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
+        console.log("ImpactPage: Received projects from Firestore", data);
+        setProjects(data);
+        setLoading(false);
+      }
+    }, (err) => {
+      console.error("ImpactPage: Firestore error", err);
+      // Fallback to API on error
+      api.getProjects().then(data => {
+        setProjects(data);
+        setLoading(false);
+      });
+    });
+
+    return () => unsub();
   }, []);
+
+  const fetchProjects = () => {
+    // This is now handled by onSnapshot, but we'll keep the signature for SuportModal callback
+  };
 
   if (loading) {
     return (
@@ -113,15 +134,21 @@ export default function ImpactPage() {
                     <span>{project.status === 'active' ? 'Quedan 12 días' : 'Finalizado con éxito'}</span>
                   </div>
                   <Button 
-                    onClick={() => setSelectedProject(project)}
-                    disabled={project.status !== 'active' || !user.isWalletConnected}
-                    variant={project.status === 'active' && user.isWalletConnected ? 'primary' : 'ghost'}
+                    onClick={() => {
+                      if (!isConnected) {
+                        connect();
+                      } else {
+                        setSelectedProject(project);
+                      }
+                    }}
+                    disabled={(project.status !== 'active' && isConnected) || isConnecting}
+                    variant={project.status === 'active' ? 'primary' : 'ghost'}
                     className={cn(
                       "w-full sm:w-auto",
-                      (!project.status || !user.isWalletConnected) && "bg-gray-100 text-gray-400 cursor-not-allowed hover:bg-gray-100 hover:text-gray-400"
+                      (project.status !== 'active' && isConnected) && "bg-gray-100 text-gray-400 cursor-not-allowed hover:bg-gray-100 hover:text-gray-400"
                     )}
                   >
-                    {!user.isWalletConnected ? 'Conectá tu cuenta' : project.status === 'active' ? 'Donar ahora' : 'Ver Evidencia'}
+                    {!isConnected ? (isConnecting ? 'Conectando...' : 'Conectá tu cuenta') : project.status === 'active' ? 'Donar ahora' : 'Ver Evidencia'}
                   </Button>
                 </div>
               </div>

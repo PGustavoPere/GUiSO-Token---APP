@@ -12,6 +12,8 @@ import { useWallet } from '../../core/WalletProvider';
 
 import { api } from '../../services/api';
 import { convertGuisoToFiat } from '../../core/economy';
+import { db } from '../../lib/firebase';
+import { doc, updateDoc, increment, setDoc } from 'firebase/firestore';
 
 interface SupportModalProps {
   project: { id: string; title: string; category: string; walletAddress: string };
@@ -23,7 +25,7 @@ interface SupportModalProps {
 export default function SupportModal({ project, initialAmount = 100, onClose, onSuccess }: SupportModalProps) {
   const { token, recordSupportTransaction } = useGuisoCore();
   const { updateAfterImpact } = useIdentityStore();
-  const { address } = useWallet();
+  const { address, isConnected, connect, isConnecting } = useWallet();
   const [amount, setAmount] = useState(initialAmount);
   const [isSuccess, setIsSuccess] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
@@ -72,13 +74,26 @@ export default function SupportModal({ project, initialAmount = 100, onClose, on
       if (paymentId) {
         try {
           console.log("SupportModal: Updating payment to completed", paymentId);
-          await api.updatePayment(paymentId, {
+          // Update Firestore payment
+          await updateDoc(doc(db, 'payments', paymentId), {
             status: 'completed',
             txHash: result.txHash
           });
-          console.log("SupportModal: Payment updated successfully");
+
+          // Increment Project raised amount in Firestore
+          await updateDoc(doc(db, 'projects', project.id), {
+            raised: increment(amount)
+          });
+
+          // Sync with server if needed
+          await api.updatePayment(paymentId, {
+            status: 'completed',
+            txHash: result.txHash
+          }).catch(err => console.error("Error updating payment on server:", err));
+
+          console.log("SupportModal: Payment and Project updated successfully in Firestore");
         } catch (err) {
-          console.error("Error updating payment on backend:", err);
+          console.error("Error updating Firestore:", err);
         }
       }
 
@@ -137,6 +152,18 @@ export default function SupportModal({ project, initialAmount = 100, onClose, on
               <div className="bg-guiso-cream p-4 rounded-2xl mb-6 border border-guiso-orange/10">
                 <p className="text-xs text-gray-500 uppercase font-bold mb-1">Causa seleccionada</p>
                 <p className="font-display font-bold text-lg text-guiso-dark">{project.title}</p>
+                {!isConnected && (
+                  <div className="mt-4 p-3 bg-white/50 rounded-xl border border-guiso-orange/20 flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-gray-500">Wallet no conectada</span>
+                    <button 
+                      onClick={connect}
+                      disabled={isConnecting}
+                      className="text-[10px] font-bold text-guiso-orange hover:underline"
+                    >
+                      {isConnecting ? 'Conectando...' : 'Conectar ahora'}
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4 mb-8">
@@ -178,11 +205,13 @@ export default function SupportModal({ project, initialAmount = 100, onClose, on
 
               <Button 
                 onClick={handleSupport}
-                disabled={amount <= 0 || amount > token.gsoBalance || txStatus === 'pending' || txStatus === 'confirming'}
+                disabled={!isConnected || amount <= 0 || amount > token.gsoBalance || txStatus === 'pending' || txStatus === 'confirming'}
                 size="lg"
                 className="w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {txStatus === 'pending' || txStatus === 'confirming' ? (
+                {!isConnected ? (
+                  'Conectá tu Wallet para donar'
+                ) : txStatus === 'pending' || txStatus === 'confirming' ? (
                   <div className="flex flex-col items-center justify-center w-full">
                     <span className="flex items-center justify-center gap-2 mb-1">
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

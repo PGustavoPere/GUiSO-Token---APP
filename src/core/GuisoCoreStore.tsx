@@ -256,8 +256,15 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    * Acción: Registrar una transacción de apoyo confirmada
    */
   const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string, category: string = 'General') => {
-    if (amount > token.gsoBalance) return '';
-    if (!address) return '';
+    console.log(`GuisoCoreStore: Recording support transaction for ${projectTitle}, amount: ${amount}`);
+    if (amount > token.gsoBalance) {
+      console.warn("GuisoCoreStore: Insufficient balance for transaction");
+      return '';
+    }
+    if (!address) {
+      console.warn("GuisoCoreStore: No wallet address connected");
+      return '';
+    }
 
     const impactGenerated = impactEngine.calculateImpactPoints(amount);
     
@@ -299,6 +306,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     setToken(prev => {
       const newBalance = prev.gsoBalance - amount;
+      console.log(`GuisoCoreStore: Updating balance from ${prev.gsoBalance} to ${newBalance}`);
       return {
         gsoBalance: newBalance,
         transactions: [newTransaction, ...prev.transactions],
