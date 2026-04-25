@@ -12,7 +12,7 @@ import { convertGuisoToFiat, FIAT_SYMBOL, TOKEN_SYMBOL } from '../../core/econom
 
 export default function MerchantDashboard() {
   const { merchant, registerMerchant, isMerchant, loading } = useMerchantStore();
-  const { payments } = usePaymentStore();
+  const { payments, confirmPayment } = usePaymentStore();
   const { getMerchantTrust } = useTrustStore();
   const { isConnected, connect, address } = useWallet();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -20,6 +20,33 @@ export default function MerchantDashboard() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [regError, setRegError] = useState<string | null>(null);
   const [prevCompletedCount, setPrevCompletedCount] = useState<number | null>(null);
+  const [verifyingId, setVerifyingId] = useState<string | null>(null);
+
+  const handleVerify = async (id: string) => {
+    if (verifyingId) return;
+    setVerifyingId(id);
+    try {
+      // 1. Update Server
+      const success = await confirmPayment(id);
+      if (success) {
+        // 2. Update Firestore for real-time customer view sync
+        try {
+          const { db } = await import('../../lib/firebase');
+          const { doc, updateDoc } = await import('firebase/firestore');
+          await updateDoc(doc(db, 'payments', id), {
+            status: 'completed',
+            updatedAt: Date.now()
+          });
+        } catch (fsErr) {
+          console.warn("Could not sync Firestore status, but server is updated:", fsErr);
+        }
+      } else {
+        alert("Error al verificar el pago.");
+      }
+    } finally {
+      setVerifyingId(null);
+    }
+  };
 
   // Audio for success
   const playSuccessSound = () => {
@@ -144,11 +171,11 @@ export default function MerchantDashboard() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed': return <Badge variant="success" className="flex items-center gap-1"><CheckCircle2 size={12}/> Pagado</Badge>;
-      case 'pending':
-      case 'confirming': return <Badge variant="primary" className="flex items-center gap-1 animate-pulse"><Clock size={12}/> Procesando</Badge>;
+      case 'awaiting_payment': return <Badge variant="primary" className="flex items-center gap-1 animate-pulse"><Clock size={12}/> Esperando Pago</Badge>;
+      case 'confirming': return <Badge variant="primary" className="flex items-center gap-1 animate-pulse"><Clock size={12}/> Confirmando</Badge>;
       case 'failed': return <Badge variant="danger" className="flex items-center gap-1"><XCircle size={12}/> Fallido</Badge>;
       case 'expired': return <Badge variant="neutral" className="flex items-center gap-1"><Clock size={12}/> Expirado</Badge>;
-      default: return <Badge variant="neutral" className="flex items-center gap-1"><Clock size={12}/> Esperando</Badge>;
+      default: return <Badge variant="neutral" className="flex items-center gap-1"><Clock size={12}/> {status}</Badge>;
     }
   };
 
@@ -251,7 +278,20 @@ export default function MerchantDashboard() {
                     <p className="font-bold text-guiso-orange">{payment.tokenAmount} GSO</p>
                     <p className="text-xs text-gray-400">${payment.fiatAmount} ARS</p>
                   </div>
-                  {getStatusBadge(payment.status)}
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(payment.status)}
+                    {payment.status === 'awaiting_payment' && (
+                      <Button 
+                        size="sm" 
+                        variant="primary" 
+                        className="py-1 px-3 text-[10px] h-auto"
+                        onClick={() => handleVerify(payment.id)}
+                        disabled={verifyingId === payment.id}
+                      >
+                        {verifyingId === payment.id ? '...' : 'Verificar'}
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             ))}
