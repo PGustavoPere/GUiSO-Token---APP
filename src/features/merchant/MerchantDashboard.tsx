@@ -11,13 +11,42 @@ import CreatePaymentModal from './CreatePaymentModal';
 import { convertGuisoToFiat, FIAT_SYMBOL, TOKEN_SYMBOL } from '../../core/economy';
 
 export default function MerchantDashboard() {
-  const { merchant, registerMerchant, isMerchant } = useMerchantStore();
-  const { payments } = usePaymentStore();
+  const { merchant, registerMerchant, isMerchant, loading } = useMerchantStore();
+  const { payments, confirmPayment } = usePaymentStore();
   const { getMerchantTrust } = useTrustStore();
   const { isConnected, connect, address } = useWallet();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [regName, setRegName] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [regError, setRegError] = useState<string | null>(null);
   const [prevCompletedCount, setPrevCompletedCount] = useState<number | null>(null);
+  const [verifyingId, setVerifyingId] = useState<string | null>(null);
+
+  const handleVerify = async (id: string) => {
+    if (verifyingId) return;
+    setVerifyingId(id);
+    try {
+      // 1. Update Server
+      const success = await confirmPayment(id);
+      if (success) {
+        // 2. Update Firestore for real-time customer view sync
+        try {
+          const { db } = await import('../../lib/firebase');
+          const { doc, updateDoc } = await import('firebase/firestore');
+          await updateDoc(doc(db, 'payments', id), {
+            status: 'completed',
+            updatedAt: Date.now()
+          });
+        } catch (fsErr) {
+          console.warn("Could not sync Firestore status, but server is updated:", fsErr);
+        }
+      } else {
+        alert("Error al verificar el pago.");
+      }
+    } finally {
+      setVerifyingId(null);
+    }
+  };
 
   // Audio for success
   const playSuccessSound = () => {
@@ -58,6 +87,15 @@ export default function MerchantDashboard() {
     );
   }
 
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto py-12 text-center">
+        <div className="w-12 h-12 border-4 border-guiso-orange/20 border-t-guiso-orange rounded-full animate-spin mx-auto mb-4" />
+        <p className="text-gray-500">Verificando estado del comercio...</p>
+      </div>
+    );
+  }
+
   if (!isMerchant) {
     return (
       <div className="max-w-4xl mx-auto space-y-8">
@@ -77,17 +115,37 @@ export default function MerchantDashboard() {
               <input 
                 type="text" 
                 value={regName}
-                onChange={(e) => setRegName(e.target.value)}
+                onChange={(e) => {
+                  setRegName(e.target.value);
+                  setRegError(null);
+                }}
                 placeholder="Ej. Panadería La Unión"
                 className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-guiso-orange/20"
+                disabled={isRegistering}
               />
             </div>
+
+            {regError && (
+              <p className="text-xs text-red-500 font-medium">{regError}</p>
+            )}
+
             <Button 
-              onClick={() => registerMerchant(regName)}
-              disabled={!regName}
+              onClick={async () => {
+                if (!regName || isRegistering) return;
+                setIsRegistering(true);
+                setRegError(null);
+                try {
+                  await registerMerchant(regName);
+                } catch (err: any) {
+                  console.error("Registration error:", err);
+                  setRegError("Error al registrar: " + (err.message || "Intente nuevamente"));
+                  setIsRegistering(false);
+                }
+              }}
+              disabled={!regName || isRegistering}
               className="w-full"
             >
-              Registrar Comercio
+              {isRegistering ? 'Registrando...' : 'Registrar Comercio'}
             </Button>
           </div>
         </Card>
@@ -113,11 +171,11 @@ export default function MerchantDashboard() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'completed': return <Badge variant="success" className="flex items-center gap-1"><CheckCircle2 size={12}/> Pagado</Badge>;
-      case 'pending':
-      case 'confirming': return <Badge variant="primary" className="flex items-center gap-1 animate-pulse"><Clock size={12}/> Procesando</Badge>;
+      case 'awaiting_payment': return <Badge variant="primary" className="flex items-center gap-1 animate-pulse"><Clock size={12}/> Esperando Pago</Badge>;
+      case 'confirming': return <Badge variant="primary" className="flex items-center gap-1 animate-pulse"><Clock size={12}/> Confirmando</Badge>;
       case 'failed': return <Badge variant="danger" className="flex items-center gap-1"><XCircle size={12}/> Fallido</Badge>;
       case 'expired': return <Badge variant="neutral" className="flex items-center gap-1"><Clock size={12}/> Expirado</Badge>;
-      default: return <Badge variant="neutral" className="flex items-center gap-1"><Clock size={12}/> Esperando</Badge>;
+      default: return <Badge variant="neutral" className="flex items-center gap-1"><Clock size={12}/> {status}</Badge>;
     }
   };
 
@@ -220,7 +278,20 @@ export default function MerchantDashboard() {
                     <p className="font-bold text-guiso-orange">{payment.tokenAmount} GSO</p>
                     <p className="text-xs text-gray-400">${payment.fiatAmount} ARS</p>
                   </div>
-                  {getStatusBadge(payment.status)}
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(payment.status)}
+                    {payment.status === 'awaiting_payment' && (
+                      <Button 
+                        size="sm" 
+                        variant="primary" 
+                        className="py-1 px-3 text-[10px] h-auto"
+                        onClick={() => handleVerify(payment.id)}
+                        disabled={verifyingId === payment.id}
+                      >
+                        {verifyingId === payment.id ? '...' : 'Verificar'}
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             ))}

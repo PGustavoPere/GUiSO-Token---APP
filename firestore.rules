@@ -1,0 +1,60 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidPayment(data) {
+      return data.id is string
+          && data.merchantName is string && data.merchantName.size() <= 200
+          && data.fiatAmount is number && data.fiatAmount >= 0
+          && data.tokenAmount is number && data.tokenAmount >= 0
+          && data.status in ['created', 'awaiting_payment', 'pending', 'confirming', 'completed', 'failed', 'expired']
+          && data.createdAt is number
+          && data.expiresAt is number;
+    }
+
+    // Projects: Public read, partial update for 'raised' amount
+    match /projects/{projectId} {
+      allow read: if true;
+      allow update: if isValidId(projectId) 
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['raised'])
+                    && incoming().raised >= existing().raised;
+    }
+
+    // Payments: Public read/create, strict update
+    match /payments/{paymentId} {
+      allow read: if true;
+      allow create: if isValidId(paymentId) && isValidPayment(incoming());
+      allow update: if isValidId(paymentId) && isValidPayment(incoming()) && (
+        // Allow status transitions
+        (existing().status == 'awaiting_payment' && incoming().status in ['pending', 'confirming', 'failed']) ||
+        (existing().status == 'pending' && incoming().status in ['confirming', 'completed', 'failed']) ||
+        (existing().status == 'confirming' && incoming().status in ['completed', 'failed']) ||
+        // Immutable once completed
+        (existing().status == 'completed' && incoming().status == 'completed' && incoming().diff(existing()).affectedKeys().size() == 0)
+      );
+    }
+
+    // Merchants: Public read/write for now
+    match /merchants/{merchantId} {
+      allow read: if true;
+      allow create, update: if isValidId(merchantId);
+    }
+  }
+}

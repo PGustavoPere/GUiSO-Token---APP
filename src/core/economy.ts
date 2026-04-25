@@ -4,7 +4,7 @@
  */
 
 // Paridad: 1 GSO = 100 ARS (Pesos Argentinos)
-// Esta tasa es fija para el MVP para dar estabilidad a los comercios.
+// Esta tasa ayuda a que el token tenga un valor percibido más alto.
 export const GUISO_RATE_ARS = 100;
 
 // Símbolos y formatos

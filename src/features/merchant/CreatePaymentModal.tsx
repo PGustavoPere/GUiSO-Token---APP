@@ -7,6 +7,8 @@ import { usePaymentStore } from '../payments/PaymentStore';
 import { useMerchantStore } from './MerchantStore';
 import { generatePaymentQRUrl } from '../payments/paymentQR';
 import { convertFiatToGuiso, TOKEN_SYMBOL } from '../../core/economy';
+import { db, handleFirestoreError } from '../../lib/firebase';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
 
 interface CreatePaymentModalProps {
   onClose: () => void;
@@ -19,54 +21,68 @@ export default function CreatePaymentModal({ onClose }: CreatePaymentModalProps)
   const [amountARS, setAmountARS] = useState<number | ''>('');
   const [paymentId, setPaymentId] = useState<string | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<string>('');
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const tokenAmount = amountARS ? convertFiatToGuiso(Number(amountARS)) : 0;
 
   const handleCreate = async () => {
     if (!merchant || !amountARS || !description) return;
     
+    setIsCreating(true);
+    setError(null);
+
+    const id = `pay-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const expiresAt = Date.now() + (30 * 60 * 1000); // 30 minutes
+    const tokenAmt = convertFiatToGuiso(Number(amountARS));
+
+    const newPayment = {
+      id,
+      merchantId: merchant.id,
+      merchantName: merchant.name,
+      description,
+      fiatAmount: Number(amountARS),
+      tokenAmount: tokenAmt,
+      walletAddress: merchant.walletAddress,
+      status: 'awaiting_payment',
+      createdAt: Date.now(),
+      expiresAt,
+    };
+
     try {
-      const response = await fetch('/api/payments', {
+      // First, create the document in Firestore
+      await setDoc(doc(db, 'payments', id), newPayment);
+      
+      // Also notify the server so it can track it if needed (optional, keeping for compatibility)
+      fetch('/api/payments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          merchantName: merchant.name,
-          description,
-          fiatAmount: Number(amountARS),
-          tokenAmount,
-          walletAddress: merchant.walletAddress,
-        })
-      });
-      
-      const data = await response.json();
-      if (data.id) {
-        setPaymentId(data.id);
-        setPaymentStatus('awaiting_payment');
-      }
-    } catch (error) {
+        body: JSON.stringify(newPayment)
+      }).catch(err => console.error('Silent error notifying server:', err));
+
+      setPaymentId(id);
+      setPaymentStatus('awaiting_payment');
+    } catch (error: any) {
       console.error('Error creating payment:', error);
+      setError('Error al crear el pago en Firestore');
+    } finally {
+      setIsCreating(false);
     }
   };
 
   useEffect(() => {
     if (!paymentId) return;
 
-    const interval = setInterval(async () => {
-      try {
-        const response = await fetch(`/api/payments/${paymentId}`);
-        if (response.ok) {
-          const payment = await response.json();
-          setPaymentStatus(payment.status);
-          if (payment.status === 'completed' || payment.status === 'expired') {
-            clearInterval(interval);
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching payment status:', error);
+    const unsub = onSnapshot(doc(db, 'payments', paymentId), (docSnap) => {
+      if (docSnap.exists()) {
+        const paymentData = docSnap.data();
+        setPaymentStatus(paymentData.status);
       }
-    }, 1000);
+    }, (error) => {
+      console.error('Error listening to payment status:', error);
+    });
 
-    return () => clearInterval(interval);
+    return () => unsub();
   }, [paymentId]);
 
   const paymentUrl = paymentId ? generatePaymentQRUrl(paymentId) : '';
@@ -119,14 +135,20 @@ export default function CreatePaymentModal({ onClose }: CreatePaymentModalProps)
                     <span className="text-sm font-bold text-guiso-orange">Total a cobrar en GUISO:</span>
                     <span className="text-lg font-bold text-guiso-orange">{tokenAmount} GSO</span>
                   </div>
+
+                  {error && (
+                    <div className="p-3 bg-red-100/50 border border-red-200 rounded-xl text-xs text-red-600 font-medium">
+                      {error}
+                    </div>
+                  )}
                 </div>
 
                 <Button 
                   onClick={handleCreate}
-                  disabled={!amountARS || !description || tokenAmount <= 0}
+                  disabled={!amountARS || !description || tokenAmount <= 0 || isCreating}
                   className="w-full py-4 text-lg"
                 >
-                  Generar QR de Cobro
+                  {isCreating ? 'Generando...' : 'Generar QR de Cobro'}
                 </Button>
               </motion.div>
             ) : paymentStatus === 'completed' ? (

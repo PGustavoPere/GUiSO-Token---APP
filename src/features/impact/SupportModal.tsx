@@ -10,16 +10,23 @@ import { impactCertificateService } from '../impactCertificate/impactCertificate
 import { useIdentityStore } from '../identity/IdentityStore';
 import { useWallet } from '../../core/WalletProvider';
 
+import { api } from '../../services/api';
+import { convertGuisoToFiat } from '../../core/economy';
+import { db } from '../../lib/firebase';
+import { doc, updateDoc, increment, setDoc } from 'firebase/firestore';
+
 interface SupportModalProps {
-  project: { id: string; title: string; category: string };
+  project: { id: string; title: string; category: string; walletAddress: string };
+  initialAmount?: number;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function SupportModal({ project, onClose }: SupportModalProps) {
+export default function SupportModal({ project, initialAmount = 100, onClose, onSuccess }: SupportModalProps) {
   const { token, recordSupportTransaction } = useGuisoCore();
   const { updateAfterImpact } = useIdentityStore();
-  const { address } = useWallet();
-  const [amount, setAmount] = useState(100);
+  const { address, isConnected, connect, isConnecting } = useWallet();
+  const [amount, setAmount] = useState(initialAmount);
   const [isSuccess, setIsSuccess] = useState(false);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [txStatus, setTxStatus] = useState<TransactionStatus>('idle');
@@ -28,6 +35,23 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
     if (amount > token.gsoBalance) return;
     
     setTxStatus('pending');
+    
+    // 1. Create payment on backend
+    let paymentId = '';
+    try {
+      const p = await api.createPayment({
+        merchantId: project.id,
+        merchantName: project.title,
+        tokenAmount: amount,
+        fiatAmount: convertGuisoToFiat(amount),
+        description: `Donación a ${project.title}`,
+        walletAddress: project.walletAddress
+      });
+      paymentId = p.id;
+    } catch (err) {
+      console.error("Error creating payment on backend:", err);
+    }
+
     const transactionAdapter = web3Bridge.getTransaction();
     const result = await transactionAdapter.sendTransaction(amount, project.title);
     
@@ -46,10 +70,37 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
       setTxStatus('confirmed');
       const impactPoints = impactEngine.calculateImpactPoints(amount);
       
-      // 1. Record in core store
+      // 2. Update payment on backend to completed (this triggers incrementRaised)
+      if (paymentId) {
+        try {
+          console.log("SupportModal: Updating payment to completed", paymentId);
+          // Update Firestore payment
+          await updateDoc(doc(db, 'payments', paymentId), {
+            status: 'completed',
+            txHash: result.txHash
+          });
+
+          // Increment Project raised amount in Firestore
+          await updateDoc(doc(db, 'projects', project.id), {
+            raised: increment(amount)
+          });
+
+          // Sync with server if needed
+          await api.updatePayment(paymentId, {
+            status: 'completed',
+            txHash: result.txHash
+          }).catch(err => console.error("Error updating payment on server:", err));
+
+          console.log("SupportModal: Payment and Project updated successfully in Firestore");
+        } catch (err) {
+          console.error("Error updating Firestore:", err);
+        }
+      }
+
+      // 3. Record in core store
       recordSupportTransaction(project.id, project.title, amount, result.txHash, project.category);
       
-      // 2. Generate Certificate
+      // 4. Generate Certificate
       if (address) {
         impactCertificateService.generateCertificate(
           result.txHash,
@@ -58,11 +109,19 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
           impactPoints
         );
         
-        // 3. Update Identity Store
+        // 5. Update Identity Store
         updateAfterImpact(address, impactPoints, true);
       }
       
       setIsSuccess(true);
+      
+      // Wait a bit for the backend to process the increment before calling onSuccess
+      setTimeout(() => {
+        if (onSuccess) {
+          console.log("SupportModal: Success! Calling onSuccess callback after delay.");
+          onSuccess();
+        }
+      }, 1000);
     } else {
       setTxStatus('failed');
       setTimeout(() => setTxStatus('idle'), 3000);
@@ -84,22 +143,34 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
               className="p-6 md:p-8"
             >
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl md:text-2xl font-display font-bold">Apoyar Causa</h3>
+                <h3 className="text-xl md:text-2xl font-display font-bold">Donar a esta causa</h3>
                 <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                   <X size={20} />
                 </button>
               </div>
 
               <div className="bg-guiso-cream p-4 rounded-2xl mb-6 border border-guiso-orange/10">
-                <p className="text-xs text-gray-500 uppercase font-bold mb-1">Proyecto</p>
+                <p className="text-xs text-gray-500 uppercase font-bold mb-1">Causa seleccionada</p>
                 <p className="font-display font-bold text-lg text-guiso-dark">{project.title}</p>
+                {!isConnected && (
+                  <div className="mt-4 p-3 bg-white/50 rounded-xl border border-guiso-orange/20 flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-gray-500">Wallet no conectada</span>
+                    <button 
+                      onClick={connect}
+                      disabled={isConnecting}
+                      className="text-[10px] font-bold text-guiso-orange hover:underline"
+                    >
+                      {isConnecting ? 'Conectando...' : 'Conectar ahora'}
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-4 mb-8">
                 <div className="flex flex-col sm:flex-row justify-between text-xs md:text-sm font-bold gap-1">
-                  <span>Cantidad GSO</span>
+                  <span>Monto a donar</span>
                   <span className={amount > token.gsoBalance ? "text-red-500" : "text-guiso-orange"}>
-                    Balance: {token.gsoBalance.toLocaleString()} GSO
+                    Disponible: {token.gsoBalance.toLocaleString()} GSO
                   </span>
                 </div>
                 
@@ -127,18 +198,20 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
                 
                 {amount > token.gsoBalance && (
                   <p className="text-red-500 text-xs font-bold text-center mt-2">
-                    Necesitás tokens GUISO para generar impacto.
+                    Necesitás más GSO para realizar esta donación.
                   </p>
                 )}
               </div>
 
               <Button 
                 onClick={handleSupport}
-                disabled={amount <= 0 || amount > token.gsoBalance || txStatus === 'pending' || txStatus === 'confirming'}
+                disabled={!isConnected || amount <= 0 || amount > token.gsoBalance || txStatus === 'pending' || txStatus === 'confirming'}
                 size="lg"
                 className="w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {txStatus === 'pending' || txStatus === 'confirming' ? (
+                {!isConnected ? (
+                  'Conectá tu Wallet para donar'
+                ) : txStatus === 'pending' || txStatus === 'confirming' ? (
                   <div className="flex flex-col items-center justify-center w-full">
                     <span className="flex items-center justify-center gap-2 mb-1">
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -148,7 +221,7 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
                 ) : (
                   <>
                     <Heart size={20} />
-                    Confirmar Apoyo
+                    Confirmar donación
                   </>
                 )}
               </Button>
@@ -165,17 +238,17 @@ export default function SupportModal({ project, onClose }: SupportModalProps) {
                 <Sparkles size={40} className="animate-pulse md:w-12 md:h-12" />
               </div>
               <div>
-                <h3 className="text-2xl md:text-3xl font-display font-bold text-guiso-dark mb-2">¡Impacto Generado!</h3>
+                <h3 className="text-2xl md:text-3xl font-display font-bold text-guiso-dark mb-2">¡Gracias por tu ayuda!</h3>
                 <p className="text-guiso-orange font-bold text-xs md:text-sm mb-2 italic">"{impactEngine.getRandomMotivation()}"</p>
-                <p className="text-gray-500 text-sm md:text-base">Has aportado {amount} GSO a esta causa.</p>
+                <p className="text-gray-500 text-sm md:text-base">Tu aporte de {amount} GSO fue registrado correctamente.</p>
               </div>
               <div className="flex flex-col items-center gap-2">
                 <div className="px-4 py-2 bg-guiso-orange/10 text-guiso-orange rounded-full text-xs md:text-sm font-bold">
-                  +{impactEngine.calculateImpactPoints(amount)} Impact Points
+                  +{impactEngine.calculateImpactPoints(amount)} Puntos de Impacto
                 </div>
                 {txHash && (
                   <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100 w-full">
-                    <p className="text-xs text-gray-500 font-bold mb-1">Transaction Hash</p>
+                    <p className="text-xs text-gray-500 font-bold mb-1">Comprobante de transparencia</p>
                     <a 
                       href={`https://testnet.bscscan.com/tx/${txHash}`}
                       target="_blank"

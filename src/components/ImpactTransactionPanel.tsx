@@ -12,13 +12,15 @@ import { Card, Button, Badge } from './ui';
 import { web3Bridge } from '../web3/web3Provider';
 import TransactionStatusBadge, { TransactionStatus } from './TransactionStatusBadge';
 
+import { api } from '../services/api';
+
 const CAUSES = [
-  { id: 'kitchen', title: 'Comedor Comunitario', icon: Utensils, description: 'Provee comidas calientes a familias en riesgo.' },
-  { id: 'homeless', title: 'Apoyo a Personas sin Hogar', icon: Home, description: 'Kits de higiene y refugio temporal.' },
-  { id: 'food', title: 'Programa Alimentario Infantil', icon: Heart, description: 'Nutrición básica para niños en edad escolar.' },
+  { id: '1', title: 'Un Lugar — General Cabrera', icon: Heart, description: 'Espacio comunitario para niños.', category: 'Infancia y Alimentación', walletAddress: '0x742d35Cc6634C0532925a3b8D4C9b4444' },
+  { id: '2', title: 'Comedor Tía Kusi', icon: Utensils, description: 'Alimentación y apoyo escolar.', category: 'Alimentación', walletAddress: '0x821d35Cc6634C0532925a3b8D4C9b4444' },
+  { id: '3', title: 'Pancitas Felices', icon: Home, description: 'Erradicación desnutrición infantil.', category: 'Infancia', walletAddress: '0x932e35Cc6634C0532925a3b8D4C9b4444' },
 ];
 
-export default function ImpactTransactionPanel() {
+export default function ImpactTransactionPanel({ onClose }: { onClose?: () => void }) {
   const navigate = useNavigate();
   const { token, recordSupportTransaction, user } = useGuisoCore();
   const { connect, isConnecting, address } = useWallet();
@@ -35,6 +37,23 @@ export default function ImpactTransactionPanel() {
     if (amount > token.gsoBalance) return;
     
     setTxStatus('pending');
+    
+    // 1. Create payment on backend
+    let paymentId = '';
+    try {
+      const p = await api.createPayment({
+        merchantId: selectedCause.id,
+        merchantName: selectedCause.title,
+        tokenAmount: amount,
+        fiatAmount: amount / 10,
+        description: `Donación a ${selectedCause.title}`,
+        walletAddress: selectedCause.walletAddress
+      });
+      paymentId = p.id;
+    } catch (err) {
+      console.error("Error creating payment on backend:", err);
+    }
+
     const transactionAdapter = web3Bridge.getTransaction();
     const result = await transactionAdapter.sendTransaction(amount, selectedCause.title);
     
@@ -51,7 +70,20 @@ export default function ImpactTransactionPanel() {
     
     if (confirmed) {
       setTxStatus('confirmed');
-      const generatedCertId = recordSupportTransaction(selectedCause.id, selectedCause.title, amount, result.txHash, selectedCause.id === 'kitchen' ? 'Alimentación' : selectedCause.id === 'food' ? 'Alimentación' : 'Comunidad');
+      
+      // 2. Update payment on backend to completed
+      if (paymentId) {
+        try {
+          await api.updatePayment(paymentId, {
+            status: 'completed',
+            txHash: result.txHash
+          });
+        } catch (err) {
+          console.error("Error updating payment on backend:", err);
+        }
+      }
+
+      const generatedCertId = recordSupportTransaction(selectedCause.id, selectedCause.title, amount, result.txHash, selectedCause.category);
       
       if (generatedCertId) {
         setCertId(generatedCertId as string);
@@ -64,6 +96,10 @@ export default function ImpactTransactionPanel() {
       }
       
       setIsSuccess(true);
+      
+      // Trigger a refresh of projects if possible
+      // (This panel is usually inside a modal, so we might not have a direct way to trigger parent refresh
+      // but the polling we added to pages will catch it)
       
       // Show story after success (Disabled Demo Mode)
       if (false) {

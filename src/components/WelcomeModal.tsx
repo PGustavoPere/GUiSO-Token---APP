@@ -15,7 +15,7 @@ export default function WelcomeModal() {
     { icon: <LinkIcon className="w-5 h-5 text-indigo-500" />, text: "3️⃣ Impacto verificado: Se registra en la blockchain" },
     { icon: <FileCheck className="w-5 h-5 text-amber-500" />, text: "4️⃣ Certificado: Recibes un comprobante inmutable" },
     { icon: <Star className="w-5 h-5 text-purple-500" />, text: "5️⃣ Reputación: Tu nivel de impacto (IP) crece" },
-    { icon: <Users className="w-5 h-5 text-cyan-500" />, text: "6️⃣ Comunidad: Decidimos juntos el futuro" },
+    { icon: <Users className="w-5 h-5 text-cyan-500" />, text: "6️⃣ Ecosistema: Gobernanza DAO y Decisiones" },
   ];
 
   return (

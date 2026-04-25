@@ -1,5 +1,31 @@
-import React, { useState, useMemo } from 'react';
-import { Wallet, Award, History, ExternalLink, ShieldCheck, LogOut, Heart, Sparkles, User, Edit2, X, Check, PieChart as PieChartIcon, Medal, Zap, Camera, ArrowUpRight, ArrowDownLeft, Copy, QrCode } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { 
+  Wallet, 
+  Award, 
+  History, 
+  ExternalLink, 
+  ShieldCheck, 
+  LogOut, 
+  Heart, 
+  Sparkles, 
+  User, 
+  Edit2, 
+  X, 
+  Check, 
+  PieChart as PieChartIcon, 
+  Medal, 
+  Zap, 
+  Camera, 
+  ArrowUpRight, 
+  ArrowDownLeft, 
+  Copy, 
+  QrCode,
+  Coins,
+  ChevronRight,
+  TrendingUp,
+  Shield,
+  Share2
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
@@ -10,6 +36,7 @@ import { ActivityTimeline } from '../../components/ActivityTimeline';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import { QRScanner } from '../../components/QRScanner';
 import ImpactTransactionPanel from '../../components/ImpactTransactionPanel';
+import { api } from '../../services/api';
 
 const COLORS = ['#FF6321', '#5A5A40', '#141414', '#F27D26', '#E4E3E0'];
 
@@ -55,6 +82,20 @@ export default function ProfilePage() {
   const balance = token.gsoBalance;
   const history = token.transactions;
   const totalSupportedCauses = global.supportedCauses;
+
+  const fetchProjects = () => {
+    console.log("Profile: Fetching projects for real-time update...");
+    // We don't need to store projects here, but calling it ensures the backend is active
+    // and we can potentially sync other data if needed.
+    api.getProjects();
+  };
+
+  useEffect(() => {
+    fetchProjects();
+    // Polling for real-time updates in profile too
+    const interval = setInterval(fetchProjects, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const nextThreshold = impactEngine.getNextThreshold(impactScore);
   const currentThreshold = impactEngine.calculateLevel(impactScore);
@@ -713,20 +754,3 @@ function cn(...inputs: any[]) {
   return inputs.filter(Boolean).join(' ');
 }
 
-function Coins({ size, className }: { size: number, className?: string }) {
-  return (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill="none" 
-      stroke="currentColor" 
-      strokeWidth="2" 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      className={className}
-    >
-      <circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82" />
-    </svg>
-  );
-}

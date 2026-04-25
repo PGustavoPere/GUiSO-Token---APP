@@ -22,13 +22,13 @@ export default function Layout() {
   const { address, isConnected, connect, disconnect, isConnecting } = useWallet();
 
   const navItems = [
-    { to: '/', icon: LayoutDashboard, label: 'Panel de Control' },
-    { to: '/impacto', icon: Heart, label: 'Impacto Verificable' },
-    { to: '/comunidad', icon: Users, label: 'Ecosistema' },
-    { to: '/vision', icon: Globe, label: 'Visión' },
-    { to: '/perfil', icon: User, label: 'Mi Perfil' },
-    { to: '/merchant', icon: Store, label: 'Comercios' },
-    { to: '/impact-explorer', icon: Activity, label: 'Explorador de Impacto' },
+    { to: '/', icon: LayoutDashboard, label: 'Inicio' },
+    { to: '/impacto', icon: Heart, label: 'Causas' },
+    { to: '/ecosistema', icon: Users, label: 'Ecosistema' },
+    { to: '/vision', icon: Globe, label: 'Nuestra Visión' },
+    { to: '/perfil', icon: User, label: 'Mi Cuenta' },
+    { to: '/merchant', icon: Store, label: 'Comercios Amigos' },
+    { to: '/impact-explorer', icon: Activity, label: 'Transparencia' },
   ];
 
   return (
@@ -76,7 +76,7 @@ export default function Layout() {
           <div className="w-10 h-10 bg-guiso-orange rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-guiso-orange/20">G</div>
           <div className="flex flex-col">
             <span className="font-display font-bold text-xl leading-none">GUISO</span>
-            <span className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Proyecto Token</span>
+            <span className="text-[10px] text-gray-400 uppercase tracking-widest font-semibold">Impacto Social</span>
           </div>
         </div>
 
@@ -94,6 +94,11 @@ export default function Layout() {
             >
               <item.icon size={20} className={cn("transition-transform group-hover:scale-110")} />
               <span>{item.label}</span>
+              {item.to === '/ecosistema' && (
+                <span className="ml-auto text-[8px] font-bold bg-guiso-orange text-white px-1.5 py-0.5 rounded-full animate-pulse">
+                  NEW
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -101,8 +106,8 @@ export default function Layout() {
         <div className="p-4 mt-auto space-y-4">
           <div className="flex items-center justify-between px-2">
             <div className="flex items-center gap-2">
-              <Cpu size={12} className="text-guiso-orange" />
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Estado del Puente</span>
+              <Activity size={12} className="text-guiso-orange" />
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Estado de Red</span>
             </div>
             <button 
               onClick={() => {
@@ -118,7 +123,7 @@ export default function Layout() {
           </div>
 
           <div className="bg-guiso-cream rounded-2xl p-4 border border-guiso-orange/10">
-            <p className="text-xs text-gray-500 mb-2">Tu Wallet</p>
+            <p className="text-xs text-gray-500 mb-2">Tu Cuenta</p>
             <div className="flex flex-col gap-1">
               <span className="font-mono text-[10px] text-gray-400 truncate">
                 {isConnected ? address : 'No conectada'}
@@ -171,6 +176,11 @@ export default function Layout() {
                 >
                   <item.icon size={24} />
                   <span>{item.label}</span>
+                  {item.to === '/ecosistema' && (
+                    <span className="ml-auto text-xs font-bold bg-guiso-orange text-white px-2 py-1 rounded-full">
+                      NEW
+                    </span>
+                  )}
                 </NavLink>
               ))}
             </nav>

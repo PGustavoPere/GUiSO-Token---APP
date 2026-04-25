@@ -12,6 +12,7 @@ import { useWallet } from './WalletProvider';
 import { web3Bridge } from '../web3/web3Provider';
 import { tokenBalanceService } from '../web3/tokenBalanceService';
 
+import { api } from '../services/api';
 import { impactCertificateService } from '../features/impactCertificate/impactCertificateService';
 
 /**
@@ -170,6 +171,43 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     }
   }, [isConnected, address]);
 
+  // Real-time updates for balance and transactions
+  useEffect(() => {
+    if (!isConnected || !address) return;
+
+    const fetchLatestData = async () => {
+      if (web3Bridge.getMode() === 'web3') {
+        const result = await tokenBalanceService.getBalance(address);
+        setToken(prev => ({
+          ...prev,
+          gsoBalance: result.balance,
+          impactPower: tokenBalanceService.getImpactPower(result.balance),
+          influenceBadge: tokenBalanceService.getInfluenceBadge(result.balance),
+        }));
+      }
+    };
+
+    const interval = setInterval(fetchLatestData, 5000);
+    
+    // Also fetch global stats periodically
+    const fetchGlobalStats = async () => {
+      try {
+        const stats = await api.getStats();
+        setGlobal(stats);
+      } catch (err) {
+        console.error("Error fetching global stats:", err);
+      }
+    };
+    
+    fetchGlobalStats();
+    const statsInterval = setInterval(fetchGlobalStats, 10000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(statsInterval);
+    };
+  }, [isConnected, address]);
+
   // Marcar como cargado (sin persistencia local)
   useEffect(() => {
     isLoaded.current = true;
@@ -218,16 +256,24 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    * Acción: Registrar una transacción de apoyo confirmada
    */
   const recordSupportTransaction = useCallback((projectId: string, projectTitle: string, amount: number, txHash: string, category: string = 'General') => {
-    if (amount > token.gsoBalance) return '';
-    if (!address) return '';
+    console.log(`GuisoCoreStore: Recording support transaction for ${projectTitle}, amount: ${amount}`);
+    if (amount > token.gsoBalance) {
+      console.warn("GuisoCoreStore: Insufficient balance for transaction");
+      return '';
+    }
+    if (!address) {
+      console.warn("GuisoCoreStore: No wallet address connected");
+      return '';
+    }
 
     const impactGenerated = impactEngine.calculateImpactPoints(amount);
     
     // Mapping of project IDs to specific unique images
     const projectSpecificImages: Record<string, string> = {
-      'kitchen': 'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=400&auto=format&fit=crop',
-      'homeless': 'https://images.unsplash.com/photo-1542810634-71277d95dcbb?q=80&w=400&auto=format&fit=crop',
-      'food': 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=400&auto=format&fit=crop',
+      '1': 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=400&auto=format&fit=crop', // Cabrera
+      '2': 'https://images.unsplash.com/photo-1593113598332-cd288d649433?q=80&w=400&auto=format&fit=crop', // Tía Kusi
+      '3': 'https://images.unsplash.com/photo-1509099836639-18ba1795216d?q=80&w=400&auto=format&fit=crop', // Pancitas Felices
+      '4': 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=400&auto=format&fit=crop', // Remar
     };
 
     // Mapping of category to fallback images
@@ -237,7 +283,10 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       'Salud': 'https://images.unsplash.com/photo-1505751172107-573967a4dd29?q=80&w=400&auto=format&fit=crop',
       'Medio Ambiente': 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=400&auto=format&fit=crop',
       'Comunidad': 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=400&auto=format&fit=crop',
-      'General': 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=400&auto=format&fit=crop'
+      'Infancia': 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?q=80&w=400&auto=format&fit=crop',
+      'Infancia y Alimentación': 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?q=80&w=400&auto=format&fit=crop',
+      'Social y Salud': 'https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?q=80&w=400&auto=format&fit=crop',
+      'General': 'https://images.unsplash.com/photo-1559027615-cd9d7a915490?q=80&w=400&auto=format&fit=crop'
     };
 
     const certImage = projectSpecificImages[projectId] || categoryImages[category] || categoryImages['General'];
@@ -257,6 +306,7 @@ export const GuisoCoreProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     setToken(prev => {
       const newBalance = prev.gsoBalance - amount;
+      console.log(`GuisoCoreStore: Updating balance from ${prev.gsoBalance} to ${newBalance}`);
       return {
         gsoBalance: newBalance,
         transactions: [newTransaction, ...prev.transactions],

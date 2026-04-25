@@ -3,7 +3,36 @@
 ## 🏗️ Visión General
 La plataforma GUISO está construida como una **Aplicación de Página Única (SPA)** moderna, diseñada para ser modular y escalable. Aunque actualmente utiliza un backend simulado para el MVP, su arquitectura está preparada para integrarse con contratos inteligentes reales en la Binance Smart Chain (BSC).
 
-![Arquitectura de Transparencia](/guiso-flow.png)
+```mermaid
+graph TD
+    subgraph "Capa de Usuario (Frontend)"
+        UI[Componentes UI / Layout]
+        Router[React Router]
+    end
+
+    subgraph "Capa de Estado (Core)"
+        Store[GuisoCoreStore]
+        Wallet[WalletProvider]
+    end
+
+    subgraph "Capa de Lógica (System)"
+        Engine[Impact Engine]
+        Cert[Certificate Service]
+    end
+
+    subgraph "Capa de Datos / Web3"
+        Bridge[Web3 Bridge]
+        API[Express API / Mock]
+        BSC[Binance Smart Chain]
+    end
+
+    UI --> Store
+    Store --> Engine
+    Engine --> Cert
+    Store --> Bridge
+    Bridge --> BSC
+    Bridge --> API
+```
 
 ## 🎨 Estructura del Proyecto
 Utilizamos una arquitectura basada en **características (features)**, lo que permite que cada módulo de negocio (Impacto, Perfil, Comercio) sea independiente y fácil de mantener.

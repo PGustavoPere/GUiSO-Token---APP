@@ -34,13 +34,26 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
       setError(null);
       setIsCameraActive(true);
 
+      // Stop any existing instance
       await stopScanner();
-      setIsCameraActive(true); // Reset after stop
+      setIsCameraActive(true);
 
       // Ensure the element exists
       const element = document.getElementById(scannerId);
       if (!element) {
         throw new Error("Elemento de escaneo no encontrado");
+      }
+
+      // 1. Request cameras first - this triggers the browser permission prompt
+      // and gives us the list of available devices.
+      let devices: any[] = [];
+      let enumerationError = false;
+      try {
+        devices = await Html5Qrcode.getCameras();
+      } catch (camErr: any) {
+        console.error("Error al obtener cámaras:", camErr);
+        enumerationError = true;
+        // Don't throw yet, we'll try to start with facingMode as a fallback
       }
 
       const html5QrCode = new Html5Qrcode(scannerId);
@@ -52,43 +65,53 @@ export const QRScanner: React.FC<QRScannerProps> = ({ onScan, onClose }) => {
         aspectRatio: 1.0
       };
 
-      // Prefer rear camera (facingMode: "environment") as requested
+      // 2. Try to start the scanner
       try {
-        await html5QrCode.start(
-          { facingMode: "environment" }, 
-          config, 
-          (decodedText) => {
-            onScan(decodedText);
-          },
-          () => {} // Ignore scan errors
-        );
-      } catch (err) {
-        // Fallback to any camera if rear is not available
-        const devices = await Html5Qrcode.getCameras();
         if (devices && devices.length > 0) {
+          // Prefer back camera if found in labels
+          const backCamera = devices.find(device => 
+            /back|rear|trasera|entorno/i.test(device.label)
+          );
+          
           await html5QrCode.start(
-            devices[0].id, 
+            backCamera ? backCamera.id : devices[0].id, 
+            config, 
+            (decodedText) => {
+              onScan(decodedText);
+            },
+            () => {} // Ignore scan errors
+          );
+        } else {
+          // Fallback to facingMode if no devices list (some browsers or if enumeration failed)
+          await html5QrCode.start(
+            { facingMode: "environment" }, 
             config, 
             (decodedText) => {
               onScan(decodedText);
             },
             () => {}
           );
-        } else {
-          throw err;
         }
+      } catch (startErr: any) {
+        console.error("Error al iniciar stream:", startErr);
+        // If we also failed with facingMode and we had an enumeration error, then it's a real problem
+        throw startErr;
       }
       
       setIsInitializing(false);
     } catch (err: any) {
       console.error("Error al iniciar el escáner:", err);
       let msg = "No se pudo acceder a la cámara.";
-      if (err.message?.includes("Permission denied")) {
-        msg = "Permiso denegado. Por favor, permití el acceso a la cámara en los ajustes de tu navegador.";
-      } else if (err.message?.includes("NotFound")) {
-        msg = "No se encontró ninguna cámara en este dispositivo.";
+      const errStr = err.toString() || err.message || "";
+      
+      if (errStr.includes("Permission denied") || errStr.includes("NotAllowedError") || errStr.includes("PermissionDeniedError")) {
+        msg = "Permiso de cámara denegado. Para solucionar esto:\n1. Habilitar el permiso en tu navegador.\n2. Si estás en AI Studio, probá el botón arriba a la derecha 'Open in new tab' para que el navegador te pida el permiso correctamente.";
+      } else if (errStr.includes("NotFound") || errStr.includes("DevicesNotFoundError")) {
+        msg = "No se encontró ninguna cámara. Si estás en desktop, asegurate de tener una conectada.";
+      } else if (errStr.includes("NotReadableError") || errStr.includes("TrackStartError")) {
+        msg = "La cámara está bloqueada por otra app o pestaña. Cerrá otras cámaras e intentá de nuevo.";
       } else {
-        msg = "Error al iniciar la cámara. Verificá que no esté siendo usada por otra app y que uses HTTPS.";
+        msg = "Error de hardware o seguridad. Verificá que estés usando HTTPS y que no haya otra app usando la cámara.";
       }
       setError(msg);
       setIsInitializing(false);

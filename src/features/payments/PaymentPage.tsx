@@ -9,6 +9,9 @@ import { web3Bridge } from '../../web3/web3Provider';
 import { Card, Button } from '../../components/ui';
 import TransactionStatusBadge, { TransactionStatus } from '../../components/TransactionStatusBadge';
 import FiatPaymentModal from '../fiatBridge/FiatPaymentModal';
+import { db, handleFirestoreError } from '../../lib/firebase';
+import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
+
 export default function PaymentPage() {
   const { paymentId } = useParams<{ paymentId: string }>();
   const navigate = useNavigate();
@@ -21,53 +24,83 @@ export default function PaymentPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (paymentId) {
-      const fetchPayment = async () => {
-        try {
-          const url = `${window.location.origin}/api/payments/${paymentId}`;
-          const res = await fetch(url);
-          if (res.ok) {
-            const p = await res.json();
-            setPayment(p);
-            setIsLoading(false);
-          } else {
-            setIsLoading(false);
+    if (!paymentId) return;
+
+    let retryCount = 0;
+    const maxRetries = 3;
+
+    const attemptFetch = () => {
+      const normalizedId = paymentId.toLowerCase();
+      
+      // Track what we're currently trying to fetch
+      let currentId = retryCount === 0 ? paymentId : normalizedId;
+      console.log(`PaymentPage: Checking for payment ${currentId} (Attempt ${retryCount + 1})`);
+
+      const unsub = onSnapshot(doc(db, 'payments', currentId), (docSnap) => {
+        if (docSnap.exists()) {
+          console.log(`PaymentPage: Payment ${currentId} found in Firestore`);
+          setPayment(docSnap.data());
+          setIsLoading(false);
+        } else {
+          if (retryCount < maxRetries) {
+            retryCount++;
+            setTimeout(attemptFetch, 1500);
+            return;
           }
-        } catch (error) {
-          console.error('Error fetching payment:', error);
+
+          // Final fallback: try API with both cases
+          const tryApi = async (id: string) => {
+            const res = await fetch(`${window.location.origin}/api/payments/${id}`);
+            if (res.ok) return res.json();
+            throw new Error("404");
+          };
+
+          tryApi(paymentId)
+            .catch(() => tryApi(normalizedId))
+            .then(data => {
+              console.log(`PaymentPage: Payment found via API`);
+              setPayment(data);
+              setIsLoading(false);
+            })
+            .catch(() => {
+              console.error(`PaymentPage: Payment not found anywhere`);
+              setPayment(null);
+              setIsLoading(false);
+            });
+        }
+      }, (error) => {
+        console.error('Firestore snapshot error:', error);
+        if (retryCount < maxRetries) {
+          retryCount++;
+          setTimeout(attemptFetch, 1000);
+        } else {
           setIsLoading(false);
         }
-      };
-      
-      fetchPayment();
-      
-      const interval = setInterval(async () => {
-        try {
-          const url = `${window.location.origin}/api/payments/${paymentId}`;
-          const res = await fetch(url);
-          if (res.ok) {
-            const updated = await res.json();
-            setPayment(updated);
-            if (updated.status === 'expired' || updated.status === 'completed') {
-              clearInterval(interval);
-            }
-          }
-        } catch (error) {
-          console.error('Error polling payment:', error);
-        }
-      }, 1000);
-      
-      return () => clearInterval(interval);
-    }
+      });
+
+      return unsub;
+    };
+
+    const unsubscribe = attemptFetch();
+    return () => {
+      if (typeof unsubscribe === 'function') unsubscribe();
+    };
   }, [paymentId]);
 
   const updatePaymentStatus = async (id: string, status: string, txHash?: string) => {
     try {
-      await fetch(`/api/payments/${id}`, {
+      // Update Firestore directly
+      await updateDoc(doc(db, 'payments', id), {
+        status,
+        ...(txHash ? { txHash } : {})
+      });
+      
+      // Also notify the server for record keeping (optional)
+      fetch(`/api/payments/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status, ...(txHash ? { txHash } : {}) })
-      });
+      }).catch(err => console.error('Silent error updating server:', err));
     } catch (error) {
       console.error('Error updating payment status:', error);
     }

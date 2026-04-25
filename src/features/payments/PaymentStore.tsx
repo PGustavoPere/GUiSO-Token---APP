@@ -3,12 +3,27 @@ import { PaymentIntent, PaymentStatus } from './types';
 
 interface PaymentContextType {
   payments: Record<string, PaymentIntent>;
+  confirmPayment: (paymentId: string) => Promise<boolean>;
 }
 
 const PaymentContext = createContext<PaymentContextType | undefined>(undefined);
 
 export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [payments, setPayments] = useState<Record<string, PaymentIntent>>({});
+
+  const confirmPayment = useCallback(async (paymentId: string) => {
+    try {
+      const res = await fetch(`${window.location.origin}/api/payments/${paymentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'completed' })
+      });
+      return res.ok;
+    } catch (error) {
+      console.error('Error confirming payment:', error);
+      return false;
+    }
+  }, []);
 
   useEffect(() => {
     let errorCount = 0;
@@ -64,7 +79,8 @@ export const PaymentProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   return (
     <PaymentContext.Provider value={{
-      payments
+      payments,
+      confirmPayment
     }}>
       {children}
     </PaymentContext.Provider>

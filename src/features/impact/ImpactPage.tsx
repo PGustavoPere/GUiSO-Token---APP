@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { api, Project } from '../../services/api';
 import { Heart, CheckCircle2, Clock, MapPin, Share2, Sparkles, Shield, Info, ExternalLink, Vote, X } from 'lucide-react';
 import { useGuisoCore } from '../../core/GuisoCoreStore';
+import { useWallet } from '../../core/WalletProvider';
 import { useImpactExplorerStore } from '../impactExplorer/ImpactExplorerStore';
 import SupportModal from './SupportModal';
 import CertificateHistory from '../impactCertificate/CertificateHistory';
 import EcosystemActivityFeed from '../../components/EcosystemActivityFeed';
 import { Card, Button, Badge } from '../../components/ui';
 import { motion, AnimatePresence } from 'motion/react';
+import { db } from '../../lib/firebase';
+import { collection, onSnapshot, doc, setDoc, query, getDocs } from 'firebase/firestore';
 
 export default function ImpactPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -16,16 +19,76 @@ export default function ImpactPage() {
   const [showLedger, setShowLedger] = useState(false);
   const [showDAO, setShowDAO] = useState(false);
   const { user } = useGuisoCore();
+  const { isConnected, connect, isConnecting } = useWallet();
   const { getRecentEvents } = useImpactExplorerStore();
 
   const recentEvents = getRecentEvents().slice(0, 5);
 
   useEffect(() => {
-    api.getProjects().then(data => {
-      setProjects(data);
-      setLoading(false);
+    let isMounted = true;
+    let initialLoadDone = false;
+
+    // Use a simpler approach: check Firestore once, seed if empty, then subscribe
+    const setupSync = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'projects'));
+        
+        if (querySnapshot.empty && isMounted) {
+          console.log("ImpactPage: Firestore empty, seeding from API...");
+          const mockData = await api.getProjects();
+          if (isMounted) {
+            setProjects(mockData);
+            setLoading(false);
+            // Seed background
+            for (const p of mockData) {
+              await setDoc(doc(db, 'projects', p.id), p);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("ImpactPage: Initial setup error", err);
+      }
+
+      // Now start the real-time subscription
+      if (!isMounted) return;
+      
+      const unsub = onSnapshot(collection(db, 'projects'), (snapshot) => {
+        if (!isMounted) return;
+        if (!snapshot.empty || initialLoadDone) {
+          const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Project));
+          setProjects(data);
+          setLoading(false);
+          initialLoadDone = true;
+        }
+      }, (err) => {
+        console.error("ImpactPage: Firestore sub error", err);
+        if (isMounted && !initialLoadDone) {
+          api.getProjects().then(data => {
+            if (isMounted) {
+              setProjects(data);
+              setLoading(false);
+            }
+          });
+        }
+      });
+
+      return unsub;
+    };
+
+    let unsubscribe: (() => void) | undefined;
+    setupSync().then(unsub => {
+      unsubscribe = unsub;
     });
+
+    return () => {
+      isMounted = false;
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
+
+  const fetchProjects = () => {
+    // This is now handled by onSnapshot, but we'll keep the signature for SuportModal callback
+  };
 
   if (loading) {
     return (
@@ -42,13 +105,13 @@ export default function ImpactPage() {
     <div className="space-y-10">
       <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">Ayuda Verificable</h1>
-          <p className="text-gray-500 text-sm md:text-base">Causas apoyadas y validadas por personas como vos en la comunidad GUISO.</p>
+          <h1 className="text-3xl md:text-4xl font-display font-bold mb-2">Causas que necesitan tu ayuda</h1>
+          <p className="text-gray-500 text-sm md:text-base">Proyectos reales verificados y validados por la comunidad.</p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
           <div className="px-4 py-2 bg-white rounded-full text-xs md:text-sm font-bold border border-gray-100 shadow-sm flex items-center justify-center gap-2 w-full sm:w-auto">
             <Sparkles size={16} className="text-guiso-orange" />
-            Tu Compromiso: <span className="text-guiso-orange">{user.impactScore} IP</span>
+            Tu Compromiso: <span className="text-guiso-orange">{user.impactScore} Puntos</span>
           </div>
         </div>
       </header>
@@ -85,7 +148,7 @@ export default function ImpactPage() {
 
               <div className="space-y-4">
                 <div className="flex justify-between items-end mb-1">
-                  <span className="text-sm font-bold">{project.raised.toLocaleString()} GSO</span>
+                  <span className="text-sm font-bold">{project.raised.toLocaleString()} GSO recaudados</span>
                   <span className="text-[10px] md:text-xs text-gray-400">Objetivo: {project.goal.toLocaleString()} GSO</span>
                 </div>
                 <div className="w-full bg-gray-100 h-2 md:h-3 rounded-full overflow-hidden">
@@ -100,15 +163,21 @@ export default function ImpactPage() {
                     <span>{project.status === 'active' ? 'Quedan 12 días' : 'Finalizado con éxito'}</span>
                   </div>
                   <Button 
-                    onClick={() => setSelectedProject(project)}
-                    disabled={project.status !== 'active' || !user.isWalletConnected}
-                    variant={project.status === 'active' && user.isWalletConnected ? 'primary' : 'ghost'}
+                    onClick={() => {
+                      if (!isConnected) {
+                        connect();
+                      } else {
+                        setSelectedProject(project);
+                      }
+                    }}
+                    disabled={(project.status !== 'active' && isConnected) || isConnecting}
+                    variant={project.status === 'active' ? 'primary' : 'ghost'}
                     className={cn(
                       "w-full sm:w-auto",
-                      (!project.status || !user.isWalletConnected) && "bg-gray-100 text-gray-400 cursor-not-allowed hover:bg-gray-100 hover:text-gray-400"
+                      (project.status !== 'active' && isConnected) && "bg-gray-100 text-gray-400 cursor-not-allowed hover:bg-gray-100 hover:text-gray-400"
                     )}
                   >
-                    {!user.isWalletConnected ? 'Conecta Wallet' : project.status === 'active' ? 'Apoyar Causa' : 'Ver Evidencia'}
+                    {!isConnected ? (isConnecting ? 'Conectando...' : 'Conectá tu cuenta') : project.status === 'active' ? 'Donar ahora' : 'Ver Evidencia'}
                   </Button>
                 </div>
               </div>
@@ -121,6 +190,7 @@ export default function ImpactPage() {
         <SupportModal 
           project={selectedProject} 
           onClose={() => setSelectedProject(null)} 
+          onSuccess={fetchProjects}
         />
       )}
 
@@ -128,7 +198,7 @@ export default function ImpactPage() {
       <Card variant="terracotta" padding="xl" rounded="3xl">
         <div className="relative z-10 max-w-2xl">
           <h2 className="text-2xl md:text-3xl font-display font-bold mb-4">Transparencia para Confiar</h2>
-          <p className="text-white/80 text-sm md:text-base mb-6 md:mb-8">Cada aporte que realizas es rastreable. Utilizamos tecnología para asegurar que la ayuda llegue a su destino, permitiendo que cualquiera pueda verificar la trazabilidad de forma abierta.</p>
+          <p className="text-white/80 text-sm md:text-base mb-6 md:mb-8">Cada aporte que realizás es rastreable. Utilizamos tecnología para asegurar que la ayuda llegue a su destino, permitiendo que cualquiera pueda verificar la trazabilidad de forma abierta.</p>
           <div className="flex flex-col sm:flex-row flex-wrap gap-3 md:gap-4">
             <Button 
               onClick={() => setShowLedger(true)}
@@ -169,7 +239,7 @@ export default function ImpactPage() {
                   <div className="p-2 bg-guiso-orange/10 rounded-xl text-guiso-orange">
                     <Shield size={24} />
                   </div>
-                  <h3 className="text-xl font-display font-bold">Ledger de Impacto</h3>
+                  <h3 className="text-xl font-display font-bold">Registro de Impacto</h3>
                 </div>
                 <button onClick={() => setShowLedger(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                   <X size={20} />
@@ -178,7 +248,7 @@ export default function ImpactPage() {
               
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 <p className="text-sm text-gray-500 mb-4">
-                  Registro público de las últimas transacciones de impacto verificadas en la red GUISO. Cada entrada representa ayuda real entregada.
+                  Registro público de las últimas donaciones verificadas. Cada entrada representa ayuda real entregada.
                 </p>
                 
                 {recentEvents.map((event) => (
@@ -193,7 +263,7 @@ export default function ImpactPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-guiso-orange font-bold">+{event.impactAmount} IP</p>
+                      <p className="text-guiso-orange font-bold">+{event.impactAmount} Puntos</p>
                       <p className="text-[10px] text-gray-400">Verificado</p>
                     </div>
                   </div>
@@ -201,13 +271,13 @@ export default function ImpactPage() {
                 
                 {recentEvents.length === 0 && (
                   <div className="text-center py-12 text-gray-400">
-                    <p>No hay transacciones recientes en el ledger.</p>
+                    <p>No hay transacciones recientes.</p>
                   </div>
                 )}
               </div>
               
               <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end">
-                <Button onClick={() => setShowLedger(false)}>Cerrar Ledger</Button>
+                <Button onClick={() => setShowLedger(false)}>Cerrar Registro</Button>
               </div>
             </motion.div>
           </div>
@@ -229,7 +299,7 @@ export default function ImpactPage() {
                   <div className="p-2 bg-white/10 rounded-xl text-guiso-orange">
                     <Vote size={24} />
                   </div>
-                  <h3 className="text-xl font-display font-bold">Gobernanza DAO</h3>
+                  <h3 className="text-xl font-display font-bold">Gobernanza del Ecosistema</h3>
                 </div>
                 <button onClick={() => setShowDAO(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
                   <X size={20} />
@@ -240,38 +310,38 @@ export default function ImpactPage() {
                 <section className="space-y-3">
                   <h4 className="font-bold text-lg flex items-center gap-2">
                     <Info size={18} className="text-guiso-orange" />
-                    ¿Qué es el DAO de GUISO?
+                    ¿Cómo participamos?
                   </h4>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    La Organización Autónoma Descentralizada (DAO) permite que la comunidad tome las decisiones importantes. No hay una entidad central que decida a dónde va el dinero; lo decides tú con tus tokens GSO.
+                    Nuestra comunidad permite que todos tomen las decisiones importantes. No hay una entidad central que decida a dónde va el dinero; lo decidís vos con tu participación.
                   </p>
                 </section>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 bg-guiso-cream/30 rounded-2xl border border-guiso-orange/10">
-                    <h5 className="font-bold text-sm mb-2">Impact Power (IP)</h5>
-                    <p className="text-xs text-gray-500">Tu poder de voto no solo depende de cuántos tokens tienes, sino de cuánto impacto has generado previamente.</p>
+                    <h5 className="font-bold text-sm mb-2">Poder de Decisión</h5>
+                    <p className="text-xs text-gray-500">Tu voz no solo depende de tu aporte, sino de cuánto impacto has generado previamente.</p>
                   </div>
                   <div className="p-4 bg-guiso-cream/30 rounded-2xl border border-guiso-orange/10">
                     <h5 className="font-bold text-sm mb-2">Propuestas Abiertas</h5>
-                    <p className="text-xs text-gray-500">Cualquier miembro con suficiente reputación puede proponer una nueva causa para ser financiada.</p>
+                    <p className="text-xs text-gray-500">Cualquier miembro con suficiente compromiso puede proponer una nueva causa para ser financiada.</p>
                   </div>
                 </div>
 
                 <section className="space-y-3">
-                  <h4 className="font-bold text-lg">El Proceso de Votación</h4>
+                  <h4 className="font-bold text-lg">El Proceso de Validación</h4>
                   <ol className="space-y-4">
                     <li className="flex gap-4">
                       <div className="w-6 h-6 rounded-full bg-guiso-orange text-white flex items-center justify-center text-xs font-bold shrink-0">1</div>
-                      <p className="text-sm text-gray-600"><span className="font-bold text-guiso-dark">Propuesta:</span> Se presenta un proyecto con objetivos claros y presupuesto en GSO.</p>
+                      <p className="text-sm text-gray-600"><span className="font-bold text-guiso-dark">Propuesta:</span> Se presenta un proyecto con objetivos claros y presupuesto.</p>
                     </li>
                     <li className="flex gap-4">
                       <div className="w-6 h-6 rounded-full bg-guiso-orange text-white flex items-center justify-center text-xs font-bold shrink-0">2</div>
-                      <p className="text-sm text-gray-600"><span className="font-bold text-guiso-dark">Votación:</span> Los holders usan su Impact Power para validar la viabilidad y prioridad.</p>
+                      <p className="text-sm text-gray-600"><span className="font-bold text-guiso-dark">Votación:</span> Los miembros usan su compromiso para validar la prioridad.</p>
                     </li>
                     <li className="flex gap-4">
                       <div className="w-6 h-6 rounded-full bg-guiso-orange text-white flex items-center justify-center text-xs font-bold shrink-0">3</div>
-                      <p className="text-sm text-gray-600"><span className="font-bold text-guiso-dark">Ejecución:</span> Si se aprueba, los fondos se liberan mediante smart contracts según hitos verificables.</p>
+                      <p className="text-sm text-gray-600"><span className="font-bold text-guiso-dark">Ejecución:</span> Si se aprueba, los fondos se liberan según hitos verificables.</p>
                     </li>
                   </ol>
                 </section>
